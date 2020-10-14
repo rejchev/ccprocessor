@@ -116,7 +116,7 @@ public void OnPluginStart()
     }
     
     (game_mode = CreateConVar("gch_CRTP", "0", "Enable/Disable color real time processing", _, true, 0.0, true, 1.0)).AddChangeHook(CVAR_CRTP);
-    CCP_RTP(game_mode, NULL_STRING, NULL_STRING);
+    CVAR_CRTP(game_mode, NULL_STRING, NULL_STRING);
 
     delete game_mode;
     
