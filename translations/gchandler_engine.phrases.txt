@@ -1,0 +1,176 @@
+"Phrases"
+{
+    // Still replenished ...
+
+    "#Player_Cash_Award_Killed_Enemy"
+    {
+        "ru"                "{W}Вам добавлено {G}$ {1} {W}за убийство врага из {G}{2}"
+        "en"                "{W}You were added {G}$ {1} {W}for killing an enemy from {G}{2}"
+        "pl"                "{W}Dostałeś {G}$ {1} {W}za zabicie przeciwnika z {G}{2}"
+    }
+
+    "#Player_Cash_Award_Killed_Enemy_Generic"
+    {
+        "ru"                "{W}Вам добавлено {G}$ {1} {W}за нейтрализацию врага"
+        "en"                "{W}You were added {G}$ {1} {W}for neutralizing an enemy"
+        "pl"                "{W}Dostałeś {G}$ {1} {W}za zneutralizowanie wroga"
+    }
+
+    "#Player_Cash_Award_Bomb_Planted"
+    {
+        "ru"                "{W}Вам добавлено {G}$ {1} {W}за установку C4"
+        "en"                "{W}You were added {G}$ {1} {W}for planting the C4"
+        "pl"                "{W}Dostałeś {G}$ {1} {W}za zaplantowanie bomby"
+    }
+
+    "#Player_Cash_Award_Bomb_Defused"
+    {
+        "ru"                "{W}Вам добавлено {G}$ {1} {W}за обезвреживание C4"
+        "en"                "{W}You were added {G}$ {1} {W}for defusing the C4"
+        "pl"                "{W}Dostałeś {G}$ {1} {W}za rozbrojenie bomby"
+    }
+
+    "#Player_Cash_Award_Rescued_Hostage"
+    {
+        "ru"                "{W}Вам добавлено {G}$ {1} {W}за спасение заложника"
+        "en"                "{W}You were added {G}$ {1} {W}for extracting a hostage"
+        "pl"                "{W}Dostałeś {G}$ {1} {W}za uratowanie zakładnika"
+    }
+
+    "#Player_Cash_Award_Interact_Hostage"
+    {
+        "ru"                "{W}Вам добавлено {G}$ {1} {W}за достижение заложника"
+        "en"                "{W}You were added {G}$ {1} {W}for reaching a hostage"
+        "pl"                "{W}Dostałeś {G}$ {1} {W}za dostarczenie zakładnika"
+    }
+
+    "#Player_Cash_Award_Damage_Hostage"
+    {
+        "ru"                "{W}Вы оштрафованы на {R}$ {1} {W}за ранение заложника"
+        "en"                "{W}You are fined {R}$ {1} {W}for wounding a hostage"
+        "pl"                "{W}Jesteś ukarany grzywną  {R}$ {1} {W}za zranienie przeciwnika"
+    }
+
+    "#Player_Cash_Award_Kill_Hostage"
+    {
+        "ru"                "{W}Вы оштрафованы на {R}$ {1} {W}за убийство заложника"
+        "en"                "{W}You are fined {R}$ {1} {W}for killing a hostage"
+        "pl"                "{W}Jesteś ukarany grzywną {R}$ {1} {W}za zabicie zakładnika"
+    }
+
+    "#Team_Cash_Award_T_Win_Bomb"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за подрыв бомбы"
+        "en"                "{W}Team bonus {G}$ {1} {W}for detonating bomb"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za wysadzenie bomby"
+    }
+
+    "#Team_Cash_Award_Elim_Hostage"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за уничтожение вражеской команды"
+        "en"                "{W}Team bonus {G}$ {1} {W}for eliminating the enemy team"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za wyeliminowanie drużyny przeciwnej "
+    }
+
+    "#Team_Cash_Award_Elim_Bomb"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за уничтожение вражеской команды"
+        "en"                "{W}Team bonus {G}$ {1} {W}for eliminating the enemy team"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za wyeliminowanie drużyny przeciwnej "
+    }
+
+    "#Team_Cash_Award_Win_Time"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}по истечении времени раунда"
+        "en"                "{W}Team bonus {G}$ {1} {W}for winning by running down the clock"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za wygranie rundy przez zakończenie czasu"
+    }
+
+    "#Team_Cash_Award_Win_Defuse_Bomb"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за победу с обезвреживанием C4"
+        "en"                "{W}Team bonus {G}$ {1} {W}for winning by defusing the C4"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za rozbrojenie bomby"
+    }
+
+    "#Team_Cash_Award_Win_Hostage_Rescue"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за победу при спасении заложника"
+        "en"                "{W}You were added {G}$ {1} {W}for winning by rescuing a hostage"
+        "pl"                "{W}Dostałeś {G}$ {1} {W}za wygraną poprzez uratowanie zakładnika"
+    }
+
+    "#Team_Cash_Award_Loser_Bonus"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за проигрыш"
+        "en"                "{W}Team bonus {G}$ {1} {W}for losing"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za przegraną"
+    }
+
+    "#Team_Cash_Award_Rescued_Hostage"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за спасение заложника"
+        "en"                "{W}Team bonus {G}$ {1} {W}for rescuing a hostage"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za uratowanie zakładnika"
+    }
+
+    "#Team_Cash_Award_Hostage_Alive"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за выживших заложников"
+        "en"                "{W}Team bonus {G}$ {1} {W}for surviving hostages"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za przetrwałych zakładników"
+    }
+
+    "#Team_Cash_Award_Planted_Bomb_But_Defused"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за установку бомбы"
+        "en"                "{W}Team bonus {G}$ {1} {W}for planting the bomb"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za zaplantowanie bomby"
+    }
+
+    "#Team_Cash_Award_CT_VIP_Escaped"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за эвакуацию VIP"
+        "en"                "{W}Team bonus {G}$ {1} {W}for evac'ing the VIP"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za ewakuację VIP'a"
+    }
+
+    "#Team_Cash_Award_T_VIP_Killed"
+    {
+        "ru"                "{W}Командный бонус {G}$ {1} {W}за нейтрализацию VIP"
+        "en"                "{W}Team bonus {G}$ {1} {W}for neutralizing the VIP"
+        "pl"                "{W}Bonus drużynowy {G}$ {1} {W}za neutralizację VIP'a"
+    }
+
+    "#Chat_SavePlayer_Saved"
+    {
+        // {1} - Who saved you, {2} - From whom was saved
+        "ru"                "{G}{1} {W}спасает вас от {G}{2}"
+        "en"                "{G}{1} {W}saves you from {G}{2}"
+        "pl"                "{G}{1} {W}ratuje cię przed {G}{2}"
+    }
+
+    "#Chat_SavePlayer_Savior"
+    {
+        // {1} - Who was saved, {2} - From whom was saved
+        "ru"                "{W}Вы спасаете {G}{1} {W}от {G}{2}"
+        "en"                "{W}You save {G}{1} {W}from {G}{2}"
+        "pl"                "{W}Uratujesz {G}{1} {W}przed {G}{2}"
+    }
+
+    "#Chat_SavePlayer_Spectator"
+    {
+        // {1} - Who saved, {2} - Who was saved, {3} - From whom was saved
+        "ru"                "{G}{1} {W}спасает {G}{2} {W}от {G}{3}"
+        "en"                "{G}{1} {W}saves {G}{2} {W}from {G}{3}"
+        "pl"                "{G}{1} {W}ratuje {G}{2} {W}przed {G}{3}"
+    }
+
+    "#Cstrike_TitlesTXT_Game_teammate_attack"
+    {
+        // {1} - Who was that
+        "ru"                "{G}{1} {W}истязает союзника"
+        "en"                "{G}{1} {W}attacked a teammate"
+        "pl"                "{G}{1} {W}zaatakował kolegę z drużyny"
+    }
+}

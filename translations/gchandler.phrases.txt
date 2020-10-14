@@ -1,0 +1,247 @@
+"Phrases"
+{
+    "TeamTAll"
+    {
+        "ru"                "{T}(T)"
+        "en"                "{T}(T)"
+        "pl"                "{T}(T)"
+    }
+
+    "TeamT"
+    {
+        "ru"                "{T}(Private T)"
+        "en"                "{T}(Private T)"
+        "pl"                "{T}(Private CT)"
+    }
+
+    "TeamCTAll"
+    {
+        "ru"                "{T}(CT)"
+        "en"                "{T}(CT)"
+        "pl"                "{T}(CT)"
+    }
+
+    "TeamCT"
+    {
+        "ru"                "{T}(Private CT)"
+        "en"                "{T}(Private CT)"
+        "pl"                "{T}(Private CT)"
+    }
+
+    "TeamSPECAll"
+    {
+        "ru"                "{T}(SPEC)"
+        "en"                "{T}(SPEC)"
+        "pl"                "{T}(SPEC)"
+    }
+
+    "TeamSPEC"
+    {
+        "ru"                "{T}(Private SPEC)"
+        "en"                "{T}(Private SPEC)"
+        "pl"                "{T}(Private SPEC)"
+    }
+
+    "RadioMsg"
+    {
+        "ru"                "{GO}(Radio)"
+        "en"                "{GO}(Radio)"
+        "pl"                "{GO}(Radio)"
+    }
+
+    "ClientStatus_Alive"
+    {
+        "ru"                "{G}•"
+        "en"                "{G}•"
+        "pl"                "{G}•"
+    }
+
+    "ClientStatus_Died"
+    {
+        "ru"                "{R}•"
+        "en"                "{R}•"
+        "pl"                "{R}•"
+    }
+
+    "{W}"
+    {
+        "ru"                "{W}Белый"
+        "en"                "{W}White"
+        "pl"                "{W}Biały"
+    }
+
+    "{R}"
+    {
+        "ru"                "{R}Красный"
+        "en"                "{R}Red"
+        "pl"                "{R}Czerwony"
+    }
+
+    "{T}"
+    {
+        "ru"                "{T}Командный"
+        "en"                "{T}Team"
+        "pl"                "{T}Team"
+    }
+
+    "{G}"
+    {
+        "ru"                "{G}Зеленый"
+        "en"                "{G}Green"
+        "pl"                "{G}Zielony"
+    }
+
+    "{P}"
+    {
+        "ru"                "{P}Фисташшковый"
+        "en"                "{P}Pistachio"
+        "pl"                "{P}Pistacjowy"
+    }
+
+    "{LG}"
+    {
+        "ru"                "{LG}Светло-зеленый"
+        "en"                "{LG}Light green"
+        "pl"                "{LG}Jasny zielony"
+    }
+
+    "{S}"
+    {
+        "ru"                "{S}Алый"
+        "en"                "{S}Scarlet"
+        "pl"                "{S}Szkarłatny"
+    }
+
+    "{GR}"
+    {
+        "ru"                "{GR}Серый"
+        "en"                "{GR}Grey"
+        "pl"                "{GR}Szary"
+    }
+
+    "{BA}"
+    {
+        "ru"                "{BA}Банановый"
+        "en"                "{BA}Banana"
+        "pl"                "{BA}Bananowy"
+    }
+
+    "{DG}"
+    {
+        "ru"                "{DG}Песочно-серый"
+        "en"                "{DG}Dusty-grey"
+        "pl"                "{DG}Popielaty"
+    }
+
+    "{C}"
+    {
+        "ru"                "{C}Голубой"
+        "en"                "{C}Cyan"
+        "pl"                "{C}Cyjanowy"
+    }
+
+    "{B}"
+    {
+        "ru"                "{B}Синий"
+        "en"                "{B}Blue"
+        "pl"                "{B}Niebieski"
+    }
+
+    "{V}"
+    {
+        "ru"                "{V}Фиалковый"
+        "en"                "{V}Violet"
+        "pl"                "{V}Fioletowy"
+    }
+
+    "{PI}"
+    {
+        "ru"                "{PI}Розовый"
+        "en"                "{PI}Pink"
+        "pl"                "{PI}Różowy"
+    }
+
+    "{CO}"
+    {
+        "ru"                "{CO}Коралловый"
+        "en"                "{CO}Сoralline"
+        "pl"                "{CO}Koralowy"
+    }
+
+    "{GO}"
+    {
+        "ru"                "{GO}Золотой"
+        "en"                "{GO}Gold"
+        "pl"                "{GO}Złoty"
+    }
+
+    "ccp_disable"
+    {
+        "ru"                "Убрать"
+        "en"                "Remove"
+        "pl"                "Usuń"
+    }
+
+    "{PROTOTYPE}"
+    {
+        "ru"                "Шаблон"
+        "en"                "Template"
+        "pl"                "Szablon"
+    }
+
+    "{STATUS}"
+    {
+        "ru"                "Статус"
+        "en"                "Status"
+        "pl"                "Status"
+    }
+
+    "{TEAM}"
+    {
+        "ru"                "Команда"
+        "en"                "Team"
+        "pl"                "Komenda"
+    }
+
+    "{PREFIXCO}"
+    {
+        "ru"                "Цвет префикса"
+        "en"                "Prefix Color"
+        "pl"                "Kolor prefiksu"
+    }
+
+    "{PREFIX}"
+    {
+        "ru"                "Префикс"
+        "en"                "Prefiks"
+        "pl"                "Prefiks"
+    }
+
+    "{NAMECO}"
+    {
+        "ru"                "Цвет прозвища"
+        "en"                "Nickname color"
+        "pl"                "Kolor pseudonimu"
+    }
+
+    "{NAME}"
+    {
+        "ru"                "Прозвище"
+        "en"                "Nickname"
+        "pl"                "Przezwisko"
+    }
+
+    "{MSGCO}"
+    {
+        "ru"                "Цвет сообщения"
+        "en"                "Message color"
+        "pl"                "Kolor wiadomości"
+    }
+
+    "{MSG}"
+    {
+        "ru"                "Сообщение"
+        "en"                "Message"
+        "pl"                "Wiadomość"
+    }
+}

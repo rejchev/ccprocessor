@@ -1,0 +1,29 @@
+dist: xenial
+os: linux
+
+addons:
+    apt_packages:
+        - lib32z1
+        - lib32stdc++6
+
+language: c
+
+env:
+  global:
+    - SCRIPTING=addons/sourcemod/scripting
+  jobs:
+    - SMVERSION=1.10
+
+install:
+    - wget --input-file=http://sourcemod.net/smdrop/$SMVERSION/sourcemod-latest-linux
+    - tar -xzf $(cat sourcemod-latest-linux)
+before_script:
+    - chmod +x $SCRIPTING/spcomp
+    - cp -R scripting addons/sourcemod/
+    - cd $SCRIPTING
+
+script:
+    - ./spcomp gchandler.sp -E -v0
+
+notifications:
+    email: false
