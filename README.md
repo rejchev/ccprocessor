@@ -1,4 +1,4 @@
-<h1 align="center">Color Chat Processor</h1>
+<h1 align="center">Game Chat Handler</h1>
 <p align="center">
     <a href = "https://travis-ci.org/github/nyood/Game-Chat-Handler/builds" title = "Build Status">
         <img src="https://travis-ci.org/nyood/Game-Chat-Handler.svg?branch=main" />
@@ -12,7 +12,7 @@
 </p>
 
 ## Description
-The processor is based on real-time processing of color tags and subsequent interpretation.
+The chat handler is based on real-time processing of color tags and subsequent interpretation.
 This makes it possible to use color tags without third-party modifications of standard functions and color libraries.
 
 ## Game support
