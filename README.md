@@ -1,6 +1,6 @@
 <h1 align="center">Color Chat Processor</h1>
 <p align="center">
-    <a href = "https://travis-ci.org/github/nyood/CCProcessor/builds" title = "Build Status">
+    <a href = "https://travis-ci.org/github/nyood/CCProcessor/requests" title = "Build Requests">
         <img src="https://travis-ci.org/nyood/CCProcessor.svg?branch=ccp-3.1" />
     </a>
     <a href = "https://discord.gg/ChTyPUG" title = "Online support">
