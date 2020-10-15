@@ -10,7 +10,12 @@ language: c
 
 env:
   global:
-    - SCRIPTING=addons/sourcemod/scripting
+    - REMOTESRC=addons/sourcemod/scripting
+    - BUILDIR=$TRAVIS_BUILD_DIR/sourcemod
+    - SRCDIR=$TRAVIS_BUILD_DIR/scripting
+    - CFGDIR=$TRAVIS_BUILD_DIR/configs
+    - LNGDIR=$TRAVIS_BUILD_DIR/translations
+    - BINDIR=$BUILDIR/plugins
   jobs:
     - SMVERSION=1.10
 
@@ -18,12 +23,17 @@ install:
     - wget --input-file=http://sourcemod.net/smdrop/$SMVERSION/sourcemod-latest-linux
     - tar -xzf $(cat sourcemod-latest-linux)
 before_script:
-    - chmod +x $SCRIPTING/spcomp
-    - cp -R scripting addons/sourcemod/
-    - cd $SCRIPTING
+    - mkdir $BUILDIR && mkdir $BINDIR && cp $TRAVIS_BUILD_DIR'/LICENSE' $BUILDIR'/'
+    - cp -R $SRCDIR $BUILDIR'/' && cp -R $CFGDIR $BUILDIR'/' && cp -R $LNGDIR $BUILDIR'/'
+    - chmod +x $REMOTESRC/spcomp
+    - cp -R -f $REMOTESRC'/include' $SRCDIR'/' && cp $SCRIPTING'/spcomp' $SRCDIR'/'
 
 script:
-    - ./spcomp ccprocessor.sp -E -v0
+    - $BUILDIR'/spcomp' $BUILDIR'/ccprocessor.sp' -E -v1 -i=$SRCDIR'/include' -o=$BINDIR'/ccprocessor.smx'
 
+before_deploy:
+  - tar -czvf ccprocessor-${TRAVIS_TAG}-${TRAVIS_BUILD_ID}.tar.gz $BUILDIR
+  - ls -a -l
+  
 notifications:
     email: false
