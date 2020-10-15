@@ -1,7 +1,7 @@
-#if defined _gchandler_included
+#if defined _ccprocessor_included
  #endinput
 #endif
-#define _gchandler_included
+#define _ccprocessor_included
 
 #define STATUS_LENGTH   	16
 #define TEAM_LENGTH     	64
@@ -264,10 +264,10 @@ public void cc_proc_APIHandShake(const int key)
 }
 #endif
 
-public SharedPlugin __pl_gchandler= 
+public SharedPlugin __pl_ccprocessor= 
 {
-	name = "gchandler",
-	file = "gchandler.smx",
+	name = "ccprocessor",
+	file = "ccprocessor.smx",
 #if defined REQUIRE_PLUGIN
 	required = 1
 #else
@@ -276,7 +276,7 @@ public SharedPlugin __pl_gchandler=
 };
 
 #if !defined REQUIRE_PLUGIN
-public void __pl_gchandler_SetNTVOptional()
+public void __pl_ccprocessor_SetNTVOptional()
 {
 	MarkNativeAsOptional("cc_drop_palette");
 	MarkNativeAsOptional("cc_clear_allcolors");

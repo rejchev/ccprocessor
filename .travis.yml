@@ -23,7 +23,7 @@ before_script:
     - cd $SCRIPTING
 
 script:
-    - ./spcomp gchandler.sp -E -v0
+    - ./spcomp ccprocessor.sp -E -v0
 
 notifications:
     email: false

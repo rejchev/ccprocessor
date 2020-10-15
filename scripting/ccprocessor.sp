@@ -7,10 +7,10 @@
 #define TEAM_R      2
 #define TEAM_B      3
 
-#include <gchandler>
+#include <ccprocessor>
 #include <regex>
 
-static char g_szLogEx[MESSAGE_LENGTH] = "logs/gchandler"
+static char g_szLogEx[MESSAGE_LENGTH] = "logs/ccprocessor"
 
 UserMessageType umType;
 
@@ -48,10 +48,10 @@ int Section, g_iMsgIdx;
 
 public Plugin myinfo = 
 {
-    name        = "Game Chat Handler",
+    name        = "CCProcessor",
     author      = "nullent?",
-    description = "Advanced game chat handler",
-    version     = "1.0.0",
+    description = "Color chat processor",
+    version     = "3.1.2",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -90,37 +90,37 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     g_fwdAPIHandShake       = new GlobalForward("cc_proc_APIHandShake", ET_Ignore, Param_Cell);
     g_fwdRebuildClients     = new GlobalForward("cc_proc_RebuildClients", ET_Ignore, Param_Cell, Param_Cell, Param_Array, Param_CellByRef);
 
-    RegPluginLibrary("gchandler");
+    RegPluginLibrary("ccprocessor");
 
     if(late) OnAllPluginsLoaded();
 
     return APLRes_Success;
 }
 
-#include "gchandler/gch_saytext2.sp"
-#include "gchandler/gch_saytext.sp"
-#include "gchandler/gch_textmsg.sp"
-#include "gchandler/gch_radiomsg.sp"
+#include "ccprocessor/ccp_saytext2.sp"
+#include "ccprocessor/ccp_saytext.sp"
+#include "ccprocessor/ccp_textmsg.sp"
+#include "ccprocessor/ccp_radiomsg.sp"
 
 public void OnPluginStart()
 {
-    LoadTranslations("gchandler.phrases");
-    LoadTranslations("gchandler_engine.phrases");
+    LoadTranslations("ccproc.phrases");
+    LoadTranslations("ccp_defmessage.phrases");
 
     g_mPalette = new StringMap();
     g_mMessage = new StringMap();
 
     {
-        if(!DirExists("/cfg/gchandler"))
-            CreateDirectory("/cfg/gchandler", 0x1ED);
+        if(!DirExists("/cfg/ccprocessor"))
+            CreateDirectory("/cfg/ccprocessor", 0x1ED);
     }
     
-    (game_mode = CreateConVar("gch_CRTP", "0", "Enable/Disable color real time processing", _, true, 0.0, true, 1.0)).AddChangeHook(CVAR_CRTP);
-    CVAR_CRTP(game_mode, NULL_STRING, NULL_STRING);
+    (game_mode = CreateConVar("ccp_color_RTP", "0", "Enable/Disable color real time processing", _, true, 0.0, true, 1.0)).AddChangeHook(CCP_RTP);
+    CCP_RTP(game_mode, NULL_STRING, NULL_STRING);
 
     delete game_mode;
     
-    AutoExecConfig(true, "core", "gchandler");
+    AutoExecConfig(true, "core", "ccprocessor");
 
     game_mode = FindConVar("game_mode");
     if(!game_mode)
@@ -142,7 +142,7 @@ public void OnModChanged(ConVar cvar, const char[] oldVal, const char[] newVal)
     cvar.GetString(mode_default_value, sizeof(mode_default_value));
 }
 
-public void CVAR_CRTP(ConVar cvar, const char[] oldVal, const char[] newVal)
+public void CCP_RTP(ConVar cvar, const char[] oldVal, const char[] newVal)
 {
     g_bRTP = cvar.BoolValue;
 }
@@ -153,7 +153,7 @@ public void OnMapStart()
 
     UpdateLogFile();
 
-#define SETTINGS_PATH "configs/gchandler/%s.ini"
+#define SETTINGS_PATH "configs/ccprocessor/%s.ini"
 
     static char szConfig[MESSAGE_LENGTH];
 
@@ -186,7 +186,7 @@ public void OnMapStart()
 
 public void UpdateLogFile()
 {
-#define LOG_TEMPLATE "logs/gchandler/day_%j.log"
+#define LOG_TEMPLATE "logs/ccprocessor/day_%j.log"
 
     FormatTime(g_szLogEx, sizeof(g_szLogEx), LOG_TEMPLATE, GetTime());
     BuildPath(Path_SM, g_szLogEx, sizeof(g_szLogEx), g_szLogEx);
