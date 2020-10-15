@@ -29,7 +29,7 @@ before_script:
     - cp -R -f $REMOTESRC'/include' $SRCDIR'/' && cp $REMOTESRC'/spcomp' $SRCDIR'/'
 
 script:
-    - $BUILDIR'/spcomp' $BUILDIR'/ccprocessor.sp' -E -v1 -i=$SRCDIR'/include' -o=$BINDIR'/ccprocessor.smx'
+    - $SRCDIR'/spcomp' $SRCDIR'/ccprocessor.sp' -E -v1 -i=$SRCDIR'/include' -o=$BINDIR'/ccprocessor.smx'
 
 before_deploy:
   - tar -czvf ccprocessor-${TRAVIS_TAG}-${TRAVIS_BUILD_ID}.tar.gz $BUILDIR
