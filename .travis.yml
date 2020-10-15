@@ -26,7 +26,7 @@ before_script:
     - mkdir $BUILDIR && mkdir $BINDIR && cp $TRAVIS_BUILD_DIR'/LICENSE' $BUILDIR'/'
     - cp -R $SRCDIR $BUILDIR'/' && cp -R $CFGDIR $BUILDIR'/' && cp -R $LNGDIR $BUILDIR'/'
     - chmod +x $REMOTESRC/spcomp
-    - cp -R -f $REMOTESRC'/include' $SRCDIR'/' && cp $SCRIPTING'/spcomp' $SRCDIR'/'
+    - cp -R -f $REMOTESRC'/include' $SRCDIR'/' && cp $REMOTESRC'/spcomp' $SRCDIR'/'
 
 script:
     - $BUILDIR'/spcomp' $BUILDIR'/ccprocessor.sp' -E -v1 -i=$SRCDIR'/include' -o=$BINDIR'/ccprocessor.smx'
