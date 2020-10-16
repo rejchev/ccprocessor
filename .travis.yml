@@ -39,7 +39,7 @@ deploy:
   token:
     secure: Psj4P1giX7Un/R7TPsPdMkuDiHTcVWTgCuQfVWMe1nFrLqeC0Uc59CpvhRaRs/+DpL6j8WHDWLhKpoX7c0UDWgaKy9FAGs0iXROXHKaJ20YrWomeaWBZNFseNcfOmiSmLzxVZ92sQJxwgzjaH5fjhc+I4kXoxKyf166yxyZzVVroZ+WNUNaOxcX+azz3i7XMAXD+57VF9Cc7mZs/z2mNF8HoQPKIN1QQ0QcVNqRMtJ0ZoUn+sKHQecGxtNirl0lc4RC4HRWt0ojSchszOVEzfHgvvnN82t1F86jFz8/YiHwDTyaYhjL6CLNX/f1yil2u3syhib6U/sKjnyLL4vkKrvk+8zpMDdu/1LUc3PkzX5xp/WzcTWzK5dMQTqTliiJVwCyfZa2Q/jtUVJULp7Moir3uZJN+8hJuqVtjRMBsZSw2iU2tw3Bn6DWPPQgQVUfd0ixGj8Dx9bSV0whiRSnCaxxjq9e1QI4ONro3sWpUE1pmN6JF41tfzCCX2gRr6aGKd9pJiw8pLwPRD0u6HEasX7lxeBf7nsjJWXABeZVYr1O1vyOTriQ1fvkVStg1feDAIb9LtgV5rMLmpM5u3OWTSGUS9/W2elrZX1EPkUvcQ6jpOf6M1J/MK0dzAi2gzwY1B3XI3zGJgq87kU+c6h8xf/kclB/boO/6r1ZOcn2QoCA=
   file: ccp-build-${TRAVIS_BUILD_NUMBER}.tar.gz
-  cleanup: false
+  skip_cleanup: true
   on:
     tags: true
   
