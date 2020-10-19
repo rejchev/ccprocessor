@@ -329,16 +329,16 @@ stock void FormatBind(const char[] prefix, const int iBind, const char to = 0, c
     if(to)
     {
         if(to == 'l' || to == 'L')
-            StringToLowercase(szBuffer, 0, strlen(szBuffer));
+            StringToLowercase(szBuffer);
         
         else if(to == 'u' || to == 'U')
-            StringToUppercase(szBuffer, 0, strlen(szBuffer));
+            StringToUppercase(szBuffer);
     }
 }
 
 
 // Author Wend4r: https://hlmod.ru/threads/sklad-funkcij-sourcepawn.45161/post-417351
-stock void StringToLowercase(char[] sText, int iStartLen = 0, int iEndLen = 0)
+stock void StringToLowercase(char[] sText)
 {
     int i;
     while(i < strlen(sText)) {
