@@ -264,6 +264,111 @@ public void cc_proc_APIHandShake(const int key)
 }
 #endif
 
+// Stocks
+
+stock void BreakString_stock(char[] szValue, int MaxSmb)
+{
+    for(int i, a, b; i < strlen(szValue); i++)
+    {
+        if(a >= MaxSmb)
+        {
+            szValue[i] = 0;
+            break;
+        }
+
+        if((b = IsCharMB(szValue[i])))
+            i += b-1;
+        
+        a++;
+    }
+}
+
+stock int numlts_stock(const char[] str)
+{
+    int a;
+
+    for(int i, b; i < strlen(str); i++)
+    {
+        if((b = IsCharMB(szValue[i])))
+            i += b-1;
+        
+        a++;
+    }
+
+    return a;
+}
+
+stock int BindFromString(const char[] inputString)
+{
+    char szBuffer[SIZE_PART_CLR];
+    
+    for(int i; i < BIND_MAX; i++)
+    {
+        FormatBind(NULL_STRING, i, _, szBuffer, sizeof(szBuffer));
+
+        if(StrContains(inputString, szBuffer, false) != -1)
+            return i;
+    }
+
+    return BIND_MAX;
+}
+
+stock void FormatBind(const char[] prefix, const int iBind, const char to = 0, char[] szBuffer, int size)
+{
+    if(iBind < 0 || iBind >= BIND_MAX)
+        return;
+
+    strcopy(szBuffer, size, szBinds[iBind]);
+
+    ReplaceString(szBuffer, size, "{", "");
+    ReplaceString(szBuffer, size, "}", "");
+
+    if(prefix[0])
+        Format(szBuffer, size, "%s%s", prefix, szBuffer);
+
+    if(to)
+    {
+        if(to == 'l' || to == 'L')
+            StringToLowercase(szBuffer, 0, strlen(szBuffer));
+        
+        else if(to == 'u' || to == 'U')
+            StringToUppercase(szBuffer, 0, strlen(szBuffer));
+    }
+}
+
+
+// Author Wend4r: https://hlmod.ru/threads/sklad-funkcij-sourcepawn.45161/post-417351
+stock void StringToLowercase(char[] sText, int iStartLen = 0, int iEndLen = 0)
+{
+    int iLen = strlen(sText);
+
+    if(1 > iEndLen || iLen < iEndLen)
+    {
+        iEndLen = iLen;
+    }
+
+    for(int i = iStartLen; i != iEndLen; i++)
+    {
+        sText[i] |= 0x20;
+    }
+}
+
+// Author Wend4r: https://hlmod.ru/threads/sklad-funkcij-sourcepawn.45161/post-417351
+stock void StringToUppercase(char[] sText, int iStartLen = 0, int iEndLen = 0)
+{
+    int iLen = strlen(sText);
+
+    if(1 > iEndLen || iLen < iEndLen)
+    {
+        iEndLen = iLen;
+    }
+
+    for(int i = iStartLen; i != iEndLen; i++)
+    {
+        sText[i] &= ~0x20;
+    }
+}
+
 public SharedPlugin __pl_ccprocessor= 
 {
 	name = "ccprocessor",
