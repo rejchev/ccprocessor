@@ -300,7 +300,7 @@ stock int numlts_stock(const char[] str)
 
 stock int BindFromString(const char[] inputString)
 {
-    char szBuffer[SIZE_PART_CLR];
+    char szBuffer[NAME_LENGTH];
     
     for(int i; i < BIND_MAX; i++)
     {
