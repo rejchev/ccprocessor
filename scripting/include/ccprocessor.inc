@@ -340,32 +340,20 @@ stock void FormatBind(const char[] prefix, const int iBind, const char to = 0, c
 // Author Wend4r: https://hlmod.ru/threads/sklad-funkcij-sourcepawn.45161/post-417351
 stock void StringToLowercase(char[] sText, int iStartLen = 0, int iEndLen = 0)
 {
-    int iLen = strlen(sText);
-
-    if(1 > iEndLen || iLen < iEndLen)
-    {
-        iEndLen = iLen;
-    }
-
-    for(int i = iStartLen; i != iEndLen; i++)
-    {
-        sText[i] |= 0x20;
+    int i;
+    while(i < strlen(sText)) {
+        sText[i] = CharToLower(sText[i]);
+        i++;
     }
 }
 
 // Author Wend4r: https://hlmod.ru/threads/sklad-funkcij-sourcepawn.45161/post-417351
-stock void StringToUppercase(char[] sText, int iStartLen = 0, int iEndLen = 0)
+stock void StringToUppercase(char[] sText)
 {
-    int iLen = strlen(sText);
-
-    if(1 > iEndLen || iLen < iEndLen)
-    {
-        iEndLen = iLen;
-    }
-
-    for(int i = iStartLen; i != iEndLen; i++)
-    {
-        sText[i] &= ~0x20;
+    int i;
+    while(i < strlen(sText)) {
+        sText[i] = CharToUpper(sText[i]);
+        i++;
     }
 }
 
