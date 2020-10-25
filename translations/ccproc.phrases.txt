@@ -373,7 +373,7 @@
     // ------------ Msg color ----------- //
 
     // -- Msg color: user (empty or value)
-    "DEF_NAMECO_U"
+    "DEF_MSGCO_U"
     {
         "ru"                "{W}"
         "en"                "{W}"
@@ -381,7 +381,7 @@
     }
 
     // -- Msg color: server
-    "DEF_NAMECO_S"
+    "DEF_MSGCO_S"
     {
         "ru"                "{W}"
         "en"                "{W}"
