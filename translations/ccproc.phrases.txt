@@ -1,66 +1,391 @@
 "Phrases"
 {
-    "TeamTAll"
+    // ---------- Status colors --------- //
+
+    // Status color: Alive
+    "DEF_STATUSCO_A"
     {
-        "ru"                "{T}(T)"
-        "en"                "{T}(T)"
-        "pl"                "{T}(T)"
+        "ru"                "{G}"
+        "en"                "{G}"
+        "pl"                "{G}"
     }
 
-    "TeamT"
+    // Status color: Died
+    "DEF_STATUSCO_D"
     {
-        "ru"                "{T}(Private T)"
-        "en"                "{T}(Private T)"
-        "pl"                "{T}(Private CT)"
+        "ru"                "{R}"
+        "en"                "{R}"
+        "pl"                "{R}"
     }
 
-    "TeamCTAll"
+    // Status color: Server
+    "DEF_STATUSCO_D_S"
     {
-        "ru"                "{T}(CT)"
-        "en"                "{T}(CT)"
-        "pl"                "{T}(CT)"
+        "ru"                "{GO}"
+        "en"                "{GO}"
+        "pl"                "{GO}"
     }
 
-    "TeamCT"
+    // ---------- Status --------- //
+
+    // Status: Alive
+    "DEF_STATUS_A"
     {
-        "ru"                "{T}(Private CT)"
-        "en"                "{T}(Private CT)"
-        "pl"                "{T}(Private CT)"
+        "ru"                "•"
+        "en"                "•"
+        "pl"                "•"
     }
 
-    "TeamSPECAll"
+    // Status: Died
+    "DEF_STATUS_D"
     {
-        "ru"                "{T}(SPEC)"
-        "en"                "{T}(SPEC)"
-        "pl"                "{T}(SPEC)"
+        "ru"                "•"
+        "en"                "•"
+        "pl"                "•"
     }
 
-    "TeamSPEC"
+    // Status: Server
+    "DEF_STATUS_D_S"
     {
-        "ru"                "{T}(Private SPEC)"
-        "en"                "{T}(Private SPEC)"
-        "pl"                "{T}(Private SPEC)"
+        "ru"                "•"
+        "en"                "•"
+        "pl"                "•"
     }
 
-    "RadioMsg"
+    // ---------- Team colors --------- //
+
+        // ------ Private chat (optional) ----- //
+
+        // -- Blue team color
+        "DEF_TEAMCO_P_B"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+        // -- Red team color
+        "DEF_TEAMCO_P_R"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+        // -- Spec team color
+        "DEF_TEAMCO_P_S"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+        // ------ All chat (optional) ----- //
+
+        // -- Blue team color
+        "DEF_TEAMCO_A_B"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+        // -- Red team color
+        "DEF_TEAMCO_A_R"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+        // -- Spec team color
+        "DEF_TEAMCO_A_S"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+        // ------ Radio chat (optional) ----- //
+
+        // -- Blue team color
+        "DEF_TEAMCO_R_B"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // -- Red team color
+        "DEF_TEAMCO_R_R"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // -- Spec team color
+        "DEF_TEAMCO_R_S"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // ------ Server chat (optional) ----- //
+
+        // -- Blue team color
+        "DEF_TEAMCO_S_B"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // -- Red team color
+        "DEF_TEAMCO_S_R"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // -- Spec team color
+        "DEF_TEAMCO_S_S"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // ------ Name change (optional) ----- //
+
+        // -- Blue team color
+        "DEF_TEAMCO_C_B"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+        // -- Red team color
+        "DEF_TEAMCO_C_R"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+        // -- Spec team color
+        "DEF_TEAMCO_C_S"
+        {
+            "ru"                "{T}"
+            "en"                "{T}"
+            "pl"                "{T}"
+        }
+
+    // ------------ Teams ----------- //
+
+        // ------ Private chat (optional) ----- //
+
+        // -- Blue team
+        "DEF_TEAM_P_B"
+        {
+            "ru"                "(*CT*)"
+            "en"                "(*CT*)"
+            "pl"                "(*CT*)"
+        }
+
+        // -- Red team
+        "DEF_TEAM_P_R"
+        {
+            "ru"                "(*T*)"
+            "en"                "(*T*)"
+            "pl"                "(*T*)"
+        }
+
+        // -- Spec team
+        "DEF_TEAM_P_S"
+        {
+            "ru"                "(*SPEC*)"
+            "en"                "(*SPEC*)"
+            "pl"                "(*SPEC*)"
+        }
+
+        // ------ Public chat (optional) ----- //
+
+        // -- Blue team
+        "DEF_TEAM_A_B"
+        {
+            "ru"                "(CT)"
+            "en"                "(CT)"
+            "pl"                "(CT)"
+        }
+
+        // -- Red team
+        "DEF_TEAM_A_R"
+        {
+            "ru"                "(T)"
+            "en"                "(T)"
+            "pl"                "(T)"
+        }
+
+        // -- Spec team
+        "DEF_TEAM_A_S"
+        {
+            "ru"                "(SPEC)"
+            "en"                "(SPEC)"
+            "pl"                "(SPEC)"
+        }
+
+        // ------ Radio chat (optional) ----- //
+
+        // -- Blue team
+        "DEF_TEAM_R_B"
+        {
+            "ru"                "(RADIO)"
+            "en"                "(RADIO)"
+            "pl"                "(RADIO)"
+        }
+
+        // -- Red team
+        "DEF_TEAM_R_R"
+        {
+            "ru"                "(RADIO)"
+            "en"                "(RADIO)"
+            "pl"                "(RADIO)"
+        }
+
+        // -- Spec team
+        "DEF_TEAM_R_S"
+        {
+            "ru"                "(RADIO)"
+            "en"                "(RADIO)"
+            "pl"                "(RADIO)"
+        }
+
+        // ------ Server chat (optional) ----- //
+
+        // // -- Blue team
+        // "DEF_TEAM_S_B"
+        // {
+        //     "ru"                "(RADIO)"
+        //     "en"                "(RADIO)"
+        //     "pl"                "(RADIO)"
+        // }
+
+        // // -- Red team
+        // "DEF_TEAM_S_R"
+        // {
+        //     "ru"                "(RADIO)"
+        //     "en"                "(RADIO)"
+        //     "pl"                "(RADIO)"
+        // }
+
+        // -- Spec team
+        "DEF_TEAM_S_S"
+        {
+            "ru"                "(SYS)"
+            "en"                "(SYS)"
+            "pl"                "(SYS)"
+        }
+
+        // ------ Name change (optional) ----- //
+
+        // -- Blue team
+        "DEF_TEAM_C_B"
+        {
+            "ru"                "(SET)"
+            "en"                "(SET)"
+            "pl"                "(SET)"
+        }
+
+        // -- Red team
+        "DEF_TEAM_C_R"
+        {
+            "ru"                "(SET)"
+            "en"                "(SET)"
+            "pl"                "(SET)"
+        }
+
+        // -- Spec team
+        "DEF_TEAM_C_S"
+        {
+            "ru"                "(SET)"
+            "en"                "(SET)"
+            "pl"                "(SET)"
+        }
+    
+    // ------------ Prefix color ----------- //
+
+    // -- Prefix color: user
+    "DEF_PREFIXCO_U"
     {
-        "ru"                "{GO}(Radio)"
-        "en"                "{GO}(Radio)"
-        "pl"                "{GO}(Radio)"
+        "ru"                "{T}"
+        "en"                "{T}"
+        "pl"                "{T}"
     }
 
-    "ClientStatus_Alive"
+    // -- Prefix color: server
+    "DEF_PREFIXCO_S"
     {
-        "ru"                "{G}•"
-        "en"                "{G}•"
-        "pl"                "{G}•"
+        "ru"                "{CO}"
+        "en"                "{CO}"
+        "pl"                "{CO}"
     }
 
-    "ClientStatus_Died"
+    // ------------ Prefix ----------- //
+
+    // -- Prefix: user (empty or value)
+    "DEF_PREFIX_U"
     {
-        "ru"                "{R}•"
-        "en"                "{R}•"
-        "pl"                "{R}•"
+        "ru"                "[DEFAULT]"
+        "en"                "[DEFAULT]"
+        "pl"                "[DEFAULT]"
+    }
+
+    // -- Prefix: server
+    "DEF_PREFIX_S"
+    {
+        "ru"                "[CCP.proj]"
+        "en"                "[CCP.proj]"
+        "pl"                "[CCP.proj]"
+    }
+
+    // ------------ Name color ----------- //
+
+    // -- Name color: user (empty or value)
+    "DEF_NAMECO_U"
+    {
+        "ru"                "{T}"
+        "en"                "{T}"
+        "pl"                "{T}"
+    }
+
+    // -- Name color: server
+    "DEF_NAMECO_S"
+    {
+        "ru"                "{G}"
+        "en"                "{G}"
+        "pl"                "{G}"
+    }
+
+    // ------------ Msg color ----------- //
+
+    // -- Msg color: user (empty or value)
+    "DEF_NAMECO_U"
+    {
+        "ru"                "{W}"
+        "en"                "{W}"
+        "pl"                "{W}"
+    }
+
+    // -- Msg color: server
+    "DEF_NAMECO_S"
+    {
+        "ru"                "{W}"
+        "en"                "{W}"
+        "pl"                "{W}"
     }
 
     "{W}"

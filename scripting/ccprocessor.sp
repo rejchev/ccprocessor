@@ -51,7 +51,7 @@ public Plugin myinfo =
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.1.2",
+    version     = "3.2.0",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -346,7 +346,7 @@ void RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
         if(iType == eMsg_RADIO && i == BIND_MSG)
             continue;
 
-        GetPreCallValue(i, LANG_SERVER, iType, iTeam, IsAlive, szName, szMessage, SZ(szOther));
+        GetDefaultValue(i, LANG_SERVER, iType, iTeam, IsAlive, szName, szMessage, SZ(szOther));
         
         Call_RebuildString(iType, iIndex, level, szBinds[i], szOther, sizeof(szOther));
 
@@ -375,49 +375,119 @@ void RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
         szBuffer[0] = 0;
 }
 
-void GetPreCallValue(int iBind, int iLangValue, int iMessageType, int iSenderTeam, bool bAlive, const char[] szName, const char[] szMessage, char[] szBuffer, int size)
+void GetDefaultValue(int iBind, int iLangValue, int iMessageType, int iSenderTeam, bool bAlive, const char[] szName, const char[] szMessage, char[] szBuffer, int size)
 {
-    if(iBind == BIND_STATUS)
-        FormatEx(szBuffer, size, "%T", ((bAlive) ? "ClientStatus_Alive" : "ClientStatus_Died"), iLangValue);
-    
-    else if(iBind == BIND_TEAM && iMessageType != eMsg_CNAME)
-        GetTeamPhrase(iLangValue, iSenderTeam, iMessageType, szBuffer, size);
-    
-    else if(iBind == BIND_NAME || iBind == BIND_MSG)
-        strcopy(szBuffer, size, ((iBind == BIND_MSG) ? szMessage : szName));
-
-    // Magic... Not bad
-    else if(iBind == BIND_NAME_CO || iBind == BIND_MSG_CO || iBind == BIND_PREFIX_CO)
-        FormatEx(szBuffer, size, "%c", ((iBind == BIND_MSG_CO) ? 1 : 3));
-
-    else if(iBind == BIND_PROTOTYPE)
-        strcopy(szBuffer, size, msgPrototype[iMessageType]);
+    switch(iBind)
+    {
+        case BIND_PROTOTYPE: {
+            strcopy(szBuffer, size, msgPrototype[iMessageType]);
+        }
+        case BIND_STATUS_CO, BIND_STATUS: {
+            GetStatusDefault(iBind, iLangValue, iMessageType, bAlive, szBuffer, size);
+        }
+        case BIND_TEAM_CO, BIND_TEAM: {
+            GetTeamDefault(iBind, iLangValue, iSenderTeam, iMessageType, szBuffer, size);
+        }
+        case BIND_PREFIX_CO, BIND_PREFIX: {
+            GetPrefixDefault(iBind, iLangValue, iMessageType, szBuffer, size);
+        }
+        case BIND_NAME_CO, BIND_NAME: {
+            GetNameDefault(iBind, iLangValue, iMessageType, szName, szBuffer, size);
+        }
+        case BIND_MSG_CO, BIND_MSG: {
+            GetMsgDefault(iBind, iLangValue, iMessageType, szMessage, szBuffer, size);
+        }
+    }        
 }
 
-void GetTeamPhrase(int iLangI, int iTeam, int iType, char[] szBuffer, int size)
-{
-    szBuffer[0] = 0;
+void GetStatusDefault(int part, int lang, int mtype, bool alive, char[] szBuffer, int size) {
 
-    if(iType == eMsg_CNAME || iTeam == eMsg_SERVER)
+    // DEF_{BIND}
+    FormatBind("DEF_", part, 'u', szBuffer, size);
+
+    // DEF_{BIND}_{ALIVE}
+    Format(szBuffer, size, "%s_%s", szBuffer, (
+        (alive) ? "A" : "D"
+    ));
+
+    // DEF_{BIND}_D_S
+    if(mtype == eMsg_SERVER) {
+        Format(szBuffer, size, "%s_S", szBuffer);
+    }
+
+    Format(szBuffer, size, "%T", szBuffer, lang);
+}
+
+void GetTeamDefault(int part, int iLangI, int iTeam, int iType, char[] szBuffer, int size) {
+
+    // DEF_{BIND}
+    FormatBind("DEF_", part, 'u', szBuffer, size);
+
+    // DEF_{BIND}_{TYPE}
+    Format(szBuffer, size, "%s_%s", szBuffer, (
+        (iType == eMsg_TEAM)    ? "P" : 
+        (iType == eMsg_ALL)     ? "A" :
+        (iType == eMsg_CNAME)   ? "C" :
+        (iType == eMsg_RADIO)   ? "R" : "S"
+    ));
+
+    // DEF_{BIND}_{TYPE}_{TEAM}
+    Format(szBuffer, size, "%s_%s", szBuffer, (
+        (iTeam == TEAM_B) ? "B" : (iTeam == TEAM_R) ? "R" : "S"
+    ));
+
+    if(!TranslationPhraseExists(szBuffer)) {
+        szBuffer[0] = 0;
         return;
+    }
     
-    static const char phrases[][] = {"RadioMsg", "TeamSPECAll", "TeamTAll", "TeamCTAll"};
+    Format(szBuffer, size, "%T", szBuffer, iLangI);
+}
 
-    if(iType == eMsg_RADIO)
-    {
-        FormatEx(szBuffer, size, "%T", phrases[0], iLangI);
+void GetPrefixDefault(int part, int lang, int mtype, char[] szBuffer, int size) {
+    // DEF_{BIND}
+    FormatBind("DEF_", part, 'u', szBuffer, size);
+
+    // DEF_{BIND}_{SENDER}
+    Format(szBuffer, size, "%s_%s", szBuffer, (
+        (mtype != eMsg_SERVER) ? "U" : "S"
+    ));
+
+    Format(szBuffer, size, "%T", szBuffer, lang);
+}
+
+void GetNameDefault(int part, int lang, int mtype, const char[] name, char[] szBuffer, int size) {
+    if(part == BIND_NAME) {
+        strcopy(szBuffer, size, name);
         return;
     }
 
-    if(iTeam > TEAM_B || iTeam < TEAM_SPEC)
-        return;
-    
-    strcopy(szBuffer, size, phrases[iTeam]);
+    // DEF_{BIND}
+    FormatBind("DEF_", part, 'u', szBuffer, size);
 
-    if(!iType)
-        szBuffer[strlen(szBuffer) - 3] = 0;
-    
-    Format(szBuffer, size, "%T", szBuffer, iLangI);
+    // DEF_{BIND}_{SENDER}
+    Format(szBuffer, size, "%s_%s", szBuffer, (
+        (mtype != eMsg_SERVER) ? "U" : "S"
+    ));
+
+    Format(szBuffer, size, "%T", szBuffer, lang);
+}
+
+void GetMsgDefault(int part, int lang, int mtype, const char[] msg, char[] szBuffer, int size) {
+    if(part == BIND_MSG) {
+        strcopy(szBuffer, size, msg);
+        return;
+    }
+
+    // DEF_{BIND}
+    FormatBind("DEF_", part, 'u', szBuffer, size);
+
+    // DEF_{BIND}_{SENDER}
+    Format(szBuffer, size, "%s_%s", szBuffer, (
+        (mtype != eMsg_SERVER) ? "U" : "S"
+    ));
+
+    Format(szBuffer, size, "%T", szBuffer, lang);
 }
 
 void LOG_WRITE(const char[] szMessage, any ...)

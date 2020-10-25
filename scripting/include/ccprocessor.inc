@@ -19,7 +19,7 @@ API key:
 	ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY 			73138147
+#define API_KEY 			06922898
 
 #if !defined CORE
 	#define API_OOD 		"The plugin module uses an outdated API. You must update it."
@@ -44,7 +44,10 @@ enum
 {
 	BIND_PROTOTYPE = 0,
 
+    BIND_STATUS_CO,
 	BIND_STATUS,
+
+    BIND_TEAM_CO,
 	BIND_TEAM,
 
 	BIND_PREFIX_CO,
@@ -61,10 +64,13 @@ enum
 
 stock const char szBinds[BIND_MAX][] = 
 {
-	"{PROTOTYPE}",
+	"{PROTOTYPE}"   ,
 	
-	"{STATUS}", "{TEAM}", "{PREFIXCO}", "{PREFIX}",
-	"{NAMECO}", "{NAME}", "{MSGCO}", 	"{MSG}"
+	"{STATUSCO}"    ,   "{STATUS}"  , 
+    "{TEAMCO}"      ,   "{TEAM}"    , 
+    "{PREFIXCO}"    ,   "{PREFIX}"  ,
+	"{NAMECO}"      ,   "{NAME}"    , 
+    "{MSGCO}"       ,   "{MSG}"
 };
 
 /*
@@ -246,9 +252,12 @@ stock int BreakPoint(int iBindType, char[] szValue)
 {
 	static const int iMaxLength[BIND_MAX] = 
 	{
-		MESSAGE_LENGTH, STATUS_LENGTH, TEAM_LENGTH, 
-		STATUS_LENGTH, PREFIX_LENGTH, STATUS_LENGTH, 
-		NAME_LENGTH, STATUS_LENGTH, MESSAGE_LENGTH
+		MESSAGE_LENGTH  ,
+        STATUS_LENGTH   ,   STATUS_LENGTH   ,
+        STATUS_LENGTH   ,   TEAM_LENGTH     ,
+		STATUS_LENGTH   ,   PREFIX_LENGTH   ,
+        STATUS_LENGTH   ,   NAME_LENGTH     ,
+        STATUS_LENGTH   ,   MESSAGE_LENGTH
 	};
 
 	if(strlen(szValue) >= iMaxLength[iBindType])
