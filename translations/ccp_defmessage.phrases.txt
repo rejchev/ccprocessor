@@ -173,4 +173,13 @@
         "en"                "{G}{1} {W}attacked a teammate"
         "pl"                "{G}{1} {W}zaatakował kolegę z drużyny"
     }
+
+    // Imitation
+    "#Game_team_change"
+    {
+        // {1} - Who was that, {2} - new team
+        "ru"                "{G}{1} {W}зашел за команду {G}{2}"
+        "en"                "{G}{1} {W}is joining the {G}{2}"
+        "pl"                "{G}{1} {W}dołącza do {G}{2}"
+    }
 }
