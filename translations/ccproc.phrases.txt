@@ -514,11 +514,25 @@
         "pl"                "Szablon"
     }
 
+    "{STATUSCO}"
+    {
+        "ru"                "Цвет статуса"
+        "en"                "Status сolor"
+        "pl"                "Kolor status"
+    }
+
     "{STATUS}"
     {
         "ru"                "Статус"
         "en"                "Status"
         "pl"                "Status"
+    }
+
+    "{TEAMCO}"
+    {
+        "ru"                "Цвет команды"
+        "en"                "Team сolor"
+        "pl"                "Kolor komenda"
     }
 
     "{TEAM}"
