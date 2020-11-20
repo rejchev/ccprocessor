@@ -212,7 +212,18 @@ native StringMap cc_drop_palette();
  *
  * 	@noreturn
 */
+#pragma deprecated "Use ccp_replaceColors()"
 native void cc_clear_allcolors(char[] szBuffer, int iSize);
+
+/*
+ *	Replacing colors in a string
+ *
+ *	@param szBuffer		String buffer
+ *	@param toNull		false - replace ABBR with code/ true - clear ABBR&code in string
+ *
+ * 	@noreturn
+*/
+native void ccp_replaceColors(char[] szBuffer, bool toNull = true);
 
 /*
  *	Get the API key used by the core
@@ -382,6 +393,7 @@ public void __pl_ccprocessor_SetNTVOptional()
 {
 	MarkNativeAsOptional("cc_drop_palette");
 	MarkNativeAsOptional("cc_clear_allcolors");
+    MarkNativeAsOptional("ccp_replaceColors");
 	MarkNativeAsOptional("cc_get_APIKey");
 	MarkNativeAsOptional("cc_is_APIEqual");
 	MarkNativeAsOptional("cc_call_builder");

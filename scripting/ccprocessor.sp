@@ -51,7 +51,7 @@ public Plugin myinfo =
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.2.0",
+    version     = "3.2.1",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -67,7 +67,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     HookUserMessage(GetUserMessageId("RadioText"), UserMessage_RadioText, true, RadioText_Completed);
 
     CreateNative("cc_drop_palette", Native_DropPalette);
+
+    // Will be removed in the next version
     CreateNative("cc_clear_allcolors", Native_ClearAllColors);
+    CreateNative("ccp_replaceColors", Native_ReplaceColors);
+
     CreateNative("cc_get_APIKey", Native_GetAPIKey);
     CreateNative("cc_is_APIEqual", Native_IsAPIEqual);
     CreateNative("cc_call_builder", Native_CallBuilder);
@@ -556,12 +560,23 @@ void ClearCharArray(char[][] array, int size)
         array[i][0] = 0;
 }
 
+// Will be removed in the next version
 public int Native_ClearAllColors(Handle hPlugin, int iArgs)
 {
     char szBuffer[MESSAGE_LENGTH];
     GetNativeString(1, SZ(szBuffer));
 
     ReplaceColors(SZ(szBuffer), true);
+
+    SetNativeString(1, SZ(szBuffer));
+}
+
+public int Native_ReplaceColors(Handle hPlugin, int iArgs)
+{
+    char szBuffer[MAX_LENGTH];
+    GetNativeString(1, SZ(szBuffer));
+
+    ReplaceColors(SZ(szBuffer), view_as<bool>(GetNativeCell(2)));
 
     SetNativeString(1, SZ(szBuffer));
 }
