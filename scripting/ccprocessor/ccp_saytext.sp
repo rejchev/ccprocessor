@@ -23,9 +23,7 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
     if(!((!umType) ? view_as<bool>(BfReadByte(msg)) : PbReadBool(msg, "chat")))
         return Plugin_Continue;
         
-    RebuildMessage(TEAM_SERVER, eMsg_SERVER, szName, szMessage, SZ(szBuffer), "saytext");
-
-    if(!szBuffer[0])
+    if(!RebuildMessage(TEAM_SERVER, eMsg_SERVER, szName, szMessage, SZ(szBuffer), "saytext"))
         return Plugin_Handled;
 
     Call_MessageBuilt(eMsg_SERVER, TEAM_SERVER, szBuffer);
@@ -61,14 +59,15 @@ public void SayText_Completed(StringMap data)
 
     CopyEqualArray(players, players, numClients);
 
-    CloseHandle(data);
+    // CloseHandle(data);
+    delete data;
     
     Handle message = 
         StartMessageEx(umid, players, numClients, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
 
     if(message)
     {
-        Call_OnNewMessage();
+        // Call_OnNewMessage();
         
         if(!umType)
         {

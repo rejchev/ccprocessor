@@ -23,9 +23,7 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
     if(!Call_IsSkipColors(MsgType, iIndex))
         ReplaceColors(SZ(szMessage), true);
     
-    RebuildMessage(iIndex, MsgType, szName, szMessage, SZ(szBuffer), "saytext2");
-
-    if(!szBuffer[0])
+    if(!RebuildMessage(iIndex, MsgType, szName, szMessage, SZ(szBuffer), "saytext2"))
         return Plugin_Handled;
     
     Call_MessageBuilt(MsgType, iIndex, szBuffer);
@@ -81,7 +79,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
     if(uMessage)
     {
-        Call_OnNewMessage();
+        // Call_OnNewMessage();
         
         if(!umType)
         {

@@ -79,7 +79,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     g_fwdSkipColors         = new GlobalForward("cc_proc_SkipColorsInMsg", ET_Hook, Param_Cell, Param_Cell);
     g_fwdRebuildString      = new GlobalForward(
-        "cc_proc_RebuildString", ET_Ignore, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_String, Param_Cell
+        "cc_proc_RebuildString", ET_Hook, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_String, Param_Cell
     );
 
     g_fwdRebuildString_Post = new GlobalForward(
@@ -362,13 +362,7 @@ bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
         ReplaceString(szBuffer, iSize, szBinds[i], szOther, true);
     }
 
-    // LOG_WRITE("RebuildedMessage(): %s", szBuffer);
-
-    // Fake messages on the way
-    if(um[0] == 'd' && um[1] == 'e' && um[2] == 'v' && strlen(um) == 3)
-        szBuffer[0] = 0;
-
-    return true;
+    return !(um[0] == 'd' && um[1] == 'e' && um[2] == 'v' && strlen(um) == 3);
 }
 
 void GetDefaultValue(int iBind, int iLangValue, int iMessageType, int iSenderTeam, bool bAlive, const char[] szName, const char[] szMessage, char[] szBuffer, int size)
@@ -626,7 +620,7 @@ Action Call_RebuildString(const int mType, int iClient, const char[] szBind, cha
     Action now;
     int level;
 
-    // Call
+    // Action Call
     Call_StartForward(g_fwdRebuildString);
     Call_PushCell(mType);
     Call_PushCell(iClient);
@@ -634,7 +628,7 @@ Action Call_RebuildString(const int mType, int iClient, const char[] szBind, cha
     Call_PushString(szBind);
     Call_PushStringEx(szMessage, iSize, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
     Call_PushCell(iSize);
-    Call_Finish();
+    Call_Finish(now);
 
     BreakPoint(mType, szMessage);
         

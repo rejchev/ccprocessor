@@ -33,9 +33,7 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
         else return defMessage;
     }
 
-    RebuildMessage(TEAM_SERVER, eMsg_SERVER, DEFAULT_NAME, szBuffer, params[0], sizeof(params[]), "textmsg");
-
-    if(!params[0][0])
+    if(!RebuildMessage(TEAM_SERVER, eMsg_SERVER, DEFAULT_NAME, szBuffer, params[0], sizeof(params[]), "textmsg"))
         return Plugin_Handled;
 
     Call_MessageBuilt(eMsg_SERVER, TEAM_SERVER, params[0]);
@@ -82,13 +80,13 @@ public void TextMsg_Completed(StringMap data)
 
     CopyEqualArray(players, players, numClients);
 
-    CloseHandle(data);
+    delete data;
     
     Handle message = StartMessageEx(umid, players, numClients, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
 
     if(message)
     {
-        Call_OnNewMessage();
+        // Call_OnNewMessage();
         
         if(!umType)
         {

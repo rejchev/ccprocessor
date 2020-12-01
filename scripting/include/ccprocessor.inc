@@ -19,7 +19,7 @@ API key:
 	ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY 			06922898
+#define API_KEY 			66638615
 
 #if !defined CORE
 	#define API_OOD 		"The plugin module uses an outdated API. You must update it."
@@ -103,9 +103,11 @@ forward void cc_proc_MsgUniqueId(const int UniqueID);
  *	@param szBuffer		Buffer with value
  *	@param iSize		Size of buffer
  *
- * 	@noreturn
+ * 	@return             Plugin_Continie - build continue,
+ *                      Plugin_Handled  - build rejected (after post call),
+ *                      Plugin_Stop     - build rejected immediately (with out post call)
 */
-forward void cc_proc_RebuildString(const int mType, int iClient, int &pLevel, const char[] szBind, char[] szBuffer, int iSize);
+forward Action cc_proc_RebuildString(const int mType, int iClient, int &pLevel, const char[] szBind, char[] szBuffer, int iSize);
 
 /*
  *	Call after build part of prototype
@@ -356,8 +358,6 @@ stock void FormatBind(const char[] prefix, const int iBind, const char to = 0, c
     }
 }
 
-
-// Author Wend4r: https://hlmod.ru/threads/sklad-funkcij-sourcepawn.45161/post-417351
 stock void StringToLowercase(char[] sText)
 {
     int i;
@@ -367,7 +367,6 @@ stock void StringToLowercase(char[] sText)
     }
 }
 
-// Author Wend4r: https://hlmod.ru/threads/sklad-funkcij-sourcepawn.45161/post-417351
 stock void StringToUppercase(char[] sText)
 {
     int i;
