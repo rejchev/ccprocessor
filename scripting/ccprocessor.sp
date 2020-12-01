@@ -23,7 +23,8 @@ StringMapSnapshot
     g_snapPalette;
 
 char 
-    msgPrototype[eMsg_MAX][MESSAGE_LENGTH];
+    msgPrototype[eMsg_MAX][MESSAGE_LENGTH],
+    g_szSection[4];
 
 ConVar game_mode;
 
@@ -44,14 +45,14 @@ GlobalForward
 
 bool g_bRTP, g_bDBG, g_bResetByMap;
 
-int Section, g_iMsgIdx;
+int g_iMsgIdx;
 
 public Plugin myinfo = 
 {
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.2.1",
+    version     = "3.2.2",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -118,13 +119,6 @@ public void OnPluginStart()
         if(!DirExists("/cfg/ccprocessor"))
             CreateDirectory("/cfg/ccprocessor", 0x1ED);
     }
-    
-    (game_mode = CreateConVar("ccp_color_RTP", "0", "Enable/Disable color real time processing", _, true, 0.0, true, 1.0)).AddChangeHook(CCP_RTP);
-    CCP_RTP(game_mode, NULL_STRING, NULL_STRING);
-
-    delete game_mode;
-    
-    AutoExecConfig(true, "core", "ccprocessor");
 
     game_mode = FindConVar("game_mode");
     if(!game_mode)
@@ -146,54 +140,64 @@ public void OnModChanged(ConVar cvar, const char[] oldVal, const char[] newVal)
     cvar.GetString(mode_default_value, sizeof(mode_default_value));
 }
 
-public void CCP_RTP(ConVar cvar, const char[] oldVal, const char[] newVal)
-{
-    g_bRTP = cvar.BoolValue;
-}
-
 public void OnMapStart()
 {
-    LOG_WRITE("OnMapStart(): -----------------------------------------------");
-
-    UpdateLogFile();
-
-#define SETTINGS_PATH "configs/ccprocessor/%s.ini"
-
-    static char szConfig[MESSAGE_LENGTH];
-
-    if(!szConfig[0])
-    {
-        GetGameFolderName(SZ(szConfig));
-        Format(SZ(szConfig), SETTINGS_PATH, szConfig);
-
-        BuildPath(Path_SM, SZ(szConfig), szConfig);
-    }
-
-    if(!FileExists(szConfig))
-        SetFailState("Where is my config: %s ", szConfig);
+    LOG_WRITE("Init OnMapStart()");
 
     g_mPalette.Clear();
-    Section = 0;
-    
+    g_szSection = NULL_STRING;
+
+    GetLogFile(g_szLogEx, sizeof(g_szLogEx));
+
+    LOG_WRITE("Out: GetLogFile('%s') ", g_szLogEx);
+
+    static char szConfig[MESSAGE_LENGTH] = "configs/ccprocessor/";
+    GetConfigFileByGame(szConfig, sizeof(szConfig));
+
+    LOG_WRITE("Out: GetGameFolderName('%s') ", szConfig);
+        
+    if(!FileExists(szConfig))
+        SetFailState("Where is my config: '%s' ", szConfig);
+
+    int iLine;
+    if(CreateParser().ParseFile(szConfig, iLine) != SMCError_Okay)
+        LogError("An error was detected on line '%i' while reading", iLine);
+}
+
+void GetConfigFileByGame(char[] szConfig, int size)
+{
+    if(szConfig[0] == 'c')
+        BuildPath(Path_SM, szConfig, size, szConfig);
+
+    ReplaceString(szConfig, size, "\\", "/");
+    int len = strlen(szConfig);
+
+    if(szConfig[len-1] != 'i')
+    {
+        GetGameFolderName(szConfig[len], size - (len-1));
+        Format(szConfig, size, "%s.ini", szConfig);
+    }
+}
+
+void GetLogFile(char[] szBuffer, int size)
+{
+    szBuffer[0] = 0;
+
+    static const char LOG_TEMPLATE[] = "logs/ccprocessor/day_%j.log";
+
+    FormatTime(szBuffer, size, LOG_TEMPLATE, GetTime());
+    BuildPath(Path_SM, szBuffer, size, szBuffer);
+}
+
+SMCParser CreateParser()
+{
     SMCParser smParser = new SMCParser();
     smParser.OnKeyValue = OnKeyValue;
     smParser.OnEnterSection = OnEnterSection;
     smParser.OnEnd = OnCompReading;
     smParser.OnLeaveSection = OnLeave;
 
-    int iLine;
-    if(smParser.ParseFile(szConfig, iLine) != SMCError_Okay)
-        LogError("An error was detected on line '%i' while reading", iLine);
-    
-    LOG_WRITE("OnMapStart(): Config: %s, Pallete map: %x, Parser: %x", szConfig, g_mPalette, smParser);
-}
-
-public void UpdateLogFile()
-{
-#define LOG_TEMPLATE "logs/ccprocessor/day_%j.log"
-
-    FormatTime(g_szLogEx, sizeof(g_szLogEx), LOG_TEMPLATE, GetTime());
-    BuildPath(Path_SM, g_szLogEx, sizeof(g_szLogEx), g_szLogEx);
+    return smParser;
 }
 
 public void OnConfigsExecuted()
@@ -218,19 +222,13 @@ void ChangeModeValue(int[] clients, int count, const char[] value)
 
 SMCResult OnEnterSection(SMCParser smc, const char[] name, bool opt_quotes)
 {
-    LOG_WRITE("OnEnterSection(): %s", name);
-        
-    Section++;
-
+    g_szSection[strlen(g_szSection)] = name[0];
     return SMCParse_Continue;
 }
 
 SMCResult OnLeave(SMCParser smc)
 {
-    LOG_WRITE("OnLeave()");
-
-    Section--;
-
+    g_szSection[strlen(g_szSection)-1] = 0;
     return SMCParse_Continue;
 }
 
@@ -241,7 +239,8 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
     int iBuffer;
 
-    if(Section > 1)
+    // chat -> [p]alette
+    if(g_szSection[1] == 'p' || g_szSection[1] == 'P')
     {
         char szBuffer[STATUS_LENGTH];
         strcopy(szBuffer, sizeof(szBuffer), sValue);
@@ -285,6 +284,9 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         else if(!strcmp(sKey, "UIDByMap"))
             g_bResetByMap = view_as<bool>(StringToInt(sValue));
 
+        else if(!strcmp(sKey, "CRTP"))
+            g_bRTP = view_as<bool>(StringToInt(sValue));
+
         LOG_WRITE("OnKeyValue(): ReadKey: %s, Value: %s", sKey, sValue);
     }
 
@@ -294,6 +296,8 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 public void OnCompReading(SMCParser smc, bool halted, bool failed)
 {
     smc.Close();
+
+    g_szSection = NULL_STRING;
 
     Call_OnCompReading();
 
@@ -325,7 +329,7 @@ void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
     }
 }
 
-void RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szMessage, char[] szBuffer, int iSize, const char[] um = NULL_STRING)
+bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szMessage, char[] szBuffer, int iSize, const char[] um = NULL_STRING)
 {
     FormatEx(szBuffer, iSize, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
 
@@ -343,7 +347,7 @@ void RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
     }
     
     // Not sure, but the server should survive this. Yes there will be a flood...
-    for(int i, level; i < BIND_MAX; i++)
+    for(int i; i < BIND_MAX; i++)
     {
         szOther = NULL_STRING;
 
@@ -352,31 +356,19 @@ void RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
 
         GetDefaultValue(i, LANG_SERVER, iType, iTeam, IsAlive, szName, szMessage, SZ(szOther));
         
-        Call_RebuildString(iType, iIndex, level, szBinds[i], szOther, sizeof(szOther));
-
-        BreakPoint(i, szOther);
-        
-        if(i == BIND_MSG || !i)
-        {
-            TrimString(szOther);
-
-            if(!szOther[0])
-            {
-                szBuffer[0] = 0;
-                return;
-            }
-        }
-
-        Call_RebuildString_Post(iType, iIndex, level, szBinds[i], szOther);
+        if(Call_RebuildString(iType, iIndex, szBinds[i], szOther, sizeof(szOther)) != Plugin_Continue)
+            return false;
 
         ReplaceString(szBuffer, iSize, szBinds[i], szOther, true);
     }
 
-    LOG_WRITE("RebuildedMessage(): %s", szBuffer);
+    // LOG_WRITE("RebuildedMessage(): %s", szBuffer);
 
     // Fake messages on the way
     if(um[0] == 'd' && um[1] == 'e' && um[2] == 'v' && strlen(um) == 3)
         szBuffer[0] = 0;
+
+    return true;
 }
 
 void GetDefaultValue(int iBind, int iLangValue, int iMessageType, int iSenderTeam, bool bAlive, const char[] szName, const char[] szMessage, char[] szBuffer, int size)
@@ -629,35 +621,49 @@ void Call_OnCompReading()
     Call_Finish();
 }
 
-void Call_RebuildString(const int mType, int iClient, int &pLevel, const char[] szBind, char[] szMessage, int iSize)
+Action Call_RebuildString(const int mType, int iClient, const char[] szBind, char[] szMessage, int iSize)
 {
-    pLevel = 0;
+    Action now;
+    int level;
 
-    LOG_WRITE("Call_RebuildString(%i:%i -> %s): %s [%i]", iClient, mType, szBind, szMessage, iSize);
-
+    // Call
     Call_StartForward(g_fwdRebuildString);
     Call_PushCell(mType);
     Call_PushCell(iClient);
-    Call_PushCellRef(pLevel);
+    Call_PushCellRef(level);
     Call_PushString(szBind);
     Call_PushStringEx(szMessage, iSize, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
     Call_PushCell(iSize);
     Call_Finish();
-}
 
-void Call_RebuildString_Post(const int mType, int iClient, int pLevel, const char[] szBind, const char[] szMessage)
-{
-    LOG_WRITE("Call_RebuildString_Post(%i:%i:%i -> %s): %s [%i]", iClient, mType, pLevel, szBind, szMessage, strlen(szMessage));
+    BreakPoint(mType, szMessage);
+        
+    if(mType == BIND_MSG || !mType)
+    {
+        TrimString(szMessage);
 
+        if(!szMessage[0])
+            now = Plugin_Handled;
+    }
+
+    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s', '%s')", now, mType, iClient, level, szBind, szMessage);
+
+    // exclude post call
+    if(now == Plugin_Stop)
+        return now;
+
+    // post call
     Call_StartForward(g_fwdRebuildString_Post);
-    
     Call_PushCell(mType);
     Call_PushCell(iClient);
-    Call_PushCell(pLevel);
+    Call_PushCell(level);
     Call_PushString(szBind);
     Call_PushString(szMessage);
-
     Call_Finish();
+
+    LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, iClient, level, szBind, szMessage);
+
+    return now;
 }
 
 void Call_RebuildClients(const int mType, int iClient, int[] clients, int &numClients)
