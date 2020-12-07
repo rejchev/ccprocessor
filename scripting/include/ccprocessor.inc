@@ -207,17 +207,6 @@ forward void cc_proc_APIHandShake(const int api);
 native StringMap cc_drop_palette();
 
 /*
- *	Removing colors from a string
- *
- *	@param szBuffer		String buffer
- *	@param iSize		Size of string
- *
- * 	@noreturn
-*/
-#pragma deprecated "Use ccp_replaceColors()"
-native void cc_clear_allcolors(char[] szBuffer, int iSize);
-
-/*
  *	Replacing colors in a string
  *
  *	@param szBuffer		String buffer
@@ -391,7 +380,6 @@ public SharedPlugin __pl_ccprocessor=
 public void __pl_ccprocessor_SetNTVOptional()
 {
 	MarkNativeAsOptional("cc_drop_palette");
-	MarkNativeAsOptional("cc_clear_allcolors");
     MarkNativeAsOptional("ccp_replaceColors");
 	MarkNativeAsOptional("cc_get_APIKey");
 	MarkNativeAsOptional("cc_is_APIEqual");
