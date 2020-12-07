@@ -43,7 +43,11 @@ GlobalForward
     g_fwdRebuildClients,
     g_fwdRebuildString_Post;
 
-bool g_bRTP, g_bDBG, g_bResetByMap;
+bool 
+    g_bRTP,
+    g_bDBG,
+    g_bResetByMap,
+    allowSpaceMsgs;
 
 int g_iMsgIdx;
 
@@ -69,8 +73,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     CreateNative("cc_drop_palette", Native_DropPalette);
 
-    // Will be removed in the next version
-    CreateNative("cc_clear_allcolors", Native_ClearAllColors);
     CreateNative("ccp_replaceColors", Native_ReplaceColors);
 
     CreateNative("cc_get_APIKey", Native_GetAPIKey);
@@ -286,6 +288,9 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
         else if(!strcmp(sKey, "CRTP"))
             g_bRTP = view_as<bool>(StringToInt(sValue));
+
+        else if(!strcmp(sKey, "SpaceMessages"))
+            allowSpaceMsgs = view_as<bool>(StringToInt(sValue));
 
         LOG_WRITE("OnKeyValue(): ReadKey: %s, Value: %s", sKey, sValue);
     }
@@ -546,17 +551,6 @@ void ClearCharArray(char[][] array, int size)
         array[i][0] = 0;
 }
 
-// Will be removed in the next version
-public int Native_ClearAllColors(Handle hPlugin, int iArgs)
-{
-    char szBuffer[MESSAGE_LENGTH];
-    GetNativeString(1, SZ(szBuffer));
-
-    ReplaceColors(SZ(szBuffer), true);
-
-    SetNativeString(1, SZ(szBuffer));
-}
-
 public int Native_ReplaceColors(Handle hPlugin, int iArgs)
 {
     char szBuffer[MAX_LENGTH];
@@ -634,7 +628,10 @@ Action Call_RebuildString(const int mType, int iClient, const char[] szBind, cha
         
     if(mType == BIND_MSG || !mType)
     {
-        TrimString(szMessage);
+        // Hi, i am a single byte control symbol
+        // and your thing is really useless
+        if(!mType || !allowSpaceMsgs)
+            TrimString(szMessage);
 
         if(!szMessage[0])
             now = Plugin_Handled;
@@ -702,7 +699,7 @@ bool Call_IsSkipColors(const int mType, int iClient)
     return skip;
 }
 
-void Call_OnNewMessage()
+stock void Call_OnNewMessage()
 {
     g_iMsgIdx++;
 
