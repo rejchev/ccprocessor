@@ -46,8 +46,8 @@ GlobalForward
 bool 
     g_bRTP,
     g_bDBG,
-    g_bResetByMap,
-    allowSpaceMsgs;
+    g_bResetByMap
+    /*allowSpaceMsgs*/;
 
 int g_iMsgIdx;
 
@@ -246,24 +246,17 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
     {
         char szBuffer[STATUS_LENGTH];
         strcopy(szBuffer, sizeof(szBuffer), sValue);
-
+        
         iBuffer = strlen(szBuffer);
-
-        switch(iBuffer)
-        {
-            // Defined ASCII colors
-            case 1, 2: Format(szBuffer, sizeof(szBuffer), "%c", StringToInt(szBuffer));
-
-            // Colors based RGB/RGBA into HEX format: #RRGGBB/#RRGGBBAA
-            case 7, 9: FormatEx(szBuffer, sizeof(szBuffer), "%c%s", (iBuffer == 7) ? 7 : 8, szBuffer[1]);
-
-            default: 
-            {
-                LogError("Invalid color length for value: %s", szBuffer);
-                return SMCParse_Continue;
-            }
-        }
-
+        
+        szBuffer[0] =   (szBuffer[0] != '#')
+                            ? (iBuffer == 7) 
+                                ? 7 
+                                : 8
+                            : StringToInt(szBuffer); 
+        if(iBuffer < 3) 
+            szBuffer[1] = 0;
+        
         g_mPalette.SetString(sKey, szBuffer, true);
 
         LOG_WRITE("OnKeyValue(): ReadKey: %s, Value[0]: %s", sKey, szBuffer);
@@ -271,11 +264,11 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
     else
     {
-        iBuffer =   (!strcmp(sKey, "Chat_PrototypeTeam"))   ? eMsg_TEAM : 
-                    (!strcmp(sKey, "Chat_PrototypeAll"))    ? eMsg_ALL : 
-                    (!strcmp(sKey, "Changename_Prototype")) ? eMsg_CNAME : 
-                    (!strcmp(sKey, "Chat_ServerTemplate"))  ? eMsg_SERVER :
-                    (!strcmp(sKey, "Chat_RadioText"))       ? eMsg_RADIO : -1;
+        iBuffer =   (!strcmp(sKey, "Channel_Team"))         ? eMsg_TEAM     : 
+                    (!strcmp(sKey, "Channel_All"))          ? eMsg_ALL      : 
+                    (!strcmp(sKey, "Channel_NameChange"))   ? eMsg_CNAME    : 
+                    (!strcmp(sKey, "Channel_Server"))       ? eMsg_SERVER   :
+                    (!strcmp(sKey, "Channel_Radio"))        ? eMsg_RADIO    : -1;
         
         if(iBuffer != -1)
             strcopy(msgPrototype[iBuffer], sizeof(msgPrototype[]), sValue);
@@ -289,8 +282,8 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         else if(!strcmp(sKey, "CRTP"))
             g_bRTP = view_as<bool>(StringToInt(sValue));
 
-        else if(!strcmp(sKey, "SpaceMessages"))
-            allowSpaceMsgs = view_as<bool>(StringToInt(sValue));
+        // else if(!strcmp(sKey, "SpaceMessages"))
+        //     allowSpaceMsgs = view_as<bool>(StringToInt(sValue));
 
         LOG_WRITE("OnKeyValue(): ReadKey: %s, Value: %s", sKey, sValue);
     }
@@ -351,7 +344,6 @@ bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
         IsAlive = IsPlayerAlive(iIndex);
     }
     
-    // Not sure, but the server should survive this. Yes there will be a flood...
     for(int i; i < BIND_MAX; i++)
     {
         szOther = NULL_STRING;
@@ -361,7 +353,7 @@ bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
 
         GetDefaultValue(i, LANG_SERVER, iType, iTeam, IsAlive, szName, szMessage, SZ(szOther));
         
-        if(Call_RebuildString(iType, iIndex, szBinds[i], szOther, sizeof(szOther)) != Plugin_Continue)
+        if(Call_RebuildString(iType, iIndex, i, szOther, sizeof(szOther)) != Plugin_Continue)
             return false;
 
         ReplaceString(szBuffer, iSize, szBinds[i], szOther, true);
@@ -609,7 +601,7 @@ void Call_OnCompReading()
     Call_Finish();
 }
 
-Action Call_RebuildString(const int mType, int iClient, const char[] szBind, char[] szMessage, int iSize)
+Action Call_RebuildString(const int mType, int iClient, const int iBind, char[] szMessage, int iSize)
 {
     Action now;
     int level;
@@ -619,25 +611,21 @@ Action Call_RebuildString(const int mType, int iClient, const char[] szBind, cha
     Call_PushCell(mType);
     Call_PushCell(iClient);
     Call_PushCellRef(level);
-    Call_PushString(szBind);
+    Call_PushString(szBinds[iBind]);
     Call_PushStringEx(szMessage, iSize, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
     Call_PushCell(iSize);
     Call_Finish(now);
 
     BreakPoint(mType, szMessage);
-        
-    if(mType == BIND_MSG || !mType)
-    {
-        // Hi, i am a single byte control symbol
-        // and your thing is really useless
-        if(!mType || !allowSpaceMsgs)
-            TrimString(szMessage);
+
+    if(now != Plugin_Stop && mType < eMsg_RADIO && iBind == BIND_MSG) {
+        TrimString(szMessage);
 
         if(!szMessage[0])
             now = Plugin_Handled;
     }
 
-    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s', '%s')", now, mType, iClient, level, szBind, szMessage);
+    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s', '%s')", now, mType, iClient, level, szBinds[iBind], szMessage);
 
     // exclude post call
     if(now == Plugin_Stop)
@@ -648,11 +636,11 @@ Action Call_RebuildString(const int mType, int iClient, const char[] szBind, cha
     Call_PushCell(mType);
     Call_PushCell(iClient);
     Call_PushCell(level);
-    Call_PushString(szBind);
+    Call_PushString(szBinds[iBind]);
     Call_PushString(szMessage);
     Call_Finish();
 
-    LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, iClient, level, szBind, szMessage);
+    LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, iClient, level, szBinds[iBind], szMessage);
 
     return now;
 }
