@@ -249,7 +249,7 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         
         iBuffer = strlen(szBuffer);
         
-        szBuffer[0] =   (szBuffer[0] != '#')
+        szBuffer[0] =   (szBuffer[0] == '#')
                             ? (iBuffer == 7) 
                                 ? 7 
                                 : 8
@@ -482,10 +482,6 @@ void LOG_WRITE(const char[] szMessage, any ...)
     if(!g_bDBG)
         return;
 
-    static Regex hExp;
-    if(!hExp)
-        hExp = new Regex("\\%\\d*?\\.?\\d*?[idsfcxNLt]", PCRE_CASELESS|PCRE_UTF8);
-
     if(!FileExists(g_szLogEx))
     {
         ReplaceString(g_szLogEx, sizeof(g_szLogEx), "\\", "/");
@@ -501,25 +497,7 @@ void LOG_WRITE(const char[] szMessage, any ...)
     }
     
     static char szBuffer[1024];
-
     VFormat(szBuffer, sizeof(szBuffer), szMessage, 2);
-
-    int MhCount = hExp.MatchAll(szBuffer);
-
-    if(MhCount > 0)
-    {
-        char szMatch[32], szRp[8];
-
-        for(int i; i < MhCount; i++)
-        {
-            if(hExp.GetSubString(0, szMatch, sizeof(szMatch), i))
-            {
-                TrimString(szMatch);
-                FormatEx(szRp, sizeof(szRp), "{%s}", szMatch[strlen(szMatch) - 1]);
-                ReplaceString(szBuffer, sizeof(szBuffer), szMatch, szRp);
-            }  
-        }
-    }
 
     LogToFileEx(g_szLogEx, szBuffer);
 }
@@ -616,7 +594,7 @@ Action Call_RebuildString(const int mType, int iClient, const int iBind, char[] 
     Call_PushCell(iSize);
     Call_Finish(now);
 
-    BreakPoint(mType, szMessage);
+    BreakPoint(iBind, szMessage);
 
     if(now != Plugin_Stop && mType < eMsg_RADIO && iBind == BIND_MSG) {
         TrimString(szMessage);
@@ -625,7 +603,7 @@ Action Call_RebuildString(const int mType, int iClient, const int iBind, char[] 
             now = Plugin_Handled;
     }
 
-    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s', '%s')", now, mType, iClient, level, szBinds[iBind], szMessage);
+    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s')", now, mType, iClient, level, szBinds[iBind], szMessage);
 
     // exclude post call
     if(now == Plugin_Stop)
