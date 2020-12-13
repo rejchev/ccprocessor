@@ -27,11 +27,9 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
 
     ReplaceColors(SZ(szName), true);
 
-    RebuildMessage(iIndex, iType, szName, szKey, SZ(szBuffer), "radio");
-
-    if(!szBuffer[0])
+    if(!RebuildMessage(iIndex, iType, szName, szKey, SZ(szBuffer), "radio"))
         return Plugin_Handled;
-    
+
     Call_MessageBuilt(iType, iIndex, szBuffer);
 
     ReplaceColors(SZ(szBuffer), false);
@@ -90,7 +88,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
 
     if(message)
     {
-        Call_OnNewMessage();
+        // Call_OnNewMessage();
         
         if(!umType)
         {

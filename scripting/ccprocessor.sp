@@ -23,7 +23,8 @@ StringMapSnapshot
     g_snapPalette;
 
 char 
-    msgPrototype[eMsg_MAX][MESSAGE_LENGTH];
+    msgPrototype[eMsg_MAX][MESSAGE_LENGTH],
+    g_szSection[4];
 
 ConVar game_mode;
 
@@ -42,16 +43,20 @@ GlobalForward
     g_fwdRebuildClients,
     g_fwdRebuildString_Post;
 
-bool g_bRTP, g_bDBG, g_bResetByMap;
+bool 
+    g_bRTP,
+    g_bDBG,
+    g_bResetByMap
+    /*allowSpaceMsgs*/;
 
-int Section, g_iMsgIdx;
+int g_iMsgIdx;
 
 public Plugin myinfo = 
 {
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.2.1",
+    version     = "3.2.2",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -68,8 +73,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     CreateNative("cc_drop_palette", Native_DropPalette);
 
-    // Will be removed in the next version
-    CreateNative("cc_clear_allcolors", Native_ClearAllColors);
     CreateNative("ccp_replaceColors", Native_ReplaceColors);
 
     CreateNative("cc_get_APIKey", Native_GetAPIKey);
@@ -78,7 +81,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     g_fwdSkipColors         = new GlobalForward("cc_proc_SkipColorsInMsg", ET_Hook, Param_Cell, Param_Cell);
     g_fwdRebuildString      = new GlobalForward(
-        "cc_proc_RebuildString", ET_Ignore, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_String, Param_Cell
+        "cc_proc_RebuildString", ET_Hook, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_String, Param_Cell
     );
 
     g_fwdRebuildString_Post = new GlobalForward(
@@ -118,13 +121,6 @@ public void OnPluginStart()
         if(!DirExists("/cfg/ccprocessor"))
             CreateDirectory("/cfg/ccprocessor", 0x1ED);
     }
-    
-    (game_mode = CreateConVar("ccp_color_RTP", "0", "Enable/Disable color real time processing", _, true, 0.0, true, 1.0)).AddChangeHook(CCP_RTP);
-    CCP_RTP(game_mode, NULL_STRING, NULL_STRING);
-
-    delete game_mode;
-    
-    AutoExecConfig(true, "core", "ccprocessor");
 
     game_mode = FindConVar("game_mode");
     if(!game_mode)
@@ -146,54 +142,64 @@ public void OnModChanged(ConVar cvar, const char[] oldVal, const char[] newVal)
     cvar.GetString(mode_default_value, sizeof(mode_default_value));
 }
 
-public void CCP_RTP(ConVar cvar, const char[] oldVal, const char[] newVal)
-{
-    g_bRTP = cvar.BoolValue;
-}
-
 public void OnMapStart()
 {
-    LOG_WRITE("OnMapStart(): -----------------------------------------------");
-
-    UpdateLogFile();
-
-#define SETTINGS_PATH "configs/ccprocessor/%s.ini"
-
-    static char szConfig[MESSAGE_LENGTH];
-
-    if(!szConfig[0])
-    {
-        GetGameFolderName(SZ(szConfig));
-        Format(SZ(szConfig), SETTINGS_PATH, szConfig);
-
-        BuildPath(Path_SM, SZ(szConfig), szConfig);
-    }
-
-    if(!FileExists(szConfig))
-        SetFailState("Where is my config: %s ", szConfig);
+    LOG_WRITE("Init OnMapStart()");
 
     g_mPalette.Clear();
-    Section = 0;
-    
+    g_szSection = NULL_STRING;
+
+    GetLogFile(g_szLogEx, sizeof(g_szLogEx));
+
+    LOG_WRITE("Out: GetLogFile('%s') ", g_szLogEx);
+
+    static char szConfig[MESSAGE_LENGTH] = "configs/ccprocessor/";
+    GetConfigFileByGame(szConfig, sizeof(szConfig));
+
+    LOG_WRITE("Out: GetGameFolderName('%s') ", szConfig);
+        
+    if(!FileExists(szConfig))
+        SetFailState("Where is my config: '%s' ", szConfig);
+
+    int iLine;
+    if(CreateParser().ParseFile(szConfig, iLine) != SMCError_Okay)
+        LogError("An error was detected on line '%i' while reading", iLine);
+}
+
+void GetConfigFileByGame(char[] szConfig, int size)
+{
+    if(szConfig[0] == 'c')
+        BuildPath(Path_SM, szConfig, size, szConfig);
+
+    ReplaceString(szConfig, size, "\\", "/");
+    int len = strlen(szConfig);
+
+    if(szConfig[len-1] != 'i')
+    {
+        GetGameFolderName(szConfig[len], size - (len-1));
+        Format(szConfig, size, "%s.ini", szConfig);
+    }
+}
+
+void GetLogFile(char[] szBuffer, int size)
+{
+    szBuffer[0] = 0;
+
+    static const char LOG_TEMPLATE[] = "logs/ccprocessor/day_%j.log";
+
+    FormatTime(szBuffer, size, LOG_TEMPLATE, GetTime());
+    BuildPath(Path_SM, szBuffer, size, szBuffer);
+}
+
+SMCParser CreateParser()
+{
     SMCParser smParser = new SMCParser();
     smParser.OnKeyValue = OnKeyValue;
     smParser.OnEnterSection = OnEnterSection;
     smParser.OnEnd = OnCompReading;
     smParser.OnLeaveSection = OnLeave;
 
-    int iLine;
-    if(smParser.ParseFile(szConfig, iLine) != SMCError_Okay)
-        LogError("An error was detected on line '%i' while reading", iLine);
-    
-    LOG_WRITE("OnMapStart(): Config: %s, Pallete map: %x, Parser: %x", szConfig, g_mPalette, smParser);
-}
-
-public void UpdateLogFile()
-{
-#define LOG_TEMPLATE "logs/ccprocessor/day_%j.log"
-
-    FormatTime(g_szLogEx, sizeof(g_szLogEx), LOG_TEMPLATE, GetTime());
-    BuildPath(Path_SM, g_szLogEx, sizeof(g_szLogEx), g_szLogEx);
+    return smParser;
 }
 
 public void OnConfigsExecuted()
@@ -218,19 +224,13 @@ void ChangeModeValue(int[] clients, int count, const char[] value)
 
 SMCResult OnEnterSection(SMCParser smc, const char[] name, bool opt_quotes)
 {
-    LOG_WRITE("OnEnterSection(): %s", name);
-        
-    Section++;
-
+    g_szSection[strlen(g_szSection)] = name[0];
     return SMCParse_Continue;
 }
 
 SMCResult OnLeave(SMCParser smc)
 {
-    LOG_WRITE("OnLeave()");
-
-    Section--;
-
+    g_szSection[strlen(g_szSection)-1] = 0;
     return SMCParse_Continue;
 }
 
@@ -241,28 +241,22 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
     int iBuffer;
 
-    if(Section > 1)
+    // chat -> [p]alette
+    if(g_szSection[1] == 'p' || g_szSection[1] == 'P')
     {
         char szBuffer[STATUS_LENGTH];
         strcopy(szBuffer, sizeof(szBuffer), sValue);
-
+        
         iBuffer = strlen(szBuffer);
-
-        switch(iBuffer)
-        {
-            // Defined ASCII colors
-            case 1, 2: Format(szBuffer, sizeof(szBuffer), "%c", StringToInt(szBuffer));
-
-            // Colors based RGB/RGBA into HEX format: #RRGGBB/#RRGGBBAA
-            case 7, 9: FormatEx(szBuffer, sizeof(szBuffer), "%c%s", (iBuffer == 7) ? 7 : 8, szBuffer[1]);
-
-            default: 
-            {
-                LogError("Invalid color length for value: %s", szBuffer);
-                return SMCParse_Continue;
-            }
-        }
-
+        
+        szBuffer[0] =   (szBuffer[0] == '#')
+                            ? (iBuffer == 7) 
+                                ? 7 
+                                : 8
+                            : StringToInt(szBuffer); 
+        if(iBuffer < 3) 
+            szBuffer[1] = 0;
+        
         g_mPalette.SetString(sKey, szBuffer, true);
 
         LOG_WRITE("OnKeyValue(): ReadKey: %s, Value[0]: %s", sKey, szBuffer);
@@ -270,11 +264,11 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
     else
     {
-        iBuffer =   (!strcmp(sKey, "Chat_PrototypeTeam"))   ? eMsg_TEAM : 
-                    (!strcmp(sKey, "Chat_PrototypeAll"))    ? eMsg_ALL : 
-                    (!strcmp(sKey, "Changename_Prototype")) ? eMsg_CNAME : 
-                    (!strcmp(sKey, "Chat_ServerTemplate"))  ? eMsg_SERVER :
-                    (!strcmp(sKey, "Chat_RadioText"))       ? eMsg_RADIO : -1;
+        iBuffer =   (!strcmp(sKey, "Channel_Team"))         ? eMsg_TEAM     : 
+                    (!strcmp(sKey, "Channel_All"))          ? eMsg_ALL      : 
+                    (!strcmp(sKey, "Channel_NameChange"))   ? eMsg_CNAME    : 
+                    (!strcmp(sKey, "Channel_Server"))       ? eMsg_SERVER   :
+                    (!strcmp(sKey, "Channel_Radio"))        ? eMsg_RADIO    : -1;
         
         if(iBuffer != -1)
             strcopy(msgPrototype[iBuffer], sizeof(msgPrototype[]), sValue);
@@ -285,6 +279,12 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         else if(!strcmp(sKey, "UIDByMap"))
             g_bResetByMap = view_as<bool>(StringToInt(sValue));
 
+        else if(!strcmp(sKey, "CRTP"))
+            g_bRTP = view_as<bool>(StringToInt(sValue));
+
+        // else if(!strcmp(sKey, "SpaceMessages"))
+        //     allowSpaceMsgs = view_as<bool>(StringToInt(sValue));
+
         LOG_WRITE("OnKeyValue(): ReadKey: %s, Value: %s", sKey, sValue);
     }
 
@@ -294,6 +294,8 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 public void OnCompReading(SMCParser smc, bool halted, bool failed)
 {
     smc.Close();
+
+    g_szSection = NULL_STRING;
 
     Call_OnCompReading();
 
@@ -325,7 +327,7 @@ void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
     }
 }
 
-void RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szMessage, char[] szBuffer, int iSize, const char[] um = NULL_STRING)
+bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szMessage, char[] szBuffer, int iSize, const char[] um = NULL_STRING)
 {
     FormatEx(szBuffer, iSize, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
 
@@ -342,8 +344,7 @@ void RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
         IsAlive = IsPlayerAlive(iIndex);
     }
     
-    // Not sure, but the server should survive this. Yes there will be a flood...
-    for(int i, level; i < BIND_MAX; i++)
+    for(int i; i < BIND_MAX; i++)
     {
         szOther = NULL_STRING;
 
@@ -352,31 +353,13 @@ void RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
 
         GetDefaultValue(i, LANG_SERVER, iType, iTeam, IsAlive, szName, szMessage, SZ(szOther));
         
-        Call_RebuildString(iType, iIndex, level, szBinds[i], szOther, sizeof(szOther));
-
-        BreakPoint(i, szOther);
-        
-        if(i == BIND_MSG || !i)
-        {
-            TrimString(szOther);
-
-            if(!szOther[0])
-            {
-                szBuffer[0] = 0;
-                return;
-            }
-        }
-
-        Call_RebuildString_Post(iType, iIndex, level, szBinds[i], szOther);
+        if(Call_RebuildString(iType, iIndex, i, szOther, sizeof(szOther)) != Plugin_Continue)
+            return false;
 
         ReplaceString(szBuffer, iSize, szBinds[i], szOther, true);
     }
 
-    LOG_WRITE("RebuildedMessage(): %s", szBuffer);
-
-    // Fake messages on the way
-    if(um[0] == 'd' && um[1] == 'e' && um[2] == 'v' && strlen(um) == 3)
-        szBuffer[0] = 0;
+    return !(um[0] == 'd' && um[1] == 'e' && um[2] == 'v' && strlen(um) == 3);
 }
 
 void GetDefaultValue(int iBind, int iLangValue, int iMessageType, int iSenderTeam, bool bAlive, const char[] szName, const char[] szMessage, char[] szBuffer, int size)
@@ -499,10 +482,6 @@ void LOG_WRITE(const char[] szMessage, any ...)
     if(!g_bDBG)
         return;
 
-    static Regex hExp;
-    if(!hExp)
-        hExp = new Regex("\\%\\d*?\\.?\\d*?[idsfcxNLt]", PCRE_CASELESS|PCRE_UTF8);
-
     if(!FileExists(g_szLogEx))
     {
         ReplaceString(g_szLogEx, sizeof(g_szLogEx), "\\", "/");
@@ -518,25 +497,7 @@ void LOG_WRITE(const char[] szMessage, any ...)
     }
     
     static char szBuffer[1024];
-
     VFormat(szBuffer, sizeof(szBuffer), szMessage, 2);
-
-    int MhCount = hExp.MatchAll(szBuffer);
-
-    if(MhCount > 0)
-    {
-        char szMatch[32], szRp[8];
-
-        for(int i; i < MhCount; i++)
-        {
-            if(hExp.GetSubString(0, szMatch, sizeof(szMatch), i))
-            {
-                TrimString(szMatch);
-                FormatEx(szRp, sizeof(szRp), "{%s}", szMatch[strlen(szMatch) - 1]);
-                ReplaceString(szBuffer, sizeof(szBuffer), szMatch, szRp);
-            }  
-        }
-    }
 
     LogToFileEx(g_szLogEx, szBuffer);
 }
@@ -558,17 +519,6 @@ void ClearCharArray(char[][] array, int size)
 {
     for(int i; i < size; i++)
         array[i][0] = 0;
-}
-
-// Will be removed in the next version
-public int Native_ClearAllColors(Handle hPlugin, int iArgs)
-{
-    char szBuffer[MESSAGE_LENGTH];
-    GetNativeString(1, SZ(szBuffer));
-
-    ReplaceColors(SZ(szBuffer), true);
-
-    SetNativeString(1, SZ(szBuffer));
 }
 
 public int Native_ReplaceColors(Handle hPlugin, int iArgs)
@@ -629,35 +579,48 @@ void Call_OnCompReading()
     Call_Finish();
 }
 
-void Call_RebuildString(const int mType, int iClient, int &pLevel, const char[] szBind, char[] szMessage, int iSize)
+Action Call_RebuildString(const int mType, int iClient, const int iBind, char[] szMessage, int iSize)
 {
-    pLevel = 0;
+    Action now;
+    int level;
 
-    LOG_WRITE("Call_RebuildString(%i:%i -> %s): %s [%i]", iClient, mType, szBind, szMessage, iSize);
-
+    // Action Call
     Call_StartForward(g_fwdRebuildString);
     Call_PushCell(mType);
     Call_PushCell(iClient);
-    Call_PushCellRef(pLevel);
-    Call_PushString(szBind);
+    Call_PushCellRef(level);
+    Call_PushString(szBinds[iBind]);
     Call_PushStringEx(szMessage, iSize, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
     Call_PushCell(iSize);
-    Call_Finish();
-}
+    Call_Finish(now);
 
-void Call_RebuildString_Post(const int mType, int iClient, int pLevel, const char[] szBind, const char[] szMessage)
-{
-    LOG_WRITE("Call_RebuildString_Post(%i:%i:%i -> %s): %s [%i]", iClient, mType, pLevel, szBind, szMessage, strlen(szMessage));
+    BreakPoint(iBind, szMessage);
 
+    if(now != Plugin_Stop && mType < eMsg_RADIO && iBind == BIND_MSG) {
+        TrimString(szMessage);
+
+        if(!szMessage[0])
+            now = Plugin_Handled;
+    }
+
+    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s')", now, mType, iClient, level, szBinds[iBind], szMessage);
+
+    // exclude post call
+    if(now == Plugin_Stop)
+        return now;
+
+    // post call
     Call_StartForward(g_fwdRebuildString_Post);
-    
     Call_PushCell(mType);
     Call_PushCell(iClient);
-    Call_PushCell(pLevel);
-    Call_PushString(szBind);
+    Call_PushCell(level);
+    Call_PushString(szBinds[iBind]);
     Call_PushString(szMessage);
-
     Call_Finish();
+
+    LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, iClient, level, szBinds[iBind], szMessage);
+
+    return now;
 }
 
 void Call_RebuildClients(const int mType, int iClient, int[] clients, int &numClients)
@@ -702,7 +665,7 @@ bool Call_IsSkipColors(const int mType, int iClient)
     return skip;
 }
 
-void Call_OnNewMessage()
+stock void Call_OnNewMessage()
 {
     g_iMsgIdx++;
 
