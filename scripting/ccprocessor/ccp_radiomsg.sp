@@ -14,8 +14,8 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
     static int clients[MAXPLAYERS+1];
     CopyEqualArray(players, clients, playersNum);
 
-    static int iIndex, iBackupIndex, iRadioType;
-    iIndex = iBackupIndex = iRadioType = 0;
+    static int iIndex, /*iBackupIndex, */iRadioType;
+    iIndex = /*iBackupIndex = */iRadioType = 0;
 
     iIndex = 
         (!umType) ? 
@@ -27,10 +27,10 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
 
     ReplaceColors(SZ(szName), true);
 
-    if(!RebuildMessage(iIndex, iType, szName, szKey, SZ(szBuffer), "radio"))
+    if(!RebuildMessage(iType, iIndex, 0, szName, szKey, SZ(szBuffer), "radio"))
         return Plugin_Handled;
 
-    Call_MessageBuilt(iType, iIndex, szBuffer);
+    // Call_MessageBuilt(iType, iIndex, szBuffer);
 
     ReplaceColors(SZ(szBuffer), false);
 
@@ -38,13 +38,13 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
 
     Call_RebuildClients(iType, iIndex, clients, playersNum);
 
-    iBackupIndex = iIndex;
+    // iBackupIndex = iIndex;
 
-    if(!IsFakeClient(iIndex))
-        Call_IndexApproval(iType, iIndex);
+    // if(!IsFakeClient(iIndex))
+    //     Call_IndexApproval(iType, iIndex);
 
     g_mMessage.SetValue("ent_idx", iIndex);
-    g_mMessage.SetValue("backup_idx", iBackupIndex);
+    // g_mMessage.SetValue("backup_idx", iBackupIndex);
 
     g_mMessage.SetArray("players", clients, playersNum);
     g_mMessage.SetValue("playersNum", playersNum);
@@ -59,7 +59,7 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
 public void RadioText_Completed(UserMsg msgid, bool send)
 {
     int 
-        iIndex, iBackupIndex, iPlayersNum, iType;
+        iIndex, /*iBackupIndex,*/ iPlayersNum, iType;
     
     char
         szMessage[MAX_LENGTH], szKey[NAME_LENGTH];
@@ -68,7 +68,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
         return;
     
     g_mMessage.GetValue("ent_idx", iIndex);
-    g_mMessage.GetValue("backup_idx", iBackupIndex);
+    // g_mMessage.GetValue("backup_idx", iBackupIndex);
     g_mMessage.GetValue("playersNum", iPlayersNum);
     g_mMessage.GetValue("type", iType);
     g_mMessage.GetString("msg_name", szMessage, sizeof(szMessage));

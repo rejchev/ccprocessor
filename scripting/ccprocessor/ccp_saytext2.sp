@@ -49,7 +49,9 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
     int 
         playersNum,
-        messageType;
+        messageType,
+        team = GetClientTeam(iClient);
+    bool alive = IsPlayerAlive(iClient);
 
     // g_mMessage.SetValue("client", iBackup);
     g_mMessage.GetValue("type", messageType);
@@ -67,10 +69,11 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     ChangeModeValue(clients, playersNum, "0");
 
     Handle uMessage;
-    while((playersNum--) > -1) {
+    playersNum--;
+    while(playersNum >= 0) {
         
         // do not enable debug mode....
-        if(!RebuildMessage(iClient, messageType, szName, szMessage, SZ(szBuffer), msgName, clients[playersNum]))
+        if(!RebuildMessage(messageType, (iClient << 3|team << 1|view_as<int>(alive)), clients[playersNum], szName, szMessage, SZ(szBuffer), msgName))
             continue;
         
         ReplaceColors(SZ(szBuffer), false);
@@ -101,6 +104,8 @@ public void SayText2_Completed(UserMsg msgid, bool send)
             
             EndMessage();
         }
+
+        playersNum--;
     }
 
     ChangeModeValue(clients, playersNum, mode_default_value); 

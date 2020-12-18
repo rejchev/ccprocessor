@@ -107,7 +107,7 @@ forward void cc_proc_MsgUniqueId(const int UniqueID);
  *                      Plugin_Handled  - build rejected (after post call),
  *                      Plugin_Stop     - build rejected immediately (with out post call)
 */
-forward Action cc_proc_RebuildString(const int mType, int iClient, int &pLevel, const char[] szBind, char[] szBuffer, int iSize);
+forward Action cc_proc_RebuildString(const int mType, int sender, int recipient, int part, int &pLevel, char[] szBuffer, int size);
 
 /*
  *	Call after build part of prototype
@@ -120,7 +120,7 @@ forward Action cc_proc_RebuildString(const int mType, int iClient, int &pLevel, 
  *
  * 	@noreturn
 */
-forward void cc_proc_RebuildString_Post(const int mType, int iClient, int pLevel, const char[] szBind, const char[] szValue);
+forward void cc_proc_RebuildString_Post(const int mType, int sender, int recipient, int part, int pLevel, const char[] szValue);
 
 /*
  *	Calls when message is build ended
@@ -131,6 +131,7 @@ forward void cc_proc_RebuildString_Post(const int mType, int iClient, int pLevel
  *
  * 	@noreturn
 */
+#pragma deprecated "cc_proc_RebuildString_Post()"
 forward void cc_proc_OnMessageBuilt(const int mType, int iClient, const char[] szMessage);
 
 /*
@@ -154,6 +155,7 @@ forward void cc_proc_RebuildClients(const int mType, int iClient, int[] clients,
  *
  * 	@noreturn
 */
+#pragma deprecated ""
 forward void cc_proc_IndexApproval(const int mType, int &iClientIndex);
 
 /*

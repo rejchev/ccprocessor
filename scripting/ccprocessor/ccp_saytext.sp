@@ -23,10 +23,10 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
     if(!((!umType) ? view_as<bool>(BfReadByte(msg)) : PbReadBool(msg, "chat")))
         return Plugin_Continue;
         
-    if(!RebuildMessage(TEAM_SERVER, eMsg_SERVER, szName, szMessage, SZ(szBuffer), "saytext"))
+    if(!RebuildMessage(eMsg_SERVER, TEAM_SERVER, 0, szName, szMessage, SZ(szBuffer), "saytext"))
         return Plugin_Handled;
 
-    Call_MessageBuilt(eMsg_SERVER, TEAM_SERVER, szBuffer);
+    // Call_MessageBuilt(eMsg_SERVER, TEAM_SERVER, szBuffer);
 
     ReplaceColors(SZ(szBuffer), false);
 

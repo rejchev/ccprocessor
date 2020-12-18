@@ -33,10 +33,10 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
         else return defMessage;
     }
 
-    if(!RebuildMessage(TEAM_SERVER, eMsg_SERVER, DEFAULT_NAME, szBuffer, params[0], sizeof(params[]), "textmsg"))
+    if(!RebuildMessage(eMsg_SERVER, TEAM_SERVER, 0, DEFAULT_NAME, szBuffer, params[0], sizeof(params[]), "textmsg"))
         return Plugin_Handled;
 
-    Call_MessageBuilt(eMsg_SERVER, TEAM_SERVER, params[0]);
+    // Call_MessageBuilt(eMsg_SERVER, TEAM_SERVER, params[0]);
 
     ReplaceColors(params[0], sizeof(params[]), false);
 

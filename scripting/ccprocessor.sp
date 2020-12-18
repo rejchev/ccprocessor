@@ -81,11 +81,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     g_fwdSkipColors         = new GlobalForward("cc_proc_SkipColorsInMsg", ET_Hook, Param_Cell, Param_Cell);
     g_fwdRebuildString      = new GlobalForward(
-        "cc_proc_RebuildString", ET_Hook, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_String, Param_Cell
+        "cc_proc_RebuildString", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
     );
 
     g_fwdRebuildString_Post = new GlobalForward(
-        "cc_proc_RebuildString_Post", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_String
+        "cc_proc_RebuildString_Post", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String
     );
 
     g_fwdOnDefMessage       = new GlobalForward("cc_proc_OnDefMsg", ET_Hook, Param_String, Param_Cell, Param_Cell);
@@ -327,40 +327,50 @@ void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
     }
 }
 
-// Edit
-bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szMessage, char[] szBuffer, int iSize, const char[] um = NULL_STRING, int lang = LANG_SERVER)
+// Edited
+bool RebuildMessage(
+    int msgType,
+    int msgSender,
+    int msgRecipient,
+
+    const char[] name,
+    const char[] msg,
+
+    char[] buffer,
+    int size,
+
+    const char[] option = NULL_STRING
+)
 {
-    FormatEx(szBuffer, iSize, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
+    FormatEx(buffer, size, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
 
-    LOG_WRITE("RebuildMessage(%s): Idx: %i, Type: %i, Name: %s, In: %s, Out: %s, size: %i", um, iIndex, iType, szName, szMessage, szBuffer, iSize);
+    // LOG_WRITE("RebuildMessage(%s): Idx: %i, Type: %i, Name: %s, In: %s, Out: %s, size: %i", um, iIndex, iType, szName, szMessage, szBuffer, iSize);
     
-    int iTeam = TEAM_SPEC;
-    bool IsAlive;
+    static bool isAlive;
+    static int team;
+    static char value[MESSAGE_LENGTH];
 
-    char szOther[MESSAGE_LENGTH];
+    isAlive = (msgType != eMsg_SERVER) ? view_as<bool>(msgSender & 0x01) : false;
+    team = (msgType != eMsg_SERVER) ? (msgSender >> 1) & 0x03 : TEAM_SPEC;
 
-    if(iType != eMsg_SERVER)
-    {
-        iTeam = GetClientTeam(iIndex);
-        IsAlive = IsPlayerAlive(iIndex);
-    }
+    msgSender >>= 4;
     
     for(int i; i < BIND_MAX; i++)
     {
-        szOther = NULL_STRING;
+        value = NULL_STRING;
 
-        if(iType == eMsg_RADIO && i == BIND_MSG)
+        if(msgType == eMsg_RADIO && i == BIND_MSG)
             continue;
 
-        GetDefaultValue(i, lang, iType, iTeam, IsAlive, szName, szMessage, SZ(szOther));
+        GetDefaultValue(i, msgRecipient, msgType, team, isAlive, name, msg, SZ(value));
         
-        if(Call_RebuildString(iType, iIndex, i, szOther, sizeof(szOther)) != Plugin_Continue)
+        if(Call_RebuildString(msgType, msgSender, msgRecipient, i, SZ(value)) != Plugin_Continue)
             return false;
 
-        ReplaceString(szBuffer, iSize, szBinds[i], szOther, true);
+        ReplaceString(buffer, size, szBinds[i], value, true);
     }
 
-    return !(um[0] == 'd' && um[1] == 'e' && um[2] == 'v' && strlen(um) == 3);
+    return !(option[0] == 'd' && option[1] == 'e' && option[2] == 'v' && strlen(option) == 3);
 }
 
 void GetDefaultValue(int iBind, int iLangValue, int iMessageType, int iSenderTeam, bool bAlive, const char[] szName, const char[] szMessage, char[] szBuffer, int size)
@@ -569,7 +579,7 @@ public int Native_CallBuilder(Handle hPlugin, int iArgs)
     GetNativeString(4, szName, sizeof(szName));
     GetNativeString(5, szMessage, sizeof(szMessage));
 
-    RebuildMessage(iClient, iType, szName, szMessage, szBuffer, sizeof(szBuffer), szUM);
+    RebuildMessage(iType, iClient, 0, szName, szMessage, szBuffer, sizeof(szBuffer), szUM);
 
     SetNativeString(6, szBuffer, sizeof(szBuffer));
 }
@@ -580,7 +590,7 @@ void Call_OnCompReading()
     Call_Finish();
 }
 
-Action Call_RebuildString(const int mType, int iClient, const int iBind, char[] szMessage, int iSize)
+Action Call_RebuildString(const int mType, const int sender, const int recipient, const int iBind, char[] szMessage, int iSize)
 {
     Action now;
     int level;
@@ -588,9 +598,10 @@ Action Call_RebuildString(const int mType, int iClient, const int iBind, char[] 
     // Action Call
     Call_StartForward(g_fwdRebuildString);
     Call_PushCell(mType);
-    Call_PushCell(iClient);
+    Call_PushCell(sender);
+    Call_PushCell(recipient);
+    Call_PushCell(iBind);
     Call_PushCellRef(level);
-    Call_PushString(szBinds[iBind]);
     Call_PushStringEx(szMessage, iSize, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
     Call_PushCell(iSize);
     Call_Finish(now);
@@ -604,7 +615,7 @@ Action Call_RebuildString(const int mType, int iClient, const int iBind, char[] 
             now = Plugin_Handled;
     }
 
-    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s')", now, mType, iClient, level, szBinds[iBind], szMessage);
+    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s')", now, mType, sender, level, szBinds[iBind], szMessage);
 
     // exclude post call
     if(now == Plugin_Stop)
@@ -613,13 +624,15 @@ Action Call_RebuildString(const int mType, int iClient, const int iBind, char[] 
     // post call
     Call_StartForward(g_fwdRebuildString_Post);
     Call_PushCell(mType);
-    Call_PushCell(iClient);
+    Call_PushCell(sender);
+    Call_PushCell(recipient);
+    Call_PushCell(iBind);
     Call_PushCell(level);
-    Call_PushString(szBinds[iBind]);
+    // Call_PushString(szBinds[iBind]);
     Call_PushString(szMessage);
     Call_Finish();
 
-    LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, iClient, level, szBinds[iBind], szMessage);
+    LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, sender, level, szBinds[iBind], szMessage);
 
     return now;
 }
