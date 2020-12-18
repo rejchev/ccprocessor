@@ -1,14 +1,13 @@
 public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
 {
-    static int iIndex, MsgType, iBackupIndex;
-    iIndex = iBackupIndex = MsgType = 0;
+    int iIndex, MsgType;
 
-    static char szName[NAME_LENGTH], szMessage[MESSAGE_LENGTH], szBuffer[MAX_LENGTH];
-    szName = NULL_STRING;
-    szBuffer = NULL_STRING;
-    szMessage = NULL_STRING;
+    char 
+        szName[NAME_LENGTH], 
+        szMessage[MESSAGE_LENGTH];
 
-    static int clients[MAXPLAYERS+1];
+    int clients[MAXPLAYERS+1];
+    
     CopyEqualArray(players, clients, playersNum);
 
     iIndex = 
@@ -23,86 +22,88 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
     if(!Call_IsSkipColors(MsgType, iIndex))
         ReplaceColors(SZ(szMessage), true);
     
-    if(!RebuildMessage(iIndex, MsgType, szName, szMessage, SZ(szBuffer), "saytext2"))
-        return Plugin_Handled;
-    
-    Call_MessageBuilt(MsgType, iIndex, szBuffer);
-
-    ReplaceColors(SZ(szBuffer), false);
-
     Call_RebuildClients(MsgType, iIndex, clients, playersNum);
-
-    iBackupIndex = iIndex;
-
-    if(!IsFakeClient(iIndex))
-        Call_IndexApproval(MsgType, iIndex);
-
-    g_mMessage.SetValue("ent_idx", iIndex);
-    g_mMessage.SetValue("backup_idx", iBackupIndex);
-
+    
+    g_mMessage.SetValue("client", iIndex);
+    g_mMessage.SetValue("type", MsgType);
+    g_mMessage.SetString("name", szName);
+    g_mMessage.SetString("message", szMessage);
     g_mMessage.SetArray("players", clients, playersNum);
     g_mMessage.SetValue("playersNum", playersNum);
-
-    g_mMessage.SetString("msg_name", szBuffer);
-    g_mMessage.SetValue("type", MsgType);
 
     return Plugin_Handled;
 }
 
 public void SayText2_Completed(UserMsg msgid, bool send)
 {
-    int 
-        iIndex, iBackupIndex, iPlayersNum, iType;
-    
-    char
-        szMessage[MAX_LENGTH];
+    static const char msgName[] = "SayText2";
 
-    if(!send || !g_mMessage.GetValue("ent_idx", iIndex))
+    int iClient;
+    if(!send || !g_mMessage.GetValue("client", iClient))
         return;
     
-    g_mMessage.GetValue("backup_idx", iBackupIndex);
-    g_mMessage.GetValue("playersNum", iPlayersNum);
-    g_mMessage.GetValue("type", iType);
-    g_mMessage.GetString("msg_name", szMessage, sizeof(szMessage));
-    
-    int[] players = new int[iPlayersNum];
-    g_mMessage.GetArray("players", players, iPlayersNum);
+    char 
+        szName[NAME_LENGTH],
+        szMessage[MESSAGE_LENGTH],
+        szBuffer[MAX_LENGTH];
+
+    int 
+        playersNum,
+        messageType;
+
+    // g_mMessage.SetValue("client", iBackup);
+    g_mMessage.GetValue("type", messageType);
+    g_mMessage.GetString("name", szName, sizeof(szName));
+    g_mMessage.GetString("message", szMessage, sizeof(szMessage));
+    g_mMessage.GetValue("playersNum", playersNum);
+
+    int[] clients = new int[playersNum];
+    g_mMessage.GetArray("players", clients, playersNum);
 
     g_mMessage.Clear();
 
     // Not equal (just fix clients array)
-    CopyEqualArray(players, players, iPlayersNum);
-    ChangeModeValue(players, iPlayersNum, "0");
+    CopyEqualArray(clients, clients, playersNum);
+    ChangeModeValue(clients, playersNum, "0");
 
-    Handle uMessage = 
-        StartMessageEx(msgid, players, iPlayersNum, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
-
-    if(uMessage)
-    {
-        // Call_OnNewMessage();
+    Handle uMessage;
+    while((playersNum--) > -1) {
         
-        if(!umType)
-        {
-            BfWriteByte(uMessage, iIndex);
-            BfWriteByte(uMessage, true);
-            BfWriteString(uMessage, szMessage);
-        }
-
-        else
-        {
-            PbSetInt(uMessage, "ent_idx", iIndex);
-            PbSetBool(uMessage, "chat", true);
-            PbSetString(uMessage, "msg_name", szMessage);
-            PbSetBool(uMessage, "textallchat", view_as<bool>(iType));
-
-            for(int i; i < 4; i++)
-                PbAddString(uMessage, "params", NULL_STRING);
-        }
+        // do not enable debug mode....
+        if(!RebuildMessage(iClient, messageType, szName, szMessage, SZ(szBuffer), msgName, clients[playersNum]))
+            continue;
         
-        EndMessage();
+        ReplaceColors(SZ(szBuffer), false);
+
+        // hehe
+        uMessage = 
+            StartMessageOne(msgName, clients[playersNum], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+
+        if(uMessage)
+        {
+            if(!umType)
+            {
+                BfWriteByte(uMessage, iClient);
+                BfWriteByte(uMessage, true);
+                BfWriteString(uMessage, szBuffer);
+            }
+
+            else
+            {
+                PbSetInt(uMessage, "ent_idx", iClient);
+                PbSetBool(uMessage, "chat", true);
+                PbSetString(uMessage, "msg_name", szBuffer);
+                PbSetBool(uMessage, "textallchat", view_as<bool>(messageType));
+
+                for(int i; i < 4; i++)
+                    PbAddString(uMessage, "params", NULL_STRING);
+            }
+            
+            EndMessage();
+        }
     }
 
-    ChangeModeValue(players, iPlayersNum, mode_default_value);
+    ChangeModeValue(clients, playersNum, mode_default_value); 
 }
 
 int ReadProtoMessage(Protobuf message, int &iMsgType, char[] szSenderName, int sn_size, char[] szSenderMsg, int sm_size)

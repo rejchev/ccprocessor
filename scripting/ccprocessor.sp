@@ -56,7 +56,7 @@ public Plugin myinfo =
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.2.2",
+    version     = "3.3.0",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -327,7 +327,8 @@ void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
     }
 }
 
-bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szMessage, char[] szBuffer, int iSize, const char[] um = NULL_STRING)
+// Edit
+bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szMessage, char[] szBuffer, int iSize, const char[] um = NULL_STRING, int lang = LANG_SERVER)
 {
     FormatEx(szBuffer, iSize, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
 
@@ -351,7 +352,7 @@ bool RebuildMessage(int iIndex, int iType, const char[] szName, const char[] szM
         if(iType == eMsg_RADIO && i == BIND_MSG)
             continue;
 
-        GetDefaultValue(i, LANG_SERVER, iType, iTeam, IsAlive, szName, szMessage, SZ(szOther));
+        GetDefaultValue(i, lang, iType, iTeam, IsAlive, szName, szMessage, SZ(szOther));
         
         if(Call_RebuildString(iType, iIndex, i, szOther, sizeof(szOther)) != Plugin_Continue)
             return false;
