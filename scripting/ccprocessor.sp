@@ -722,7 +722,7 @@ stock void Call_MessageBuilt(const int mType, int iIndex, const char[] BuiltMess
     Call_Finish();
 }
 
-bool Call_RestrictRadioKey(int iIndex, const char[] szKey)
+stock bool Call_RestrictRadioKey(int iIndex, const char[] szKey)
 {
     LOG_WRITE("Call_RestrictRadioKey(): %i, %s", iIndex, szKey);
 

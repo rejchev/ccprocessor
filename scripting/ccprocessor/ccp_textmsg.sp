@@ -112,7 +112,6 @@ public void TextMsg_Completed(StringMap data)
     }
 }
 
-// iam fuck this
 void ReadMessage(Handle msg, char[][] params, int count, int size)
 {
     int i;

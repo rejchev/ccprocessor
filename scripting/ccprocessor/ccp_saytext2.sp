@@ -69,18 +69,18 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     ChangeModeValue(clients, playersNum, "0");
 
     Handle uMessage;
-    playersNum--;
-    while(playersNum >= 0) {
+    int i = playersNum - 1;
+    while(i >= 0) {
         
         // do not enable debug mode....
-        if(!RebuildMessage(messageType, (iClient << 3|team << 1|view_as<int>(alive)), clients[playersNum], szName, szMessage, SZ(szBuffer), msgName))
+        if(!RebuildMessage(messageType, (iClient << 3|team << 1|view_as<int>(alive)), clients[i], szName, szMessage, SZ(szBuffer), msgName))
             continue;
         
         ReplaceColors(SZ(szBuffer), false);
 
         // hehe
         uMessage = 
-            StartMessageOne(msgName, clients[playersNum], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+            StartMessageOne(msgName, clients[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
 
         if(uMessage)
         {
@@ -98,14 +98,14 @@ public void SayText2_Completed(UserMsg msgid, bool send)
                 PbSetString(uMessage, "msg_name", szBuffer);
                 PbSetBool(uMessage, "textallchat", view_as<bool>(messageType));
 
-                for(int i; i < 4; i++)
+                for(int j; j < 4; j++)
                     PbAddString(uMessage, "params", NULL_STRING);
             }
             
             EndMessage();
         }
 
-        playersNum--;
+        i--;
     }
 
     ChangeModeValue(clients, playersNum, mode_default_value); 
