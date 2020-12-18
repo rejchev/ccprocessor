@@ -67,9 +67,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     umType = GetUserMessageType();
 
     HookUserMessage(GetUserMessageId("TextMsg"), UserMessage_TextMsg, true);
-    HookUserMessage(GetUserMessageId("SayText"), UserMessage_SayText, true);
+    // HookUserMessage(GetUserMessageId("SayText"), UserMessage_SayText, true);
     HookUserMessage(GetUserMessageId("SayText2"), UserMessage_SayText2, true, SayText2_Completed);
-    HookUserMessage(GetUserMessageId("RadioText"), UserMessage_RadioText, true, RadioText_Completed);
+    // HookUserMessage(GetUserMessageId("RadioText"), UserMessage_RadioText, true, RadioText_Completed);
 
     CreateNative("cc_drop_palette", Native_DropPalette);
 
@@ -88,11 +88,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
         "cc_proc_RebuildString_Post", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String
     );
 
-    g_fwdOnDefMessage       = new GlobalForward("cc_proc_OnDefMsg", ET_Hook, Param_String, Param_Cell, Param_Cell);
+    g_fwdOnDefMessage       = new GlobalForward("cc_proc_OnDefMsg", ET_Hook, Param_String, Param_Cell);
     g_fwdConfigParsed       = new GlobalForward("cc_config_parsed", ET_Ignore);
     g_fwdMessageUID         = new GlobalForward("cc_proc_MsgUniqueId", ET_Ignore, Param_Cell);
-    g_fwdOnMsgBuilt         = new GlobalForward("cc_proc_OnMessageBuilt", ET_Ignore, Param_Cell, Param_Cell, Param_String);
-    g_fwdIdxApproval        = new GlobalForward("cc_proc_IndexApproval", ET_Ignore, Param_Cell, Param_CellByRef);
+    // g_fwdOnMsgBuilt         = new GlobalForward("cc_proc_OnMessageBuilt", ET_Ignore, Param_Cell, Param_Cell, Param_String);
+    // g_fwdIdxApproval        = new GlobalForward("cc_proc_IndexApproval", ET_Ignore, Param_Cell, Param_CellByRef);
     g_fwdRestrictRadio      = new GlobalForward("cc_proc_RestrictRadio", ET_Hook, Param_Cell, Param_String);
     g_fwdAPIHandShake       = new GlobalForward("cc_proc_APIHandShake", ET_Ignore, Param_Cell);
     g_fwdRebuildClients     = new GlobalForward("cc_proc_RebuildClients", ET_Ignore, Param_Cell, Param_Cell, Param_Array, Param_CellByRef);
@@ -105,9 +105,9 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 
 #include "ccprocessor/ccp_saytext2.sp"
-#include "ccprocessor/ccp_saytext.sp"
+// #include "ccprocessor/ccp_saytext.sp"
 #include "ccprocessor/ccp_textmsg.sp"
-#include "ccprocessor/ccp_radiomsg.sp"
+// #include "ccprocessor/ccp_radiomsg.sp"
 
 public void OnPluginStart()
 {
@@ -342,6 +342,10 @@ bool RebuildMessage(
     const char[] option = NULL_STRING
 )
 {
+    if(msgType > eMsg_ALL && msgType != eMsg_SERVER) {
+        return false;
+    }
+
     FormatEx(buffer, size, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
 
     // LOG_WRITE("RebuildMessage(%s): Idx: %i, Type: %i, Name: %s, In: %s, Out: %s, size: %i", um, iIndex, iType, szName, szMessage, szBuffer, iSize);
@@ -354,6 +358,8 @@ bool RebuildMessage(
     team = (msgType != eMsg_SERVER) ? (msgSender >> 1) & 0x03 : TEAM_SPEC;
 
     msgSender >>= 4;
+
+    // LogMessage("Sender: %i, isAlive: %b, team= %i, message: %s", msgSender, isAlive, team, msg);
     
     for(int i; i < BIND_MAX; i++)
     {
@@ -526,7 +532,7 @@ void CopyEqualArray(const any[] input, any[] output, int &count)
     count = a;        
 }
 
-void ClearCharArray(char[][] array, int size)
+stock void ClearCharArray(char[][] array, int size)
 {
     for(int i; i < size; i++)
         array[i][0] = 0;
@@ -649,18 +655,18 @@ void Call_RebuildClients(const int mType, int iClient, int[] clients, int &numCl
     Call_Finish();
 }
 
-Action Call_OnDefMessage(const char[] szMessage, bool IsPhraseExists, bool IsTranslated)
+Action Call_OnDefMessage(const char[] szMessage, bool IsPhraseExists)
 {
-    Action Send = (IsTranslated && IsPhraseExists) ? Plugin_Changed : Plugin_Continue;
+    Action Send = (IsPhraseExists) ? Plugin_Changed : Plugin_Continue;
 
     Call_StartForward(g_fwdOnDefMessage);
+
     Call_PushString(szMessage);
     Call_PushCell(IsPhraseExists);
-    Call_PushCell(IsTranslated);
 
     Call_Finish(Send);
 
-    LOG_WRITE("Call_OnDefMessage(): %s, %b, %b, result: %d", szMessage, IsPhraseExists, IsTranslated, Send);
+    // LOG_WRITE("Call_OnDefMessage(): %s, %b, %b, result: %d", szMessage, IsPhraseExists, IsTranslated, Send);
 
     return Send;
 }
@@ -690,7 +696,7 @@ stock void Call_OnNewMessage()
     Call_Finish();
 }
 
-void Call_IndexApproval(const int mType, int &iIndex)
+stock void Call_IndexApproval(const int mType, int &iIndex)
 {
     int back = iIndex;
 
@@ -705,7 +711,7 @@ void Call_IndexApproval(const int mType, int &iIndex)
     LOG_WRITE("Call_IndexApproval(): %i, %i", iIndex, back);
 }
 
-void Call_MessageBuilt(const int mType, int iIndex, const char[] BuiltMessage)
+stock void Call_MessageBuilt(const int mType, int iIndex, const char[] BuiltMessage)
 {
     LOG_WRITE("Call_MessageBuilt(): %i, %s", iIndex, BuiltMessage);
 

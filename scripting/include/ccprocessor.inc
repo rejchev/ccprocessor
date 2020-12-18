@@ -169,7 +169,7 @@ forward void cc_proc_IndexApproval(const int mType, int &iClientIndex);
 								Plugin_Continue - exclude engine message processing
 								Plugin_Handled 	- exclude message sending by engine
 */
-forward Action cc_proc_OnDefMsg(const char[] szMessage, bool IsPhraseExists, bool IsTranslated);
+forward Action cc_proc_OnDefMsg(const char[] szMessage, bool IsPhraseExists);
 
 /*
  *	Calls when the config reading is completed
