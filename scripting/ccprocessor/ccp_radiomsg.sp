@@ -78,22 +78,22 @@ public void RadioText_Completed(UserMsg msgid, bool send)
     CopyEqualArray(clients, clients, playersNum);
     ChangeModeValue(clients, playersNum, "0");
 
-    // optional int32 msg_dst = 1;
-	// optional int32 client = 2;
-	// optional string msg_name = 3;
-	// repeated string params = 4;
     i = playersNum - 1;
     int team = GetClientTeam(a);
     bool alive = IsPlayerAlive(sender);
+    bool translated = TranslationPhraseExists(params[a]);
 
     Handle uMessage;
     int j;
     while(i >= 0) {
         // LogMessage("Send: %i, client: %i", i, clients[i]);
-        FormatEx(message, sizeof(message), "%T", params[a], clients[i]);
-        // LogMessage("Msg: %s", message);
+        strcopy(message, sizeof(message), params[a]);
+
+        if(translated)
+            Format(message, sizeof(message), "%T", message, clients[i]);
 
         if(RebuildMessage(msgType, (sender << 3|team << 1|view_as<int>(alive)), clients[i], params[PARAMS_NAME], message, SZ(buffer), msgName)) {
+            // LogMessage("Buffer: %s, param[1]: %s, message: %s", buffer, params[1], message);
             prepareDefMessge(PARAMS_MAX, clients[i], buffer, sizeof(buffer));
             ReplaceColors(SZ(buffer), false);
 

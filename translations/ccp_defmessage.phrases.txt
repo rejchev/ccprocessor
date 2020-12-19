@@ -175,29 +175,139 @@
     }
 
     // Radio
+    "#Cstrike_TitlesTXT_Affirmative"
+    {
+        // if u need...
+        // {2} - position
+        "ru"                "{G}Подтверждаю."
+        "en"                "{G}Affirmative."
+        "pl"                "{G}Affirmative."
+    }
+
+    "#Cstrike_TitlesTXT_Negative"
+    {
+        // {2} - position
+        "ru"                "{G}Никак нет."
+        "en"                "{G}Negative."
+        "pl"                "{G}Negative."
+    }
+
+    "#Cstrike_TitlesTXT_Cheer"
+    {
+        // {2} - position
+        "ru"                "{G}Молодцы!"
+        "en"                "{G}Cheer!"
+        "pl"                "{G}Cheer!"
+    }
+
+    "#Cstrike_TitlesTXT_Hold_this_position"
+    {
+        // {2} - position
+        "ru"                "{G}Удерживайте эту позицию [{W}{2}{G}]."
+        "en"                "{G}Hold This Position [{W}{2}{G}]."
+        "pl"                "{G}Hold This Position [{W}{2}{G}]."
+    }
+
+    "#Cstrike_TitlesTXT_Follow_me"
+    {
+        // {2} - position
+        "ru"                "{G}За мной."
+        "en"                "{G}Follow Me."
+        "pl"                "{G}Follow Me."
+    }
+
+    "#Cstrike_TitlesTXT_Thanks"
+    {
+        // {2} - position
+        "ru"                "{G}Спасибо!"
+        "en"                "{G}Thanks!"
+        "pl"                "{G}Thanks!"
+    }
+
     "#Cstrike_TitlesTXT_Go_go_go"
     {
+        // {2} - position
         "ru"                "{G}Пошли, пошли!"
         "en"                "{G}Go go go!"
         "pl"                "{G}Go go go!"
     }
 
+    "#Cstrike_TitlesTXT_Team_fall_back"
+    {
+        // {2} - position
+        "ru"                "{G}Команда, отступаем!"
+        "en"                "{G}Team, fall back!"
+        "pl"                "{G}Team, fall back!"
+    }
+
+    "#Cstrike_TitlesTXT_Stick_together_team"
+    {
+        // {2} - position
+        "ru"                "{G}Держаться вместе, команда."
+        "en"                "{G}Stick together, team."
+        "pl"                "{G}Stick together, team."
+    }
+
+    "#Cstrike_TitlesTXT_Roger_that"
+    {
+        // {2} - position
+        "ru"                "{G}Так точно."
+        "en"                "{G}Roger that."
+        "pl"                "{G}Roger that."
+    }
+
+    "#Cstrike_TitlesTXT_Compliment"
+    {
+        // {2} - position
+        "ru"                "{G}Отлично!"
+        "en"                "{G}Nice!"
+        "pl"                "{G}Nice!"
+    }
+
+    "#Cstrike_TitlesTXT_Enemy_spotted"
+    {
+        // {2} - position
+        "ru"                "{G}Противник замечен на точке {W}{2}."
+        "en"                "{G}Enemy spotted on {W}{2}."
+        "pl"                "{G}Enemy spotted on {W}{2}."
+    }
+
     "#Cstrike_TitlesTXT_Need_backup"
     {
+        // {2} - position
         "ru"                "{G}Нужна помощь."
         "en"                "{G}Need backup."
         "pl"                "{G}Need backup."
     }
 
+    "#Cstrike_TitlesTXT_You_take_the_point"
+    {
+        // {2} - position
+        "ru"                "{G}Иди первым."
+        "en"                "{G}You take the point."
+        "pl"                "{G}You take the point."
+    }
+
     "#Cstrike_TitlesTXT_Sector_clear"
     {
-        "ru"                "{G}Сектор чист."
-        "en"                "{G}Sector clear."
-        "pl"                "{G}Sector clear."
+        // {2} - position
+        "ru"                "{W}{2} {G}чист."
+        "en"                "{W}{2} {G}is clear."
+        "pl"                "{W}{2} {G}is clear."
+    }
+
+    "#Cstrike_TitlesTXT_In_position"
+    {
+        // if u need...
+        // {2} - position
+        "ru"                "{G}Я на месте ({W}{2}{G})"
+        "en"                "{G}I'm in position ({W}{2}{G})."
+        "pl"                "{G}I'm in position."
     }
 
     "#Cstrike_TitlesTXT_Planting_Bomb"
     {
+        // {2} - bombsite
         "ru"                "{G}Закладываю бомбу."
         "en"                "{G}I'm planting the bomb."
         "pl"                "{G}I'm planting the bomb."
@@ -205,6 +315,7 @@
 
     "#Cstrike_TitlesTXT_Game_afk_bomb_drop"
     {
+        // {2} - position
         "ru"                "{G}Я бросил бомбу."
         "en"                "{G}I dropped the bomb."
         "pl"                "{G}I dropped the bomb."
