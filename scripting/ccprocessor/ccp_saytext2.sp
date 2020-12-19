@@ -68,43 +68,44 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     CopyEqualArray(clients, clients, playersNum);
     ChangeModeValue(clients, playersNum, "0");
 
+    Call_OnNewMessage(messageType, iClient, clients, playersNum);
+
     Handle uMessage;
     int i = playersNum - 1;
     while(i >= 0) {
         
         // do not enable debug mode....
-        if(!RebuildMessage(messageType, (iClient << 3|team << 1|view_as<int>(alive)), clients[i], szName, szMessage, SZ(szBuffer), msgName))
-            continue;
-        
-        ReplaceColors(SZ(szBuffer), false);
+        if(RebuildMessage(messageType, (iClient << 3|team << 1|view_as<int>(alive)), clients[i], szName, szMessage, SZ(szBuffer), msgName)) {
+            ReplaceColors(SZ(szBuffer), false);
 
-        // hehe
-        uMessage = 
-            StartMessageOne(msgName, clients[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+            // hehe
+            uMessage = 
+                StartMessageOne(msgName, clients[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
 
-        if(uMessage)
-        {
-            if(!umType)
+            if(uMessage)
             {
-                BfWriteByte(uMessage, iClient);
-                BfWriteByte(uMessage, true);
-                BfWriteString(uMessage, szBuffer);
-            }
+                if(!umType)
+                {
+                    BfWriteByte(uMessage, iClient);
+                    BfWriteByte(uMessage, true);
+                    BfWriteString(uMessage, szBuffer);
+                }
 
-            else
-            {
-                PbSetInt(uMessage, "ent_idx", iClient);
-                PbSetBool(uMessage, "chat", true);
-                PbSetString(uMessage, "msg_name", szBuffer);
-                PbSetBool(uMessage, "textallchat", view_as<bool>(messageType));
+                else
+                {
+                    PbSetInt(uMessage, "ent_idx", iClient);
+                    PbSetBool(uMessage, "chat", true);
+                    PbSetString(uMessage, "msg_name", szBuffer);
+                    PbSetBool(uMessage, "textallchat", view_as<bool>(messageType));
 
-                for(int j; j < 4; j++)
-                    PbAddString(uMessage, "params", NULL_STRING);
+                    for(int j; j < 4; j++)
+                        PbAddString(uMessage, "params", NULL_STRING);
+                }
+                
+                EndMessage();
             }
-            
-            EndMessage();
         }
-
+        
         i--;
     }
 

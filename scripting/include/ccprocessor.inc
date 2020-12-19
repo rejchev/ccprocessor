@@ -3,277 +3,252 @@
 #endif
 #define _ccprocessor_included
 
-#define STATUS_LENGTH   	16
-#define TEAM_LENGTH     	64
-#define PREFIX_LENGTH   	64
-#define NAME_LENGTH     	128
-#define MESSAGE_LENGTH  	256
-#define MAX_LENGTH      	512
+#define STATUS_LENGTH       16
+#define TEAM_LENGTH         64
+#define PREFIX_LENGTH       64
+#define NAME_LENGTH         128
+#define MESSAGE_LENGTH      256
+#define MAX_LENGTH          512
 
 
 /* 
 API key:
-	The value changes if the API has been changed. 
-	This is a measure against users who do not follow the changes and do not understand what is happening.
+    The value changes if the API has been changed. 
+    This is a measure against users who do not follow the changes and do not understand what is happening.
 
-	ATTENTION: Do not change it yourself if you are not ready for the consequences!
+    ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY 			66638615
+#define API_KEY             66638615
 
 #if !defined CORE
-	#define API_OOD 		"The plugin module uses an outdated API. You must update it."
+    #define API_OOD         "The plugin module uses an outdated API. You must update it."
 #endif
 
 // Message type
 enum
 {
-	eMsg_TEAM = 0,
-	eMsg_ALL,
-	eMsg_CNAME,
+    eMsg_TEAM = 0,
+    eMsg_ALL,
+    eMsg_CNAME,
 
-	/* The bind '{MSG}' is not called for this type*/
-	eMsg_RADIO,	
+    /* The bind '{MSG}' is not called for this type*/
+    eMsg_RADIO,	
 
-	eMsg_SERVER,
-	
-	eMsg_MAX
+    eMsg_SERVER,
+    
+    eMsg_MAX
 };
 
+// Message template parts
 enum
 {
-	BIND_PROTOTYPE = 0,
+    BIND_PROTOTYPE = 0,
 
     BIND_STATUS_CO,
-	BIND_STATUS,
+    BIND_STATUS,
 
     BIND_TEAM_CO,
-	BIND_TEAM,
+    BIND_TEAM,
 
-	BIND_PREFIX_CO,
-	BIND_PREFIX,
+    BIND_PREFIX_CO,
+    BIND_PREFIX,
 
-	BIND_NAME_CO,
-	BIND_NAME,
+    BIND_NAME_CO,
+    BIND_NAME,
 
-	BIND_MSG_CO,
-	BIND_MSG,
+    BIND_MSG_CO,
+    BIND_MSG,
 
-	BIND_MAX
+    BIND_MAX
 };
 
 stock const char szBinds[BIND_MAX][] = 
 {
-	"{PROTOTYPE}"   ,
-	
-	"{STATUSCO}"    ,   "{STATUS}"  , 
+    "{PROTOTYPE}"   ,
+    
+    "{STATUSCO}"    ,   "{STATUS}"  , 
     "{TEAMCO}"      ,   "{TEAM}"    , 
     "{PREFIXCO}"    ,   "{PREFIX}"  ,
-	"{NAMECO}"      ,   "{NAME}"    , 
+    "{NAMECO}"      ,   "{NAME}"    , 
     "{MSGCO}"       ,   "{MSG}"
 };
 
 /*
- *	Skip colors in an unprepared message
+ *  Skip colors in an unprepared message
  *
- *  @param mType		Message type
- *	@param iClient		Client index
- *
- * 	@return				true - skipping / false - otherwise
+ *  @param mType        Message type
+ *  @param iClient      Client index
+ *  
+ *  @return             true - skipping
+ *                      false - otherwise
 */
 forward bool cc_proc_SkipColorsInMsg(const int mType, int iClient);
 
 /*
- *	Counter of processed messages.
- *  Called every time when message is ready to be sent
- *
- *	@param UniqueID		Unique ID of sended msg (feature in progress...)
- *
- * 	@noreturn
-*/
-forward void cc_proc_MsgUniqueId(const int UniqueID);
+ *  Streaming output for editing the recipient list
+ *  
+ *  @param mType        Message type
+ *  @param iClient      Real sender index
+ *  @param clients[]    Recipient list (rewritable)
+ *  @param &numClients  Number of recipients
 
-/*
- *	Calls when building parts of the prototype
- *
- *  @param mType		Message type
- *	@param iClient		Client index
- *	@param &pLevel		Replacement priority
- *	@param szBind		Core binds ({PROTOTYPE}, {STATUS}, {TEAM}, {PREFIXCO}, {PREFIX}, {NAMECO}, {NAME}, {MSGCO}, {MSG})
- *	@param szBuffer		Buffer with value
- *	@param iSize		Size of buffer
- *
- * 	@return             Plugin_Continie - build continue,
- *                      Plugin_Handled  - build rejected (after post call),
- *                      Plugin_Stop     - build rejected immediately (with out post call)
-*/
-forward Action cc_proc_RebuildString(const int mType, int sender, int recipient, int part, int &pLevel, char[] szBuffer, int size);
-
-/*
- *	Call after build part of prototype
- *
- *  @param mType		Message type
- *	@param iClient		Client index
- *	@param pLevel		Replacement priority
- *	@param szBind		Core binds ({PROTOTYPE}, {STATUS}, {TEAM}, {PREFIXCO}, {PREFIX}, {NAMECO}, {NAME}, {MSGCO}, {MSG})
- *	@param szValue		Value of part
- *
- * 	@noreturn
-*/
-forward void cc_proc_RebuildString_Post(const int mType, int sender, int recipient, int part, int pLevel, const char[] szValue);
-
-/*
- *	Calls when message is build ended
- *
- *  @param mType			Message type
- *	@param iClient			Sender's index
- *	@param szMessage		Built message
- *
- * 	@noreturn
-*/
-#pragma deprecated "cc_proc_RebuildString_Post()"
-forward void cc_proc_OnMessageBuilt(const int mType, int iClient, const char[] szMessage);
-
-/*
- *	Streaming output for editing the recipient list
- *
- *  @param mType		Message type
- *	@param iClient		Real sender index
- *  @param clients[]	Recipient list
- *  @param numClients	Number of recipients
-
- * 	@noreturn
+ *  @noreturn
 */
 forward void cc_proc_RebuildClients(const int mType, int iClient, int[] clients, int &numClients);
 
 /*
- *	Approving the sender's index
- *	Calls when message is ready to send
- *
- *  @param mType				Message type
- *	@param &iClientIndex		Sender's index (<> 0)
- *
- * 	@noreturn
+ *  Counter of processed messages.
+ *  Called every time when message is ready to be sent
+ *  
+ *  @param mType        Type of message
+ *  @param sender       Sender index
+ *  @param msgId        Message ID
+ *  @param clients      Recipient list
+ *  @param count        Recipient count
+ *  
+ *  @noreturn
 */
-#pragma deprecated ""
-forward void cc_proc_IndexApproval(const int mType, int &iClientIndex);
+forward void cc_proc_MsgUniqueId(int mType, int sender, int msgId, const int[] clients, int count);
 
 /*
- *	Calls when capturing an engine message from the server
+ *	Calls when building parts of the template
  *
- *	@param szMessage			Key of engine message (with symbol[0] = '#')
- *	@param IsPhraseExists		If key of engine message is exists
- *	@param IsTranslated			If key of engine message is translated for LANG_SEVER
+ *  @param mType        Message type
+ *  @param sender       Sender index
+ *  @param recipient    Recipient index
+ *  @param part         Part of the message template
+ *  @param &pLevel      Replacement priority
+ *  @param buffer       Buffer
+ *  @param size         Buffer size
  *
- * 	@return					Plugin_Changed	- send message for core processing
-								Plugin_Continue - exclude engine message processing
-								Plugin_Handled 	- exclude message sending by engine
+ *  @return             Plugin_Continue - build continue,
+ *                      Plugin_Handled  - build rejected (after post call),
+ *                      Plugin_Stop     - build rejected immediately (with out post call)
+*/
+forward Action cc_proc_RebuildString(const int mType, int sender, int recipient, int part, int &pLevel, char[] buffer, int size);
+
+/*
+ *  Call after build part of the template
+ *  
+ *  @param mType        Message type
+ *  @param sender       Sender index
+ *  @param recipient    Recipient index
+ *  @param part         Part of the message template
+ *  @param pLevel       Replacement priority
+ *  @param szValue      Value of part
+ *  
+ *  @noreturn
+*/
+forward void cc_proc_RebuildString_Post(const int mType, int sender, int recipient, int part, int pLevel, const char[] szValue);
+
+/*
+ *  Calls when capturing an engine message from the server
+ *  
+ *  @param szMessage        Key of engine message (with symbol[0] = '#')
+ *  @param IsPhraseExists   If key of engine message is exists
+ *  
+ *  @return                 Plugin_Changed	- send message for core processing
+                            Plugin_Continue - exclude engine message processing
+                            Plugin_Handled 	- exclude message sending by engine
 */
 forward Action cc_proc_OnDefMsg(const char[] szMessage, bool IsPhraseExists);
 
 /*
- *	Calls when the config reading is completed
- *
- *	@noparam
- *
- * 	@noreturn
+ *  Calls when the config reading is completed
+ *  
+ *  @noparam
+ *  
+ *  @noreturn
 */
 forward void cc_config_parsed();
 
 /*
- *	Called when action is required on the radio key
- *
- *	@param iClient			Sender's index
- *	@param szRKey			Radio key
- *
- * 	@return					true - restrict, false - otherwise
-*/
-forward bool cc_proc_RestrictRadio(int iClient, const char[] szRKey);
-
-/*
- *	API hand shake
- *
- *	@param api			API version key
- *
- * 	@noreturn
+ *  API hand shake
+ *  
+ *  @param api          API version key
+ *  
+ *  @noreturn
 */
 forward void cc_proc_APIHandShake(const int api);
 
 /*
- *	Get a pallete
- *
- *	@noparam
- *
- * 	@return				Map: ABBR:value (the pointer is not cloned, so no closure is required.)
+ *  Get a pallete
+ *  
+ *  @noparam
+ *  
+ *  @return         Map: ABBR:value (the pointer is not cloned, so no closure is required.)
 */
-native StringMap cc_drop_palette();
+native ArrayList cc_drop_palette();
 
 /*
- *	Replacing colors in a string
- *
- *	@param szBuffer		String buffer
- *	@param toNull		false - replace ABBR with code/ true - clear ABBR&code in string
- *
- * 	@noreturn
+ *  Replacing colors in a string
+ *  
+ *  @param szBuffer     String buffer
+ *  @param toNull       false - replace ABBR with code
+                        true - clear ABBR&code in string
+ *  
+ *  @noreturn
 */
 native void ccp_replaceColors(char[] szBuffer, bool toNull = true);
 
 /*
- *	Get the API key used by the core
- *
- *	@noparam 
- *
- * 	@return 		API version key
+ *  Get the API key used by the core
+ *  
+ *  @noparam 
+ *  
+ *  @return         API version key
 */
 native int cc_get_APIKey();
 
 /*
- *	API key matching
- *
- *	@param api		API version key
- *
- * 	@return				true - equal / false - otherwise
+ *  API key matching
+ *  
+ *  @param api          API version key
+ *  
+ *  @return             true - equal
+                        false - otherwise
 */
 native bool cc_is_APIEqual(const int api);
 
 /*
- *	Calling the internal message builder.
- *	Calls child forwards to get the current object settings.
- *
- *	@param iClient		Client index
- *	@param mType		Message type
- *	@param um			Unique usermessage type (or. dev)
- *	@param szName		Username value
- *	@param szMessage	User message value
- *	@param szBuffer		Buffer to store
- *	@param size			Buffer size
- *
- * 	@noreturn
+ *  Calling the internal message builder.
+ *  Calls child forwards to get the current object settings.
+ *  
+ *  @param iClient      Client index
+ *  @param mType        Message type
+ *  @param um           Unique usermessage type (or. dev)
+ *  @param szName       Username value
+ *  @param szMessage    User message value
+ *  @param szBuffer     Buffer to store
+ *  @param size         Buffer size
+ *  
+ *  @noreturn
 */
-native void cc_call_builder(int iClient, int mType, const char[] um, const char[] szName, const char[] szMessage, char[] szBuffer, int size);
+native void cc_call_builder(int mType, int iClient, int iRecipient, const char[] um, const char[] szName, const char[] szMessage, char[] szBuffer, int size);
 
 stock int BreakPoint(int iBindType, char[] szValue)
 {
-	static const int iMaxLength[BIND_MAX] = 
-	{
-		MESSAGE_LENGTH  ,
+    static const int iMaxLength[BIND_MAX] = 
+    {
+        MESSAGE_LENGTH  ,
         STATUS_LENGTH   ,   STATUS_LENGTH   ,
         STATUS_LENGTH   ,   TEAM_LENGTH     ,
-		STATUS_LENGTH   ,   PREFIX_LENGTH   ,
+        STATUS_LENGTH   ,   PREFIX_LENGTH   ,
         STATUS_LENGTH   ,   NAME_LENGTH     ,
         STATUS_LENGTH   ,   MESSAGE_LENGTH
-	};
+    };
 
-	if(strlen(szValue) >= iMaxLength[iBindType])
-	    szValue[iMaxLength[iBindType]] = 0;
+    if(strlen(szValue) >= iMaxLength[iBindType])
+        szValue[iMaxLength[iBindType]] = 0;
 
-	return iMaxLength[iBindType];
+    return iMaxLength[iBindType];
 }
 
 #if !defined CORE
 public void cc_proc_APIHandShake(const int key)
 {
-	if(key != API_KEY) SetFailState(API_OOD);
+    if(key != API_KEY) SetFailState(API_OOD);
 }
 #endif
 
@@ -369,22 +344,22 @@ stock void StringToUppercase(char[] sText)
 
 public SharedPlugin __pl_ccprocessor= 
 {
-	name = "ccprocessor",
-	file = "ccprocessor.smx",
+    name = "ccprocessor",
+    file = "ccprocessor.smx",
 #if defined REQUIRE_PLUGIN
-	required = 1
+    required = 1
 #else
-	required = 0
+    required = 0
 #endif
 };
 
 #if !defined REQUIRE_PLUGIN
 public void __pl_ccprocessor_SetNTVOptional()
 {
-	MarkNativeAsOptional("cc_drop_palette");
+    MarkNativeAsOptional("cc_drop_palette");
     MarkNativeAsOptional("ccp_replaceColors");
-	MarkNativeAsOptional("cc_get_APIKey");
-	MarkNativeAsOptional("cc_is_APIEqual");
-	MarkNativeAsOptional("cc_call_builder");
+    MarkNativeAsOptional("cc_get_APIKey");
+    MarkNativeAsOptional("cc_is_APIEqual");
+    MarkNativeAsOptional("cc_call_builder");
 }
 #endif

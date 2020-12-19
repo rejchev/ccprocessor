@@ -16,11 +16,10 @@ UserMessageType umType;
 
 // Slow solution, but I think it's worth it ....
 StringMap 
-    g_mPalette,
     g_mMessage;
 
-StringMapSnapshot
-    g_snapPalette;
+ArrayList
+    g_aPalette;
 
 char 
     msgPrototype[eMsg_MAX][MESSAGE_LENGTH],
@@ -36,9 +35,6 @@ GlobalForward
     g_fwdOnDefMessage,
     g_fwdConfigParsed,
     g_fwdMessageUID,
-    g_fwdOnMsgBuilt,
-    g_fwdIdxApproval,
-    g_fwdRestrictRadio,
     g_fwdAPIHandShake,
     g_fwdRebuildClients,
     g_fwdRebuildString_Post;
@@ -69,7 +65,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     HookUserMessage(GetUserMessageId("TextMsg"), UserMessage_TextMsg, true);
     // HookUserMessage(GetUserMessageId("SayText"), UserMessage_SayText, true);
     HookUserMessage(GetUserMessageId("SayText2"), UserMessage_SayText2, true, SayText2_Completed);
-    // HookUserMessage(GetUserMessageId("RadioText"), UserMessage_RadioText, true, RadioText_Completed);
+    HookUserMessage(GetUserMessageId("RadioText"), UserMessage_RadioText, true, RadioText_Completed);
 
     CreateNative("cc_drop_palette", Native_DropPalette);
 
@@ -90,10 +86,10 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     g_fwdOnDefMessage       = new GlobalForward("cc_proc_OnDefMsg", ET_Hook, Param_String, Param_Cell);
     g_fwdConfigParsed       = new GlobalForward("cc_config_parsed", ET_Ignore);
-    g_fwdMessageUID         = new GlobalForward("cc_proc_MsgUniqueId", ET_Ignore, Param_Cell);
+    g_fwdMessageUID         = new GlobalForward("cc_proc_MsgUniqueId", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Array, Param_Cell);
     // g_fwdOnMsgBuilt         = new GlobalForward("cc_proc_OnMessageBuilt", ET_Ignore, Param_Cell, Param_Cell, Param_String);
     // g_fwdIdxApproval        = new GlobalForward("cc_proc_IndexApproval", ET_Ignore, Param_Cell, Param_CellByRef);
-    g_fwdRestrictRadio      = new GlobalForward("cc_proc_RestrictRadio", ET_Hook, Param_Cell, Param_String);
+    // g_fwdRestrictRadio      = new GlobalForward("cc_proc_RestrictRadio", ET_Hook, Param_Cell, Param_String);
     g_fwdAPIHandShake       = new GlobalForward("cc_proc_APIHandShake", ET_Ignore, Param_Cell);
     g_fwdRebuildClients     = new GlobalForward("cc_proc_RebuildClients", ET_Ignore, Param_Cell, Param_Cell, Param_Array, Param_CellByRef);
 
@@ -107,14 +103,14 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 #include "ccprocessor/ccp_saytext2.sp"
 // #include "ccprocessor/ccp_saytext.sp"
 #include "ccprocessor/ccp_textmsg.sp"
-// #include "ccprocessor/ccp_radiomsg.sp"
+#include "ccprocessor/ccp_radiomsg.sp"
 
 public void OnPluginStart()
 {
     LoadTranslations("ccproc.phrases");
     LoadTranslations("ccp_defmessage.phrases");
 
-    g_mPalette = new StringMap();
+    g_aPalette = new ArrayList(STATUS_LENGTH, 0);
     g_mMessage = new StringMap();
 
     {
@@ -146,7 +142,7 @@ public void OnMapStart()
 {
     LOG_WRITE("Init OnMapStart()");
 
-    g_mPalette.Clear();
+    g_aPalette.Clear();
     g_szSection = NULL_STRING;
 
     GetLogFile(g_szLogEx, sizeof(g_szLogEx));
@@ -257,7 +253,9 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         if(iBuffer < 3) 
             szBuffer[1] = 0;
         
-        g_mPalette.SetString(sKey, szBuffer, true);
+        g_aPalette.PushString(sKey);
+        g_aPalette.PushString(szBuffer);
+        // g_mPalette.SetString(sKey, szBuffer, true);
 
         LOG_WRITE("OnKeyValue(): ReadKey: %s, Value[0]: %s", sKey, szBuffer);
     }
@@ -304,26 +302,38 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
 
     if(g_bResetByMap)
         g_iMsgIdx = 0;
-
-    if(g_snapPalette)
-        delete g_snapPalette;
-
-    g_snapPalette = g_mPalette.Snapshot();
 }
 
 void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
 {
-    char szKey[STATUS_LENGTH], szColor[STATUS_LENGTH];
+    char
+        szKey[STATUS_LENGTH],
+        szColor[STATUS_LENGTH];
 
-    for(int i; i < g_snapPalette.Length; i++)
-    {
-        g_snapPalette.GetKey(i, szKey, sizeof(szKey));
-        g_mPalette.GetString(szKey, szColor, sizeof(szColor));
+    int i;
+    while(i < g_aPalette.Length) {
+        g_aPalette.GetString(i, szKey, sizeof(szKey));
+        g_aPalette.GetString(i+1, szColor, sizeof(szColor));
 
         ReplaceString(szBuffer, iSize, szKey, (!bToNullStr) ? szColor : NULL_STRING, true);
-
         if(bToNullStr)
             ReplaceString(szBuffer, iSize, szColor, NULL_STRING, true);
+
+        i+=2;
+    }
+}
+
+void prepareDefMessge(int params, int recipient, char[] szMessage, int size)
+{
+    char szNum[8];
+
+    if(szMessage[0] == '#')
+        Format(szMessage, size, "%T", szMessage, recipient);
+
+    for(int i = 1; i < params; i++)
+    {
+        FormatEx(szNum, sizeof(szNum), "{%i}", i);
+        ReplaceString(szMessage, size, szNum, (i == 1) ? "%s1" : (i == 2) ? "%s2" : (i == 3) ? "%s3" : "%s4");
     }
 }
 
@@ -342,10 +352,6 @@ bool RebuildMessage(
     const char[] option = NULL_STRING
 )
 {
-    if(msgType > eMsg_ALL && msgType != eMsg_SERVER) {
-        return false;
-    }
-
     FormatEx(buffer, size, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
 
     // LOG_WRITE("RebuildMessage(%s): Idx: %i, Type: %i, Name: %s, In: %s, Out: %s, size: %i", um, iIndex, iType, szName, szMessage, szBuffer, iSize);
@@ -364,9 +370,6 @@ bool RebuildMessage(
     for(int i; i < BIND_MAX; i++)
     {
         value = NULL_STRING;
-
-        if(msgType == eMsg_RADIO && i == BIND_MSG)
-            continue;
 
         GetDefaultValue(i, msgRecipient, msgType, team, isAlive, name, msg, SZ(value));
         
@@ -560,7 +563,7 @@ public int Native_IsAPIEqual(Handle hPlugin, int iArgs)
 
 public any Native_DropPalette(Handle hPlugin, int iArgs)
 {
-    return g_mPalette;
+    return g_aPalette;
 }
 
 public int Native_CallBuilder(Handle hPlugin, int iArgs)
@@ -568,8 +571,9 @@ public int Native_CallBuilder(Handle hPlugin, int iArgs)
     LOG_WRITE("Native_CallBuilder(%x)", hPlugin);
 
     int
-        iClient = GetNativeCell(1),
-        iType = GetNativeCell(2);
+        iClient = GetNativeCell(2),
+        iType = GetNativeCell(1),
+        iRecipient = GetNativeCell(3);
     
     char
         szName[NAME_LENGTH],
@@ -582,12 +586,12 @@ public int Native_CallBuilder(Handle hPlugin, int iArgs)
     if(!szUM[0])
         szUM = "dev";
 
-    GetNativeString(4, szName, sizeof(szName));
-    GetNativeString(5, szMessage, sizeof(szMessage));
+    GetNativeString(5, szName, sizeof(szName));
+    GetNativeString(6, szMessage, sizeof(szMessage));
 
-    RebuildMessage(iType, iClient, 0, szName, szMessage, szBuffer, sizeof(szBuffer), szUM);
+    RebuildMessage(iType, iClient, iRecipient, szName, szMessage, szBuffer, sizeof(szBuffer), szUM);
 
-    SetNativeString(6, szBuffer, sizeof(szBuffer));
+    SetNativeString(7, szBuffer, sizeof(szBuffer));
 }
 
 void Call_OnCompReading()
@@ -634,7 +638,6 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
     Call_PushCell(recipient);
     Call_PushCell(iBind);
     Call_PushCell(level);
-    // Call_PushString(szBinds[iBind]);
     Call_PushString(szMessage);
     Call_Finish();
 
@@ -666,8 +669,6 @@ Action Call_OnDefMessage(const char[] szMessage, bool IsPhraseExists)
 
     Call_Finish(Send);
 
-    // LOG_WRITE("Call_OnDefMessage(): %s, %b, %b, result: %d", szMessage, IsPhraseExists, IsTranslated, Send);
-
     return Send;
 }
 
@@ -685,53 +686,19 @@ bool Call_IsSkipColors(const int mType, int iClient)
     return skip;
 }
 
-stock void Call_OnNewMessage()
+void Call_OnNewMessage(const int mType, const int sender, const int[] clients, int count)
 {
     g_iMsgIdx++;
 
-    LOG_WRITE("Call_OnNewMsg(): %i", g_iMsgIdx);
+    // LOG_WRITE("Call_OnNewMsg(): %i", g_iMsgIdx);
 
     Call_StartForward(g_fwdMessageUID);
+    
+    Call_PushCell(mType);
+    Call_PushCell(sender);
     Call_PushCell(g_iMsgIdx);
+    Call_PushArray(clients, count);
+    Call_PushCell(count);
+
     Call_Finish();
-}
-
-stock void Call_IndexApproval(const int mType, int &iIndex)
-{
-    int back = iIndex;
-
-    Call_StartForward(g_fwdIdxApproval);
-    Call_PushCell(mType);
-    Call_PushCellRef(iIndex);
-    Call_Finish();
-
-    if(iIndex < 1)
-        iIndex = back;
-
-    LOG_WRITE("Call_IndexApproval(): %i, %i", iIndex, back);
-}
-
-stock void Call_MessageBuilt(const int mType, int iIndex, const char[] BuiltMessage)
-{
-    LOG_WRITE("Call_MessageBuilt(): %i, %s", iIndex, BuiltMessage);
-
-    Call_StartForward(g_fwdOnMsgBuilt);
-    Call_PushCell(mType);
-    Call_PushCell(iIndex);
-    Call_PushString(BuiltMessage)
-    Call_Finish();
-}
-
-stock bool Call_RestrictRadioKey(int iIndex, const char[] szKey)
-{
-    LOG_WRITE("Call_RestrictRadioKey(): %i, %s", iIndex, szKey);
-
-    bool restrict;
-
-    Call_StartForward(g_fwdRestrictRadio);
-    Call_PushCell(iIndex);
-    Call_PushString(szKey)
-    Call_Finish(restrict);
-
-    return restrict;
 }

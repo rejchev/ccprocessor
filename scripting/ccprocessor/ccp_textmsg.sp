@@ -68,6 +68,8 @@ public void TextMsg_Completed(StringMap data)
     data.GetArray("clients", clients, playersNum);
     CopyEqualArray(clients, clients, playersNum);
 
+    Call_OnNewMessage(msgType, 0, clients, playersNum);
+
     delete data;
 
     Handle uMessage;
@@ -76,38 +78,33 @@ public void TextMsg_Completed(StringMap data)
         FormatEx(SZ(message), params[PARAM_MESSAGE]);
 
         if(message[0] == '#') {
-            prepareDefMessge(clients[playersNum], message, sizeof(message));
+            prepareDefMessge(MAX_PARAMS, clients[playersNum], message, sizeof(message));
         }       
 
-        if(!RebuildMessage(msgType, 2, clients[playersNum], name, message, SZ(buffer), msgName))
-            continue;
+        if(RebuildMessage(msgType, 2, clients[playersNum], name, message, SZ(buffer), msgName)) {
+            ReplaceColors(SZ(buffer), false);
 
-        ReplaceColors(SZ(buffer), false);
+            uMessage = 
+                StartMessageOne(msgName, clients[playersNum], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
 
-        uMessage = 
-            StartMessageOne(msgName, clients[playersNum], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
-
-        if(!uMessage)
-            continue;
-        
-        i = 1;
-        if(!umType)
-        {
-            BfWriteByte(uMessage, 3);
-            BfWriteString(uMessage, buffer)
-            while(i < MAX_PARAMS)
-                BfWriteString(uMessage, params[i++]);
-        }
-        else
-        {
-            PbSetInt(uMessage, "msg_dst", 3);
-            PbAddString(uMessage, "params", buffer);
-            while(i < MAX_PARAMS)
-                PbAddString(uMessage, "params", params[i++]);
+            if(uMessage) {
+                i = 1;
+                if(!umType) {
+                    BfWriteByte(uMessage, 3);
+                    BfWriteString(uMessage, buffer)
+                    while(i < MAX_PARAMS)
+                        BfWriteString(uMessage, params[i++]);
+                } else {
+                    PbSetInt(uMessage, "msg_dst", 3);
+                    PbAddString(uMessage, "params", buffer);
+                    while(i < MAX_PARAMS)
+                        PbAddString(uMessage, "params", params[i++]);
+                }
+                
+                EndMessage();
+            }
         }
         
-        EndMessage();
-
         playersNum--;
     }
 }
@@ -136,14 +133,3 @@ void ReadMessage(Handle msg, char[][] params, int count, int size)
     }
 }
 
-void prepareDefMessge(int recipient, char[] szMessage, int size)
-{
-    char szNum[8];
-    Format(szMessage, size, "%T", szMessage, recipient);
-
-    for(int i = 1; i < MAX_PARAMS; i++)
-    {
-        FormatEx(szNum, sizeof(szNum), "{%i}", i);
-        ReplaceString(szMessage, size, szNum, (i == 1) ? "%s1" : (i == 2) ? "%s2" : (i == 3) ? "%s3" : "%s4");
-    }
-}
