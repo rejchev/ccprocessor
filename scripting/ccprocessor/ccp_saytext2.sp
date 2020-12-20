@@ -50,8 +50,8 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     int 
         playersNum,
         messageType,
-        team = GetClientTeam(iClient);
-    bool alive = IsPlayerAlive(iClient);
+        team = (iClient) ? GetClientTeam(iClient) : TEAM_SPEC;
+    bool alive = (iClient) ? IsPlayerAlive(iClient) : false;
 
     // g_mMessage.SetValue("client", iBackup);
     g_mMessage.GetValue("type", messageType);
