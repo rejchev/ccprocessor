@@ -321,17 +321,17 @@
     // -- Prefix color: user
     "DEF_PREFIXCO_U"
     {
-        "ru"                "{T}"
-        "en"                "{T}"
-        "pl"                "{T}"
+        "ru"                ""
+        "en"                ""
+        "pl"                ""
     }
 
     // -- Prefix color: server
     "DEF_PREFIXCO_S"
     {
-        "ru"                "{CO}"
-        "en"                "{CO}"
-        "pl"                "{CO}"
+        "ru"                ""
+        "en"                ""
+        "pl"                ""
     }
 
     // ------------ Prefix ----------- //
@@ -339,17 +339,17 @@
     // -- Prefix: user (empty or value)
     "DEF_PREFIX_U"
     {
-        "ru"                "[DEFAULT]"
-        "en"                "[DEFAULT]"
-        "pl"                "[DEFAULT]"
+        "ru"                ""
+        "en"                ""
+        "pl"                ""
     }
 
     // -- Prefix: server
     "DEF_PREFIX_S"
     {
-        "ru"                "[CCP.proj]"
-        "en"                "[CCP.proj]"
-        "pl"                "[CCP.proj]"
+        "ru"                ""
+        "en"                ""
+        "pl"                ""
     }
 
     // ------------ Name color ----------- //
