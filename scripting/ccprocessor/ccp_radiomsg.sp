@@ -8,10 +8,10 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
     if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3)
         return Plugin_Continue;
 
-    char buffer[4] = "p";
+    char buffer[64] = "p";
     char params[PARAMS_MAX][MESSAGE_LENGTH];
     int sender = 
-        ReadRadioUsermessage(msg, params, sizeof(params), sizeof(params[]));
+        ReadRadioUsermessage(msg, buffer, sizeof(buffer), params, sizeof(params), sizeof(params[]));
     int i, a;
     int clients[MAXPLAYERS+1];
     Action defMessage;
@@ -23,8 +23,15 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
     ReplaceColors(params[PARAMS_NAME], sizeof(params[]), true);
 
     a = FindDisplayMessage(params, sizeof(params));
-    if(a == -1) {
-        return Plugin_Handled;
+    if(a == -1 || StrContains(params[a], "Game_radio", false) != -1) {
+        if(StrContains(buffer, "Game_radio", false) != -1)
+            return Plugin_Handled;
+        
+        // {1} - name
+        // {2} - location
+        // {3} - msg
+        // {4} - auto (optional)
+        strcopy(params[(a = 2)], sizeof(params[]), buffer);
     }
 
     if((defMessage = Call_OnDefMessage(params[a], TranslationPhraseExists(params[a]))) != Plugin_Changed) {
@@ -39,6 +46,8 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
     g_mMessage.SetValue("message", a);
     g_mMessage.SetArray("clients", clients, playersNum);
 
+    buffer = "p";
+    buffer[2] = 0;
     while(i < sizeof(params)) {
         buffer[1] = 48 + i;
         g_mMessage.SetString(buffer, params[i++], true);
@@ -143,7 +152,7 @@ int FindDisplayMessage(char[][] params, int count) {
 }
 
 // extended textmsg :/
-int ReadRadioUsermessage(Handle msg, char[][] params, int count, int size) {
+int ReadRadioUsermessage(Handle msg, char[] buffer, int bsize, char[][] params, int count, int size) {
     // params [0] - msg_name
 
     int
@@ -151,7 +160,8 @@ int ReadRadioUsermessage(Handle msg, char[][] params, int count, int size) {
         i;
 
     if(!umType) {
-        BfReadString(msg, params[0], size);  // msg_name
+        // BfReadString(msg, params[0], size);  // msg_name
+        BfReadString(msg, buffer, bsize);
         while(BfGetNumBytesLeft(msg) > 1) {
             if(i == count) {
                 break;
@@ -160,6 +170,7 @@ int ReadRadioUsermessage(Handle msg, char[][] params, int count, int size) {
             BfReadString(msg, params[i++], size);
         }
     } else {
+        PbReadString(msg, "msg_name", buffer, bsize);
         while(i < PbGetRepeatedFieldCount(msg, "params")) {
             if(i == count) {
                 break;
