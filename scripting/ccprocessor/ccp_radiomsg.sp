@@ -1,155 +1,187 @@
+#define PARAMS_MAX 4
+#define PARAMS_NAME 0
+
 public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
 {
+    static const int msgType = eMsg_RADIO;
+
     if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3)
         return Plugin_Continue;
 
-    static char szName[NAME_LENGTH], szKey[MESSAGE_LENGTH], szBuffer[MAX_LENGTH];
-    szKey = NULL_STRING;
-    szName = NULL_STRING;
-    szBuffer = NULL_STRING;
+    char buffer[64] = "p";
+    char params[PARAMS_MAX][MESSAGE_LENGTH];
+    int sender = 
+        ReadRadioUsermessage(msg, buffer, sizeof(buffer), params, sizeof(params), sizeof(params[]));
+    int i, a;
+    int clients[MAXPLAYERS+1];
+    Action defMessage;
 
-    static const char szParam[2][4] = {"%s2", "%s3"};
-    static const int iType = eMsg_RADIO;
-
-    static int clients[MAXPLAYERS+1];
     CopyEqualArray(players, clients, playersNum);
 
-    static int iIndex, iBackupIndex, iRadioType;
-    iIndex = iBackupIndex = iRadioType = 0;
+    // #ENTNAME[#]Name
+    strcopy(params[PARAMS_NAME], sizeof(params[]), params[PARAMS_NAME][(FindCharInString(params[PARAMS_NAME], ']') + 1)]);
+    ReplaceColors(params[PARAMS_NAME], sizeof(params[]), true);
 
-    iIndex = 
-        (!umType) ? 
-            ReadRadioAsBf(view_as<BfRead>(msg), iRadioType, SZ(szName), SZ(szKey)) :
-            ReadRadioAsProto(view_as<Protobuf>(msg), iRadioType, SZ(szName), SZ(szKey));
+    a = FindDisplayMessage(params, sizeof(params));
+    if(a == -1 || StrContains(params[a], "Game_radio", false) != -1) {
+        if(StrContains(buffer, "Game_radio", false) != -1)
+            return Plugin_Handled;
+        
+        // {1} - name
+        // {2} - location
+        // {3} - msg
+        // {4} - auto (optional)
+        strcopy(params[(a = 2)], sizeof(params[]), buffer);
+    }
 
-    if(Call_RestrictRadioKey(iIndex, szKey))
-        return Plugin_Handled;
+    if((defMessage = Call_OnDefMessage(params[a], TranslationPhraseExists(params[a]))) != Plugin_Changed) {
+        return defMessage;
+    }
 
-    ReplaceColors(SZ(szName), true);
+    Call_RebuildClients(msgType, sender, clients, playersNum);
 
-    if(!RebuildMessage(iIndex, iType, szName, szKey, SZ(szBuffer), "radio"))
-        return Plugin_Handled;
+    // StringMap message = new StringMap();
+    g_mMessage.SetValue("sender", sender);
+    g_mMessage.SetValue("count", playersNum);
+    g_mMessage.SetValue("message", a);
+    g_mMessage.SetArray("clients", clients, playersNum);
 
-    Call_MessageBuilt(iType, iIndex, szBuffer);
-
-    ReplaceColors(SZ(szBuffer), false);
-
-    ReplaceString(szBuffer, sizeof(szBuffer), "{MSG}", szParam[iRadioType]);
-
-    Call_RebuildClients(iType, iIndex, clients, playersNum);
-
-    iBackupIndex = iIndex;
-
-    if(!IsFakeClient(iIndex))
-        Call_IndexApproval(iType, iIndex);
-
-    g_mMessage.SetValue("ent_idx", iIndex);
-    g_mMessage.SetValue("backup_idx", iBackupIndex);
-
-    g_mMessage.SetArray("players", clients, playersNum);
-    g_mMessage.SetValue("playersNum", playersNum);
-
-    g_mMessage.SetString("msg_name", szBuffer);
-    g_mMessage.SetString("msg_key", szKey);
-    g_mMessage.SetValue("type", iRadioType);
+    buffer = "p";
+    buffer[2] = 0;
+    while(i < sizeof(params)) {
+        buffer[1] = 48 + i;
+        g_mMessage.SetString(buffer, params[i++], true);
+    }
 
     return Plugin_Handled;
 }
 
 public void RadioText_Completed(UserMsg msgid, bool send)
 {
-    int 
-        iIndex, iBackupIndex, iPlayersNum, iType;
-    
-    char
-        szMessage[MAX_LENGTH], szKey[NAME_LENGTH];
-    
-    if(!send || !g_mMessage.GetValue("ent_idx", iIndex))
+    static const char msgName[] = "RadioText";
+    static const int msgType = eMsg_RADIO;
+
+    int sender;
+    if(!send || !g_mMessage.GetValue("sender", sender))
         return;
     
-    g_mMessage.GetValue("ent_idx", iIndex);
-    g_mMessage.GetValue("backup_idx", iBackupIndex);
-    g_mMessage.GetValue("playersNum", iPlayersNum);
-    g_mMessage.GetValue("type", iType);
-    g_mMessage.GetString("msg_name", szMessage, sizeof(szMessage));
-    g_mMessage.GetString("msg_key", szKey, sizeof(szKey));
+    int i, playersNum, a;
+    g_mMessage.GetValue("count", playersNum);
+    g_mMessage.GetValue("message", a);
 
-    int[] players = new int[iPlayersNum];
-    g_mMessage.GetArray("players", players, iPlayersNum);
+    int[] clients = new int[MAXPLAYERS+1];
+    g_mMessage.GetArray("clients", clients, playersNum);
+
+    char params[PARAMS_MAX][MESSAGE_LENGTH];
+    char buffer[MAX_LENGTH] = "p";
+    char message[MESSAGE_LENGTH];
+
+    while(i < sizeof(params)) {
+        buffer[1] = 48 + i;
+        g_mMessage.GetString(buffer, params[i++], sizeof(params[]));
+    }
 
     g_mMessage.Clear();
 
     // Not equal (just fix clients array)
-    CopyEqualArray(players, players, iPlayersNum);
-    ChangeModeValue(players, iPlayersNum, "0");
+    CopyEqualArray(clients, clients, playersNum);
+    ChangeModeValue(clients, playersNum, "0");
 
-    Handle message = 
-        StartMessageEx(msgid, players, iPlayersNum, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+    i = playersNum - 1;
+    int team = GetClientTeam(a);
+    bool alive = IsPlayerAlive(sender);
+    bool translated = TranslationPhraseExists(params[a]);
 
-    if(message)
-    {
-        // Call_OnNewMessage();
-        
-        if(!umType)
-        {
-            BfWriteByte(message, 3);
-            BfWriteByte(message, iIndex);
-            BfWriteString(message, szMessage);
-            BfWriteString(message, "1");
-            BfWriteString(message, (iType) ? "1" : szKey);
+    Handle uMessage;
+    int j;
+    while(i >= 0) {
+        // LogMessage("Send: %i, client: %i", i, clients[i]);
+        strcopy(message, sizeof(message), params[a]);
 
-            if(iType) BfWriteString(message, szKey);
+        if(translated)
+            Format(message, sizeof(message), "%T", message, clients[i]);
+
+        if(RebuildMessage(msgType, (sender << 3|team << 1|view_as<int>(alive)), clients[i], params[PARAMS_NAME], message, SZ(buffer), msgName)) {
+            // LogMessage("Buffer: %s, param[1]: %s, message: %s", buffer, params[1], message);
+            prepareDefMessge(PARAMS_MAX, clients[i], buffer, sizeof(buffer));
+            ReplaceColors(SZ(buffer), false);
+
+            uMessage = 
+                StartMessageOne(msgName, clients[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+
+            if(uMessage) {
+                j = 0;
+                if(!umType) {
+                    BfWriteByte(uMessage, 3);
+                    BfWriteByte(uMessage, sender);
+                    BfWriteString(uMessage, buffer);
+                    while(j < PARAMS_MAX) {
+                        BfWriteString(uMessage, params[j++]);
+                    }
+                    
+                } else {
+                    PbSetInt(uMessage, "msg_dst", 3);
+                    PbSetInt(uMessage, "client", sender);
+                    PbSetString(uMessage, "msg_name", buffer);
+                    while(j < PARAMS_MAX)
+                        PbAddString(uMessage, "params", params[j++]);
+                }
+
+                EndMessage();
+            }
         }
 
-        else
-        {
-            PbSetInt(message, "msg_dst", 3);
-            PbSetInt(message, "client", iIndex);
-            PbSetString(message, "msg_name", szMessage);
+        i--;
+    }
 
-            PbAddString(message, "params", NULL_STRING);
-            PbAddString(message, "params", (iType) ? NULL_STRING : szKey);
-            PbAddString(message, "params", (iType) ? szKey : NULL_STRING);
-            PbAddString(message, "params", NULL_STRING);
+    ChangeModeValue(clients, playersNum, mode_default_value);
+}
+
+int FindDisplayMessage(char[][] params, int count) {
+    count--;
+
+    while(count > PARAMS_NAME) {
+        if(params[count][0] == '#') {
+            return count;
         }
 
-        EndMessage();
+        count--;
     }
 
-    ChangeModeValue(players, iPlayersNum, mode_default_value);
+    return -1;
 }
 
-int ReadRadioAsBf(BfRead message, int &iRadioType, char[] szName, int nsize, char[] szRKey, int ksize)
-{
-    int iIndex = message.ReadByte();
+// extended textmsg :/
+int ReadRadioUsermessage(Handle msg, char[] buffer, int bsize, char[][] params, int count, int size) {
+    // params [0] - msg_name
 
-    message.ReadString(szName, nsize);
+    int
+        sender = (!umType) ? BfReadByte(msg) : PbReadInt(msg, "client"), 
+        i;
 
-    iRadioType = view_as<int>(StrContains(szName, "_location", false) != -1);
+    if(!umType) {
+        // BfReadString(msg, params[0], size);  // msg_name
+        BfReadString(msg, buffer, bsize);
+        while(BfGetNumBytesLeft(msg) > 1) {
+            if(i == count) {
+                break;
+            }
 
-    message.ReadString(szName, nsize);
-    message.ReadString(szRKey, ksize);
+            BfReadString(msg, params[i++], size);
+        }
+    } else {
+        PbReadString(msg, "msg_name", buffer, bsize);
+        while(i < PbGetRepeatedFieldCount(msg, "params")) {
+            if(i == count) {
+                break;
+            }
 
-    if(iRadioType)
-    {
-        message.ReadString(szRKey, ksize);
+            PbReadString(msg, "params", params[i], size, i);
+            // LogMessage("Param[%i]: %s", i, params[i]);
+
+            i++;
+        }
     }
-    
-    strcopy(szName, nsize, szName[FindCharInString(szName, ']')+1]);
 
-    return iIndex;
-}
-
-int ReadRadioAsProto(Protobuf message, int &iRadioType, char[] szName, int nsize, char[] szRKey, int ksize)
-{
-    message.ReadString("msg_name", szName, nsize);
-    iRadioType = view_as<int>(StrContains(szName, "_location", false) != -1);
-
-    message.ReadString("params", szName, nsize, 0);
-
-    message.ReadString("params", szRKey, ksize, (iRadioType) ? 2 : 1);
-
-    strcopy(szName, nsize, szName[FindCharInString(szName, ']')+1]);
-
-    return message.ReadInt("client");
+    return sender;
 }
