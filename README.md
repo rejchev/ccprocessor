@@ -35,17 +35,17 @@ This approach allows you to preserve the language affiliation and form a message
 
 ### Extended Radio
 The handler also deals with the radio channel. <br>
-You can edit already boring radio commands.
+You can edit already boring radio commands. <br>
 ![Radio](./.github/images/radio.png)
 
 ### And more other...
 
 ## Game support
 ---------
--[x] Counter-Strike: Global Offensive
--[x] Counter-Strike: Source (Open Beta)
--[x] Team Fortress 2
--[x] Left 4 Dead 2
+- [x] Counter-Strike: Global Offensive
+- [x] Counter-Strike: Source (Open Beta)
+- [x] Team Fortress 2
+- [x] Left 4 Dead 2
 
 ## Requirements:
 -------------
