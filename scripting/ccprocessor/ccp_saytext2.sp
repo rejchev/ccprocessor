@@ -7,7 +7,6 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
         szMessage[MESSAGE_LENGTH];
 
     int clients[MAXPLAYERS+1];
-    
     CopyEqualArray(players, clients, playersNum);
 
     iIndex = 
@@ -70,9 +69,8 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     ChangeModeValue(clients, playersNum, "0");
 
     Handle uMessage;
-    int i = playersNum - 1;
-    while(i >= 0) {
-        
+    
+    for(int i; i < playersNum; i++) {
         // do not enable debug mode....
         if(RebuildMessage(messageType, (iClient << 3|team << 1|view_as<int>(alive)), clients[i], szName, szMessage, SZ(szBuffer), msgName)) {
             ReplaceColors(SZ(szBuffer), false);
@@ -104,8 +102,6 @@ public void SayText2_Completed(UserMsg msgid, bool send)
                 EndMessage();
             }
         }
-        
-        i--;
     }
 
     ChangeModeValue(clients, playersNum, mode_default_value); 

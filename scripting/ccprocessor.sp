@@ -528,8 +528,11 @@ void CopyEqualArray(const any[] input, any[] output, int &count)
 
     for(int i; i < count; i++)
     {
-        if(IsClientConnected(input[i]) && (!IsFakeClient(input[i]) || IsClientSourceTV(input[i])))
-            output[a++] = input[i];
+        if(!IsClientConnected(input[i]) || (IsFakeClient(input[i]) && !IsClientSourceTV(input[i]))) {
+            continue;
+        }
+
+        output[a++] = input[i];  
     }
 
     count = a;        
