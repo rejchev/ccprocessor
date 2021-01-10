@@ -24,8 +24,6 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
         }
     }
 
-    Call_RebuildClients(eMsg_SERVER, TEAM_SERVER, clients, playersNum);
-
     StringMap uMessage = new StringMap();
     
     char iter[4] = "p";
@@ -66,12 +64,14 @@ public void TextMsg_Completed(StringMap data)
 
     int[] clients = new int[MAXPLAYERS+1];
     data.GetArray("clients", clients, playersNum);
-    CopyEqualArray(clients, clients, playersNum);
-
-    Call_OnNewMessage(msgType, 0, clients, playersNum);
 
     delete data;
 
+    Call_OnNewMessage(msgType, 0, params[PARAM_MESSAGE], clients, playersNum);
+    Call_RebuildClients(eMsg_SERVER, TEAM_SERVER, clients, playersNum);
+
+    CopyEqualArray(clients, clients, playersNum);
+    
     Handle uMessage;
     playersNum--;
     while(playersNum >= 0) {

@@ -52,7 +52,7 @@ public Plugin myinfo =
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.3.0",
+    version     = "3.3.1",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -86,7 +86,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     g_fwdOnDefMessage       = new GlobalForward("cc_proc_OnDefMsg", ET_Hook, Param_String, Param_Cell);
     g_fwdConfigParsed       = new GlobalForward("cc_config_parsed", ET_Ignore);
-    g_fwdMessageUID         = new GlobalForward("cc_proc_MsgUniqueId", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Array, Param_Cell);
+    g_fwdMessageUID         = new GlobalForward("cc_proc_MsgUniqueId", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Array, Param_Cell);
     // g_fwdOnMsgBuilt         = new GlobalForward("cc_proc_OnMessageBuilt", ET_Ignore, Param_Cell, Param_Cell, Param_String);
     // g_fwdIdxApproval        = new GlobalForward("cc_proc_IndexApproval", ET_Ignore, Param_Cell, Param_CellByRef);
     // g_fwdRestrictRadio      = new GlobalForward("cc_proc_RestrictRadio", ET_Hook, Param_Cell, Param_String);
@@ -686,7 +686,7 @@ bool Call_IsSkipColors(const int mType, int iClient)
     return skip;
 }
 
-void Call_OnNewMessage(const int mType, const int sender, const int[] clients, int count)
+void Call_OnNewMessage(const int mType, const int sender, const char[] message, const int[] clients, int count)
 {
     g_iMsgIdx++;
 
@@ -697,6 +697,7 @@ void Call_OnNewMessage(const int mType, const int sender, const int[] clients, i
     Call_PushCell(mType);
     Call_PushCell(sender);
     Call_PushCell(g_iMsgIdx);
+    Call_PushString(message);
     Call_PushArray(clients, count);
     Call_PushCell(count);
 

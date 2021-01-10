@@ -3,8 +3,6 @@
 
 public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
 {
-    static const int msgType = eMsg_RADIO;
-
     if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3)
         return Plugin_Continue;
 
@@ -37,8 +35,6 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
     if((defMessage = Call_OnDefMessage(params[a], TranslationPhraseExists(params[a]))) != Plugin_Changed) {
         return defMessage;
     }
-
-    Call_RebuildClients(msgType, sender, clients, playersNum);
 
     // StringMap message = new StringMap();
     g_mMessage.SetValue("sender", sender);
@@ -82,6 +78,9 @@ public void RadioText_Completed(UserMsg msgid, bool send)
     }
 
     g_mMessage.Clear();
+
+    Call_OnNewMessage(msgType, sender, params[a], clients, playersNum);
+    Call_RebuildClients(msgType, sender, clients, playersNum);
 
     // Not equal (just fix clients array)
     CopyEqualArray(clients, clients, playersNum);

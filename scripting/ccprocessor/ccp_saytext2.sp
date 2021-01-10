@@ -22,8 +22,6 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
     if(!Call_IsSkipColors(MsgType, iIndex))
         ReplaceColors(SZ(szMessage), true);
     
-    Call_RebuildClients(MsgType, iIndex, clients, playersNum);
-    
     g_mMessage.SetValue("client", iIndex);
     g_mMessage.SetValue("type", MsgType);
     g_mMessage.SetString("name", szName);
@@ -64,11 +62,12 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
     g_mMessage.Clear();
 
+    Call_OnNewMessage(messageType, iClient, szMessage, clients, playersNum);
+    Call_RebuildClients(messageType, iClient, clients, playersNum);
+
     // Not equal (just fix clients array)
     CopyEqualArray(clients, clients, playersNum);
     ChangeModeValue(clients, playersNum, "0");
-
-    Call_OnNewMessage(messageType, iClient, clients, playersNum);
 
     Handle uMessage;
     int i = playersNum - 1;

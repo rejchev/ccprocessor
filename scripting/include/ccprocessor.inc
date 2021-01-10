@@ -19,7 +19,7 @@ API key:
     ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY             66638615
+#define API_KEY             21338615
 
 #if !defined CORE
     #define API_OOD         "The plugin module uses an outdated API. You must update it."
@@ -86,6 +86,21 @@ stock const char szBinds[BIND_MAX][] =
 forward bool cc_proc_SkipColorsInMsg(const int mType, int iClient);
 
 /*
+ *  Counter of processed messages.
+ *  Called every time when message is ready to be sent
+ *  
+ *  @param mType        Type of message
+ *  @param sender       Sender index
+ *  @param msgId        Message ID
+ *  @param message      Message
+ *  @param clients      Recipient list
+ *  @param count        Recipient count
+ *  
+ *  @noreturn
+*/
+forward void cc_proc_MsgUniqueId(int mType, int sender, int msgId, const char[] message, const int[] clients, int count);
+
+/*
  *  Streaming output for editing the recipient list
  *  
  *  @param mType        Message type
@@ -96,20 +111,6 @@ forward bool cc_proc_SkipColorsInMsg(const int mType, int iClient);
  *  @noreturn
 */
 forward void cc_proc_RebuildClients(const int mType, int iClient, int[] clients, int &numClients);
-
-/*
- *  Counter of processed messages.
- *  Called every time when message is ready to be sent
- *  
- *  @param mType        Type of message
- *  @param sender       Sender index
- *  @param msgId        Message ID
- *  @param clients      Recipient list
- *  @param count        Recipient count
- *  
- *  @noreturn
-*/
-forward void cc_proc_MsgUniqueId(int mType, int sender, int msgId, const int[] clients, int count);
 
 /*
  *	Calls when building parts of the template
