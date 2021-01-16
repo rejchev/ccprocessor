@@ -363,7 +363,7 @@ bool RebuildMessage(
     isAlive = (msgType != eMsg_SERVER) ? view_as<bool>(msgSender & 0x01) : false;
     team = (msgType != eMsg_SERVER) ? (msgSender >> 1) & 0x03 : TEAM_SPEC;
 
-    msgSender >>= 4;
+    msgSender >>= 3;
 
     // LogMessage("Sender: %i, isAlive: %b, team= %i, message: %s", msgSender, isAlive, team, msg);
     
