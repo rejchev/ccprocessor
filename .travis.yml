@@ -32,7 +32,7 @@ script:
     - $SRCDIR'/spcomp' $SRCDIR'/ccprocessor.sp' -o2 -v1 -i=$SRCDIR'/include' -o=$BINDIR'/ccprocessor.smx'
 
 before_deploy:
-  - tar -czvf ccp-build-${TRAVIS_BUILD_NUMBER}.tar.gz $BUILDIR
+  - cd $BUILDIR && tar -czvf ccp-build-${TRAVIS_BUILD_NUMBER}.tar.gz *
   
 deploy:
   provider: releases
