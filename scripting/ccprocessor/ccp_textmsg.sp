@@ -1,4 +1,4 @@
-#define MAX_PARAMS 5
+#define MAX_PARAMS_TXTMSG 5
 // #define DEFAULT_NAME "CONSOLE"
 #define PARAM_MESSAGE 0
 
@@ -7,7 +7,7 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
     if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3)
         return Plugin_Continue;
 
-    char params[MAX_PARAMS][MESSAGE_LENGTH];
+    char params[MAX_PARAMS_TXTMSG][MESSAGE_LENGTH];
 
     Action defMessage;
 
@@ -29,7 +29,7 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
     char iter[4] = "p";
     int i;
 
-    while(i < MAX_PARAMS) {
+    while(i < MAX_PARAMS_TXTMSG) {
         iter[1] = i+48;
         uMessage.SetString(iter, params[i++]);
     }
@@ -48,12 +48,12 @@ public void TextMsg_Completed(StringMap data)
     char buffer[MAX_LENGTH] = "p";
     char message[MESSAGE_LENGTH];
     char name[4];
-    char params[MAX_PARAMS][MESSAGE_LENGTH];
+    char params[MAX_PARAMS_TXTMSG][MESSAGE_LENGTH];
 
     const int msgType = eMsg_SERVER;
-    int i;
+    int i, j;
 
-    while(i < MAX_PARAMS) {
+    while(i < MAX_PARAMS_TXTMSG) {
         buffer[1] = i + 48;
         data.GetString(buffer, params[i++], sizeof(params[]));
         // LogMessage("buffer: %s, params: %s", buffer, params[i-1]);
@@ -73,39 +73,36 @@ public void TextMsg_Completed(StringMap data)
     CopyEqualArray(clients, clients, playersNum);
     
     Handle uMessage;
-    playersNum--;
-    while(playersNum >= 0) {
+    for(i = 0; i < playersNum; i++) {
         FormatEx(SZ(message), params[PARAM_MESSAGE]);
 
         if(message[0] == '#') {
-            prepareDefMessge(MAX_PARAMS, clients[playersNum], message, sizeof(message));
+            prepareDefMessge(MAX_PARAMS_TXTMSG, clients[i], message, sizeof(message));
         }       
 
-        if(RebuildMessage(msgType, 2, clients[playersNum], name, message, SZ(buffer), msgName)) {
+        if(RebuildMessage(msgType, 0, clients[i], name, message, SZ(buffer), msgName)) {
             ReplaceColors(SZ(buffer), false);
 
             uMessage = 
-                StartMessageOne(msgName, clients[playersNum], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+                StartMessageOne(msgName, clients[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
 
             if(uMessage) {
-                i = 1;
+                j = PARAM_MESSAGE + 1;
                 if(!umType) {
                     BfWriteByte(uMessage, 3);
                     BfWriteString(uMessage, buffer)
-                    while(i < MAX_PARAMS)
-                        BfWriteString(uMessage, params[i++]);
+                    while(j < MAX_PARAMS_TXTMSG)
+                        BfWriteString(uMessage, params[j++]);
                 } else {
                     PbSetInt(uMessage, "msg_dst", 3);
                     PbAddString(uMessage, "params", buffer);
-                    while(i < MAX_PARAMS)
-                        PbAddString(uMessage, "params", params[i++]);
+                    while(j < MAX_PARAMS_TXTMSG)
+                        PbAddString(uMessage, "params", params[j++]);
                 }
                 
                 EndMessage();
             }
         }
-        
-        playersNum--;
     }
 }
 

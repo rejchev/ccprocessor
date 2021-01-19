@@ -1,4 +1,4 @@
-#define PARAMS_MAX 4
+#define MAX_PARAMS_RADIO 4
 #define PARAMS_NAME 0
 
 public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
@@ -7,7 +7,7 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
         return Plugin_Continue;
 
     char buffer[64] = "p";
-    char params[PARAMS_MAX][MESSAGE_LENGTH];
+    char params[MAX_PARAMS_RADIO][MESSAGE_LENGTH];
     int sender = 
         ReadRadioUsermessage(msg, buffer, sizeof(buffer), params, sizeof(params), sizeof(params[]));
     int i, a;
@@ -68,7 +68,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
     int[] clients = new int[MAXPLAYERS+1];
     g_mMessage.GetArray("clients", clients, playersNum);
 
-    char params[PARAMS_MAX][MESSAGE_LENGTH];
+    char params[MAX_PARAMS_RADIO][MESSAGE_LENGTH];
     char buffer[MAX_LENGTH] = "p";
     char message[MESSAGE_LENGTH];
 
@@ -102,7 +102,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
 
         if(RebuildMessage(msgType, (sender << 3|team << 1|view_as<int>(alive)), clients[i], params[PARAMS_NAME], message, SZ(buffer), msgName)) {
             // LogMessage("Buffer: %s, param[1]: %s, message: %s", buffer, params[1], message);
-            prepareDefMessge(PARAMS_MAX, clients[i], buffer, sizeof(buffer));
+            prepareDefMessge(MAX_PARAMS_RADIO, clients[i], buffer, sizeof(buffer));
             ReplaceColors(SZ(buffer), false);
 
             uMessage = 
@@ -114,7 +114,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
                     BfWriteByte(uMessage, 3);
                     BfWriteByte(uMessage, sender);
                     BfWriteString(uMessage, buffer);
-                    while(j < PARAMS_MAX) {
+                    while(j < MAX_PARAMS_RADIO) {
                         BfWriteString(uMessage, params[j++]);
                     }
                     
@@ -122,7 +122,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
                     PbSetInt(uMessage, "msg_dst", 3);
                     PbSetInt(uMessage, "client", sender);
                     PbSetString(uMessage, "msg_name", buffer);
-                    while(j < PARAMS_MAX)
+                    while(j < MAX_PARAMS_RADIO)
                         PbAddString(uMessage, "params", params[j++]);
                 }
 

@@ -8,13 +8,12 @@
 #define TEAM_B      3
 
 #include <ccprocessor>
-#include <regex>
+// #include <regex>
 
-static char g_szLogEx[MESSAGE_LENGTH] = "logs/ccprocessor"
+char g_szLogEx[MESSAGE_LENGTH] = "logs/ccprocessor"
 
 UserMessageType umType;
 
-// Slow solution, but I think it's worth it ....
 StringMap 
     g_mMessage;
 
@@ -52,7 +51,7 @@ public Plugin myinfo =
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.3.1",
+    version     = "3.3.2",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -63,35 +62,32 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     umType = GetUserMessageType();
 
     HookUserMessage(GetUserMessageId("TextMsg"), UserMessage_TextMsg, true);
-    // HookUserMessage(GetUserMessageId("SayText"), UserMessage_SayText, true);
+    HookUserMessage(GetUserMessageId("SayText"), UserMessage_SayText, true);
     HookUserMessage(GetUserMessageId("SayText2"), UserMessage_SayText2, true, SayText2_Completed);
     HookUserMessage(GetUserMessageId("RadioText"), UserMessage_RadioText, true, RadioText_Completed);
 
-    CreateNative("cc_drop_palette", Native_DropPalette);
+    CreateNative("cc_get_APIKey",                       Native_GetAPIKey);
+    CreateNative("cc_is_APIEqual",                      Native_IsAPIEqual);
+    CreateNative("cc_drop_palette",                     Native_DropPalette);
+    CreateNative("cc_call_builder",                     Native_CallBuilder);
+    CreateNative("ccp_replaceColors",                   Native_ReplaceColors);
 
-    CreateNative("ccp_replaceColors", Native_ReplaceColors);
-
-    CreateNative("cc_get_APIKey", Native_GetAPIKey);
-    CreateNative("cc_is_APIEqual", Native_IsAPIEqual);
-    CreateNative("cc_call_builder", Native_CallBuilder);
-
-    g_fwdSkipColors         = new GlobalForward("cc_proc_SkipColorsInMsg", ET_Hook, Param_Cell, Param_Cell);
-    g_fwdRebuildString      = new GlobalForward(
-        "cc_proc_RebuildString", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
-    );
-
-    g_fwdRebuildString_Post = new GlobalForward(
-        "cc_proc_RebuildString_Post", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String
-    );
-
-    g_fwdOnDefMessage       = new GlobalForward("cc_proc_OnDefMsg", ET_Hook, Param_String, Param_Cell);
-    g_fwdConfigParsed       = new GlobalForward("cc_config_parsed", ET_Ignore);
-    g_fwdMessageUID         = new GlobalForward("cc_proc_MsgUniqueId", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Array, Param_Cell);
-    // g_fwdOnMsgBuilt         = new GlobalForward("cc_proc_OnMessageBuilt", ET_Ignore, Param_Cell, Param_Cell, Param_String);
-    // g_fwdIdxApproval        = new GlobalForward("cc_proc_IndexApproval", ET_Ignore, Param_Cell, Param_CellByRef);
-    // g_fwdRestrictRadio      = new GlobalForward("cc_proc_RestrictRadio", ET_Hook, Param_Cell, Param_String);
-    g_fwdAPIHandShake       = new GlobalForward("cc_proc_APIHandShake", ET_Ignore, Param_Cell);
-    g_fwdRebuildClients     = new GlobalForward("cc_proc_RebuildClients", ET_Ignore, Param_Cell, Param_Cell, Param_Array, Param_CellByRef);
+    g_fwdConfigParsed       = 
+        new GlobalForward("cc_config_parsed",           ET_Ignore);
+    g_fwdAPIHandShake       = 
+        new GlobalForward("cc_proc_APIHandShake",       ET_Ignore, Param_Cell);
+    g_fwdSkipColors         = 
+        new GlobalForward("cc_proc_SkipColorsInMsg",    ET_Hook, Param_Cell, Param_Cell);
+    g_fwdOnDefMessage       = 
+        new GlobalForward("cc_proc_OnDefMsg",           ET_Hook, Param_String, Param_Cell);
+    g_fwdRebuildClients     = 
+        new GlobalForward("cc_proc_RebuildClients",     ET_Ignore, Param_Cell, Param_Cell, Param_Array, Param_CellByRef);
+    g_fwdRebuildString_Post = 
+        new GlobalForward("cc_proc_RebuildString_Post", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
+    g_fwdMessageUID         = 
+        new GlobalForward("cc_proc_MsgUniqueId",        ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Array, Param_Cell);
+    g_fwdRebuildString      = 
+        new GlobalForward("cc_proc_RebuildString",      ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell);
 
     RegPluginLibrary("ccprocessor");
 
@@ -101,7 +97,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 
 #include "ccprocessor/ccp_saytext2.sp"
-// #include "ccprocessor/ccp_saytext.sp"
+#include "ccprocessor/ccp_saytext.sp"
 #include "ccprocessor/ccp_textmsg.sp"
 #include "ccprocessor/ccp_radiomsg.sp"
 
@@ -140,19 +136,19 @@ public void OnModChanged(ConVar cvar, const char[] oldVal, const char[] newVal)
 
 public void OnMapStart()
 {
-    LOG_WRITE("Init OnMapStart()");
+    // LOG_WRITE("Init OnMapStart()");
 
     g_aPalette.Clear();
     g_szSection = NULL_STRING;
 
-    GetLogFile(g_szLogEx, sizeof(g_szLogEx));
+    // GetLogFile(g_szLogEx, sizeof(g_szLogEx));
 
-    LOG_WRITE("Out: GetLogFile('%s') ", g_szLogEx);
+    // LOG_WRITE("Out: GetLogFile('%s') ", g_szLogEx);
 
     static char szConfig[MESSAGE_LENGTH] = "configs/ccprocessor/";
     GetConfigFileByGame(szConfig, sizeof(szConfig));
 
-    LOG_WRITE("Out: GetGameFolderName('%s') ", szConfig);
+    // LOG_WRITE("Out: GetGameFolderName('%s') ", szConfig);
         
     if(!FileExists(szConfig))
         SetFailState("Where is my config: '%s' ", szConfig);
@@ -177,7 +173,7 @@ void GetConfigFileByGame(char[] szConfig, int size)
     }
 }
 
-void GetLogFile(char[] szBuffer, int size)
+stock void GetLogFile(char[] szBuffer, int size)
 {
     szBuffer[0] = 0;
 
@@ -257,7 +253,7 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         g_aPalette.PushString(szBuffer);
         // g_mPalette.SetString(sKey, szBuffer, true);
 
-        LOG_WRITE("OnKeyValue(): ReadKey: %s, Value[0]: %s", sKey, szBuffer);
+        // LOG_WRITE("OnKeyValue(): ReadKey: %s, Value[0]: %s", sKey, szBuffer);
     }
 
     else
@@ -283,7 +279,7 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         // else if(!strcmp(sKey, "SpaceMessages"))
         //     allowSpaceMsgs = view_as<bool>(StringToInt(sValue));
 
-        LOG_WRITE("OnKeyValue(): ReadKey: %s, Value: %s", sKey, sValue);
+        // LOG_WRITE("OnKeyValue(): ReadKey: %s, Value: %s", sKey, sValue);
     }
 
     return SMCParse_Continue;
@@ -291,7 +287,7 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
 public void OnCompReading(SMCParser smc, bool halted, bool failed)
 {
-    smc.Close();
+    delete smc;
 
     g_szSection = NULL_STRING;
 
@@ -330,6 +326,10 @@ void prepareDefMessge(int params, int recipient, char[] szMessage, int size)
     if(szMessage[0] == '#')
         Format(szMessage, size, "%T", szMessage, recipient);
 
+    if(!params) {
+        return;
+    }
+    
     for(int i = 1; i < params; i++)
     {
         FormatEx(szNum, sizeof(szNum), "{%i}", i);
@@ -354,7 +354,7 @@ bool RebuildMessage(
 {
     FormatEx(buffer, size, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
 
-    // LOG_WRITE("RebuildMessage(%s): Idx: %i, Type: %i, Name: %s, In: %s, Out: %s, size: %i", um, iIndex, iType, szName, szMessage, szBuffer, iSize);
+    // // LOG_WRITE("RebuildMessage(%s): Idx: %i, Type: %i, Name: %s, In: %s, Out: %s, size: %i", um, iIndex, iType, szName, szMessage, szBuffer, iSize);
     
     static bool isAlive;
     static int team;
@@ -497,7 +497,7 @@ void GetMsgDefault(int part, int lang, int mtype, const char[] msg, char[] szBuf
     Format(szBuffer, size, "%T", szBuffer, lang);
 }
 
-void LOG_WRITE(const char[] szMessage, any ...)
+stock void LOG_WRITE(const char[] szMessage, any ...)
 {
     if(!g_bDBG)
         return;
@@ -571,7 +571,7 @@ public any Native_DropPalette(Handle hPlugin, int iArgs)
 
 public int Native_CallBuilder(Handle hPlugin, int iArgs)
 {
-    LOG_WRITE("Native_CallBuilder(%x)", hPlugin);
+    // LOG_WRITE("Native_CallBuilder(%x)", hPlugin);
 
     int
         iClient = GetNativeCell(2),
@@ -628,7 +628,7 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
             now = Plugin_Handled;
     }
 
-    LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s')", now, mType, sender, level, szBinds[iBind], szMessage);
+    // LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s')", now, mType, sender, level, szBinds[iBind], szMessage);
 
     // exclude post call
     if(now == Plugin_Stop)
@@ -644,7 +644,7 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
     Call_PushString(szMessage);
     Call_Finish();
 
-    LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, sender, level, szBinds[iBind], szMessage);
+    // LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, sender, level, szBinds[iBind], szMessage);
 
     return now;
 }
@@ -684,7 +684,7 @@ bool Call_IsSkipColors(const int mType, int iClient)
     Call_PushCell(iClient);
     Call_Finish(skip);
 
-    LOG_WRITE("Call_IsSkipColors(): %i, %b", iClient, skip);
+    // LOG_WRITE("Call_IsSkipColors(): %i, %b", iClient, skip);
 
     return skip;
 }
@@ -693,7 +693,7 @@ void Call_OnNewMessage(const int mType, const int sender, const char[] message, 
 {
     g_iMsgIdx++;
 
-    // LOG_WRITE("Call_OnNewMsg(): %i", g_iMsgIdx);
+    // // LOG_WRITE("Call_OnNewMsg(): %i", g_iMsgIdx);
 
     Call_StartForward(g_fwdMessageUID);
     

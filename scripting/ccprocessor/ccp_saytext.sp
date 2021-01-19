@@ -1,89 +1,103 @@
 
-// /*
-//     This is a personal update for `level-ranks` users, which uses `SayText` for messages from the plugin.
-//     The hook allows you to build a message according to the internal patterns of the core.
-// */
+/*
+    This is a personal update for `level-ranks` users, which uses `SayText` for messages from the plugin.
+    The hook allows you to build a message according to the internal patterns of the core.
+*/
 
-// public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
-// {
-//     if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "ent_idx")) != 0)
-//         return Plugin_Continue;
+#define MAX_PARAMS_SAYTXT 0
 
-//     static char szName[NAME_LENGTH], szMessage[MESSAGE_LENGTH], szBuffer[MAX_LENGTH];
-//     szName = "CONSOLE";
-//     szBuffer = NULL_STRING;
-//     szMessage = NULL_STRING;
+public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
+{
+    if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "ent_idx")) != 0)
+        return Plugin_Continue;
 
-//     static int clients[MAXPLAYERS+1];
-//     CopyEqualArray(players, clients, playersNum);
+    char params[MESSAGE_LENGTH];
+    Action defMessage;
+    int clients[MAXPLAYERS+1];
 
-//     if(!umType) BfReadString(msg, SZ(szMessage));
-//     else PbReadString(msg, "text", SZ(szMessage));
+    CopyEqualArray(players, clients, playersNum);
 
-//     if(!((!umType) ? view_as<bool>(BfReadByte(msg)) : PbReadBool(msg, "chat")))
-//         return Plugin_Continue;
+    if(!umType) BfReadString(msg, SZ(params));
+    else PbReadString(msg, "text", SZ(params));
+
+    if(!((!umType) ? view_as<bool>(BfReadByte(msg)) : PbReadBool(msg, "chat")))
+        return Plugin_Continue;
         
-//     if(!RebuildMessage(eMsg_SERVER, TEAM_SERVER, 0, szName, szMessage, SZ(szBuffer), "saytext"))
-//         return Plugin_Handled;
+    if(params[0] == '#')
+    {
+        if((defMessage = Call_OnDefMessage(params, TranslationPhraseExists(params))) != Plugin_Changed) {
+            return defMessage;
+        }
+    }
 
-//     // Call_MessageBuilt(eMsg_SERVER, TEAM_SERVER, szBuffer);
+    StringMap uMessage = new StringMap();
+    // uMessage.SetValue("msg_id", msg_id);
+    uMessage.SetString("text", params);
+    uMessage.SetArray("clients", clients, playersNum);
+    uMessage.SetValue("playersnum", playersNum);
 
-//     ReplaceColors(SZ(szBuffer), false);
+    RequestFrame(SayText_Completed, uMessage);
+    return Plugin_Handled;
+}
 
-//     Call_RebuildClients(eMsg_SERVER, TEAM_SERVER, clients, playersNum);
+public void SayText_Completed(StringMap data)
+{
+    static const char msgName[] = "SayText";
+    static const int msgType = eMsg_SERVER;
+    static const int sender;
 
-//     StringMap uMessage = new StringMap();
-//     uMessage.SetValue("msg_id", msg_id);
-//     uMessage.SetString("text", szBuffer);
-//     uMessage.SetArray("clients", clients, playersNum);
-//     uMessage.SetValue("clients_num", playersNum);
+    int playersNum;
+    data.GetValue("playersnum", playersNum);
 
-//     RequestFrame(SayText_Completed, uMessage);
+    int[] clients = new int[playersNum];
+    data.GetArray("clients", clients, playersNum);
+
+    char params[MESSAGE_LENGTH];
+    data.GetString("text", SZ(params));
+
+    delete data;
+
+    Call_OnNewMessage(msgType, sender, params, clients, playersNum);
+    Call_RebuildClients(msgType, sender, clients, playersNum);
+
+    CopyEqualArray(clients, clients, playersNum);
     
-//     return Plugin_Handled;
-// }
+    char buffer[MAX_LENGTH], message[MESSAGE_LENGTH];
 
-// public void SayText_Completed(StringMap data)
-// {
-//     UserMsg umid;
-//     data.GetValue("msg_id", umid);
+    Handle uMessage;
+    for(int i; i < playersNum; i++) {
+        message = params;
 
-//     int numClients;
-//     data.GetValue("clients_num", numClients);
+        if(message[0] == '#') {
+            prepareDefMessge(MAX_PARAMS_SAYTXT, clients[i], SZ(message));
+        }
 
-//     int[] players = new int[numClients];
-//     data.GetArray("clients", players, numClients);
+        if(!RebuildMessage(msgType, sender, clients[i], NULL_STRING, message, SZ(buffer), msgName)) {
+            continue;
+        }
 
-//     char szMessage[MAX_LENGTH];
-//     data.GetString("text", szMessage, sizeof(szMessage));
+        ReplaceColors(SZ(buffer), false);
 
-//     CopyEqualArray(players, players, numClients);
+        uMessage = StartMessageOne(msgName, clients[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+        if(!uMessage) {
+            continue;
+        }
 
-//     // CloseHandle(data);
-//     delete data;
-    
-//     Handle message = 
-//         StartMessageEx(umid, players, numClients, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+        if(!umType)
+        {
+            BfWriteByte(uMessage, sender);
+            BfWriteString(uMessage, buffer);
+            BfWriteByte(uMessage, true);
+        }
 
-//     if(message)
-//     {
-//         // Call_OnNewMessage();
+        else
+        {
+            PbSetInt(uMessage, "ent_idx", sender);
+            PbSetString(uMessage, "text", buffer);
+            PbSetBool(uMessage, "chat", true);
+            PbSetBool(uMessage, "textallchat", true);
+        }
         
-//         if(!umType)
-//         {
-//             BfWriteByte(message, TEAM_SERVER);
-//             BfWriteString(message, szMessage);
-//             BfWriteByte(message, true);
-//         }
-
-//         else
-//         {
-//             PbSetInt(message, "ent_idx", TEAM_SERVER);
-//             PbSetString(message, "text", szMessage);
-//             PbSetBool(message, "chat", true);
-//             PbSetBool(message, "textallchat", true);
-//         }
-        
-//         EndMessage();
-//     }
-// }
+        EndMessage();
+    }
+}
