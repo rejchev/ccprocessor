@@ -70,12 +70,10 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
     Handle uMessage;
     
-    for(int i; i < playersNum; i++) {
-        // do not enable debug mode....
+    for(int i, j; i < playersNum; i++) {
         if(RebuildMessage(messageType, (iClient << 3|team << 1|view_as<int>(alive)), clients[i], szName, szMessage, SZ(szBuffer), msgName)) {
             ReplaceColors(SZ(szBuffer), false);
 
-            // hehe
             uMessage = 
                 StartMessageOne(msgName, clients[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
 
@@ -95,7 +93,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
                     PbSetString(uMessage, "msg_name", szBuffer);
                     PbSetBool(uMessage, "textallchat", view_as<bool>(messageType));
 
-                    for(int j; j < 4; j++)
+                    for(j = 0; j < 4; j++)
                         PbAddString(uMessage, "params", NULL_STRING);
                 }
                 

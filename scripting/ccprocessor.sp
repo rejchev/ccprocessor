@@ -8,7 +8,6 @@
 #define TEAM_B      3
 
 #include <ccprocessor>
-// #include <regex>
 
 char g_szLogEx[MESSAGE_LENGTH] = "logs/ccprocessor"
 
@@ -41,8 +40,7 @@ GlobalForward
 bool 
     g_bRTP,
     g_bDBG,
-    g_bResetByMap
-    /*allowSpaceMsgs*/;
+    g_bResetByMap;
 
 int g_iMsgIdx;
 
@@ -136,19 +134,11 @@ public void OnModChanged(ConVar cvar, const char[] oldVal, const char[] newVal)
 
 public void OnMapStart()
 {
-    // LOG_WRITE("Init OnMapStart()");
-
     g_aPalette.Clear();
     g_szSection = NULL_STRING;
 
-    // GetLogFile(g_szLogEx, sizeof(g_szLogEx));
-
-    // LOG_WRITE("Out: GetLogFile('%s') ", g_szLogEx);
-
     static char szConfig[MESSAGE_LENGTH] = "configs/ccprocessor/";
     GetConfigFileByGame(szConfig, sizeof(szConfig));
-
-    // LOG_WRITE("Out: GetGameFolderName('%s') ", szConfig);
         
     if(!FileExists(szConfig))
         SetFailState("Where is my config: '%s' ", szConfig);
@@ -251,9 +241,6 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         
         g_aPalette.PushString(sKey);
         g_aPalette.PushString(szBuffer);
-        // g_mPalette.SetString(sKey, szBuffer, true);
-
-        // LOG_WRITE("OnKeyValue(): ReadKey: %s, Value[0]: %s", sKey, szBuffer);
     }
 
     else
@@ -273,13 +260,8 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         else if(!strcmp(sKey, "UIDByMap"))
             g_bResetByMap = view_as<bool>(StringToInt(sValue));
 
-        else if(!strcmp(sKey, "CRTP"))
+        else if(!strcmp(sKey, "RTCP"))
             g_bRTP = view_as<bool>(StringToInt(sValue));
-
-        // else if(!strcmp(sKey, "SpaceMessages"))
-        //     allowSpaceMsgs = view_as<bool>(StringToInt(sValue));
-
-        // LOG_WRITE("OnKeyValue(): ReadKey: %s, Value: %s", sKey, sValue);
     }
 
     return SMCParse_Continue;
@@ -353,8 +335,6 @@ bool RebuildMessage(
 )
 {
     FormatEx(buffer, size, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
-
-    // // LOG_WRITE("RebuildMessage(%s): Idx: %i, Type: %i, Name: %s, In: %s, Out: %s, size: %i", um, iIndex, iType, szName, szMessage, szBuffer, iSize);
     
     static bool isAlive;
     static int team;
@@ -364,8 +344,6 @@ bool RebuildMessage(
     team = (msgType != eMsg_SERVER) ? (msgSender >> 1) & 0x03 : TEAM_SPEC;
 
     msgSender >>= 3;
-
-    // LogMessage("Sender: %i, isAlive: %b, team= %i, message: %s", msgSender, isAlive, team, msg);
     
     for(int i; i < BIND_MAX; i++)
     {
@@ -628,8 +606,6 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
             now = Plugin_Handled;
     }
 
-    // LOG_WRITE("Out(%d): Call_RebuildString(%i, %i, %i, '%s', '%s')", now, mType, sender, level, szBinds[iBind], szMessage);
-
     // exclude post call
     if(now == Plugin_Stop)
         return now;
@@ -643,8 +619,6 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
     Call_PushCell(level);
     Call_PushString(szMessage);
     Call_Finish();
-
-    // LOG_WRITE("Out(%d): Call_RebuildString_Post(%i, %i, %i, '%s', '%s')", now, mType, sender, level, szBinds[iBind], szMessage);
 
     return now;
 }
@@ -684,16 +658,12 @@ bool Call_IsSkipColors(const int mType, int iClient)
     Call_PushCell(iClient);
     Call_Finish(skip);
 
-    // LOG_WRITE("Call_IsSkipColors(): %i, %b", iClient, skip);
-
     return skip;
 }
 
 void Call_OnNewMessage(const int mType, const int sender, const char[] message, const int[] clients, int count)
 {
     g_iMsgIdx++;
-
-    // // LOG_WRITE("Call_OnNewMsg(): %i", g_iMsgIdx);
 
     Call_StartForward(g_fwdMessageUID);
     

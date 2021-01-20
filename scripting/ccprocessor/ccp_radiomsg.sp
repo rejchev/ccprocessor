@@ -86,14 +86,13 @@ public void RadioText_Completed(UserMsg msgid, bool send)
     CopyEqualArray(clients, clients, playersNum);
     ChangeModeValue(clients, playersNum, "0");
 
-    i = playersNum - 1;
-    int team = GetClientTeam(a);
+    int team = GetClientTeam(sender);
     bool alive = IsPlayerAlive(sender);
     bool translated = TranslationPhraseExists(params[a]);
 
     Handle uMessage;
     int j;
-    while(i >= 0) {
+    for(i = 0; i < playersNum; i++) {
         // LogMessage("Send: %i, client: %i", i, clients[i]);
         strcopy(message, sizeof(message), params[a]);
 
@@ -101,7 +100,6 @@ public void RadioText_Completed(UserMsg msgid, bool send)
             Format(message, sizeof(message), "%T", message, clients[i]);
 
         if(RebuildMessage(msgType, (sender << 3|team << 1|view_as<int>(alive)), clients[i], params[PARAMS_NAME], message, SZ(buffer), msgName)) {
-            // LogMessage("Buffer: %s, param[1]: %s, message: %s", buffer, params[1], message);
             prepareDefMessge(MAX_PARAMS_RADIO, clients[i], buffer, sizeof(buffer));
             ReplaceColors(SZ(buffer), false);
 
@@ -129,8 +127,6 @@ public void RadioText_Completed(UserMsg msgid, bool send)
                 EndMessage();
             }
         }
-
-        i--;
     }
 
     ChangeModeValue(clients, playersNum, mode_default_value);
