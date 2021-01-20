@@ -1,10 +1,10 @@
 <h1 align="center">Color Chat Processor</h1>
 <p align="center">
     <img src="https://travis-ci.org/nyood/CCProcessor.svg?branch=ccp-3.1" />
-    <img src="https://img.shields.io/github/license/nyood/ccprocessor" />
-    <img src="https://img.shields.io/github/v/release/nyood/CCProcessor" />
-    <img src="https://img.shields.io/badge/sourcemod-v.1.10-blue" />
-    <img src="https://img.shields.io/discord/494942123548868609" />
+    <a href="#license"><img src="https://img.shields.io/github/license/nyood/ccprocessor" /></a>
+    <a href="https://github.com/nyood/ccprocessor/releases"><img src="https://img.shields.io/github/v/release/nyood/CCProcessor" /></a>
+    <a href="#requirements"><img src="https://img.shields.io/badge/sourcemod-v.1.10-blue" /></a>
+    <a href="https://discord.gg/cFZ97Mzrjy" target="_blank"><img src="https://img.shields.io/discord/494942123548868609" /></a>
     <img src="https://img.shields.io/github/downloads/nyood/ccprocessor/total" />
 </p>
 
@@ -18,8 +18,6 @@ Its functionality and fixes for all known bugs make this handler the best of its
 RTCP is one of the features of the chat processor, which allows you to replace abbreviations with colors when sending a message
 
 ![RTCP](./.github/images/rtcp.gif)
-
-To switch the default feature availability use (ConVar): `ccp_color_RTP  1/0`
 
 ### Flexible Localization
 For a long time of development, it was decided to support flexible localization. <br>
