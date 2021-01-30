@@ -474,31 +474,6 @@ void GetMsgDefault(int part, int lang, int mtype, const char[] msg, char[] szBuf
     Format(szBuffer, size, "%T", szBuffer, lang);
 }
 
-stock void LOG_WRITE(const char[] szMessage, any ...)
-{
-    if(!g_bDBG)
-        return;
-
-    if(!FileExists(g_szLogEx))
-    {
-        ReplaceString(g_szLogEx, sizeof(g_szLogEx), "\\", "/");
-
-        int pos = FindCharInString(g_szLogEx, '/', true);
-
-        g_szLogEx[pos] = 0;
-
-        if(!DirExists(g_szLogEx))
-            CreateDirectory(g_szLogEx, 0x1ED);
-        
-        g_szLogEx[pos] = '/';
-    }
-    
-    static char szBuffer[1024];
-    VFormat(szBuffer, sizeof(szBuffer), szMessage, 2);
-
-    LogToFileEx(g_szLogEx, szBuffer);
-}
-
 void CopyEqualArray(const any[] input, any[] output, int &count)
 {
     int a;
