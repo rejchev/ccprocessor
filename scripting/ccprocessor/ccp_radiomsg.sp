@@ -14,7 +14,7 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
     int clients[MAXPLAYERS+1];
     Action defMessage;
 
-    CopyEqualArray(players, clients, playersNum);
+    UpdateRecipients(players, clients, playersNum);
 
     // #ENTNAME[#]Name
     strcopy(params[PARAMS_NAME], sizeof(params[]), params[PARAMS_NAME][(FindCharInString(params[PARAMS_NAME], ']') + 1)]);
@@ -82,8 +82,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
     Call_OnNewMessage(msgType, sender, params[a], clients, playersNum);
     Call_RebuildClients(msgType, sender, clients, playersNum);
 
-    // Not equal (just fix clients array)
-    CopyEqualArray(clients, clients, playersNum);
+    UpdateRecipients(clients, clients, playersNum);
     ChangeModeValue(clients, playersNum, "0");
 
     int team = GetClientTeam(sender);

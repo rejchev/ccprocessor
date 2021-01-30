@@ -9,8 +9,6 @@
 
 #include <ccprocessor>
 
-char g_szLogEx[MESSAGE_LENGTH] = "logs/ccprocessor"
-
 UserMessageType umType;
 
 StringMap 
@@ -39,8 +37,8 @@ GlobalForward
 
 bool 
     g_bRTP,
-    g_bDBG,
-    g_bResetByMap;
+    g_bResetByMap,
+    g_bSpaceMsgs;
 
 int g_iMsgIdx;
 
@@ -253,15 +251,15 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         
         if(iBuffer != -1)
             strcopy(msgPrototype[iBuffer], sizeof(msgPrototype[]), sValue);
-        
-        else if(!strcmp(sKey, "DebugMode"))
-            g_bDBG = view_as<bool>(StringToInt(sValue));
-        
+
         else if(!strcmp(sKey, "UIDByMap"))
             g_bResetByMap = view_as<bool>(StringToInt(sValue));
 
         else if(!strcmp(sKey, "RTCP"))
             g_bRTP = view_as<bool>(StringToInt(sValue));
+            
+        else if(!strcmp(sKey, "SpaceMessages"))
+            g_bSpaceMsgs = view_as<bool>(StringToInt(sValue));
     }
 
     return SMCParse_Continue;
@@ -474,12 +472,11 @@ void GetMsgDefault(int part, int lang, int mtype, const char[] msg, char[] szBuf
     Format(szBuffer, size, "%T", szBuffer, lang);
 }
 
-void CopyEqualArray(const any[] input, any[] output, int &count)
+void UpdateRecipients(const any[] input, any[] output, int &count)
 {
     int a;
 
-    for(int i; i < count; i++)
-    {
+    for(int i; i < count; i++) {
         if(!IsClientConnected(input[i]) || (IsFakeClient(input[i]) && !IsClientSourceTV(input[i]))) {
             continue;
         }
@@ -573,11 +570,11 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
 
     BreakPoint(iBind, szMessage);
 
-    if(now != Plugin_Stop && iBind == BIND_MSG) {
+    if(now != Plugin_Stop && iBind == BIND_MSG && !g_bSpaceMsgs) {
         bool IsValid;
 
         for(int i; i < strlen(szMessage); i++) {
-            if(IsValid = (szMessage[i] >= 33)) {
+            if((IsValid = (szMessage[i] >= 33))) {
                 break;
             }
         }

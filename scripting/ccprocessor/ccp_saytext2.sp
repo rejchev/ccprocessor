@@ -7,7 +7,7 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
         szMessage[MESSAGE_LENGTH];
 
     int clients[MAXPLAYERS+1];
-    CopyEqualArray(players, clients, playersNum);
+    UpdateRecipients(players, clients, playersNum);
 
     iIndex = 
         (!umType) ? 
@@ -65,7 +65,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     Call_RebuildClients(messageType, iClient, clients, playersNum);
 
     // Not equal (just fix clients array)
-    CopyEqualArray(clients, clients, playersNum);
+    UpdateRecipients(clients, clients, playersNum);
     ChangeModeValue(clients, playersNum, "0");
 
     Handle uMessage;

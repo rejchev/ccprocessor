@@ -15,7 +15,7 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
     Action defMessage;
     int clients[MAXPLAYERS+1];
 
-    CopyEqualArray(players, clients, playersNum);
+    UpdateRecipients(players, clients, playersNum);
 
     if(!umType) BfReadString(msg, SZ(params));
     else PbReadString(msg, "text", SZ(params));
@@ -60,7 +60,8 @@ public void SayText_Completed(StringMap data)
     Call_OnNewMessage(msgType, sender, params, clients, playersNum);
     Call_RebuildClients(msgType, sender, clients, playersNum);
 
-    CopyEqualArray(clients, clients, playersNum);
+    UpdateRecipients(clients, clients, playersNum);
+    ChangeModeValue(clients, playersNum, "0");
     
     char buffer[MAX_LENGTH], message[MESSAGE_LENGTH];
 
@@ -100,4 +101,6 @@ public void SayText_Completed(StringMap data)
         
         EndMessage();
     }
+
+    ChangeModeValue(clients, playersNum, mode_default_value); 
 }

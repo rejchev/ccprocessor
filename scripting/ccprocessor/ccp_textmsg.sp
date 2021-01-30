@@ -13,7 +13,7 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
 
     int clients[MAXPLAYERS+1];
 
-    CopyEqualArray(players, clients, playersNum);
+    UpdateRecipients(players, clients, playersNum);
 
     ReadMessage(msg, params, sizeof(params), sizeof(params[]));
 
@@ -70,7 +70,8 @@ public void TextMsg_Completed(StringMap data)
     Call_OnNewMessage(msgType, 0, params[PARAM_MESSAGE], clients, playersNum);
     Call_RebuildClients(eMsg_SERVER, TEAM_SERVER, clients, playersNum);
 
-    CopyEqualArray(clients, clients, playersNum);
+    UpdateRecipients(clients, clients, playersNum);
+    ChangeModeValue(clients, playersNum, "0");
     
     Handle uMessage;
     for(i = 0; i < playersNum; i++) {
@@ -104,6 +105,8 @@ public void TextMsg_Completed(StringMap data)
             }
         }
     }
+
+    ChangeModeValue(clients, playersNum, mode_default_value); 
 }
 
 void ReadMessage(Handle msg, char[][] params, int count, int size)
