@@ -304,7 +304,6 @@ void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
 void prepareDefMessge(int params, int recipient, char[] szMessage, int size)
 {
     char szNum[8];
-
     if(szMessage[0] == '#')
         Format(szMessage, size, "%T", szMessage, recipient);
 
@@ -599,10 +598,16 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
 
     BreakPoint(iBind, szMessage);
 
-    if(now != Plugin_Stop && mType < eMsg_RADIO && iBind == BIND_MSG) {
-        TrimString(szMessage);
+    if(now != Plugin_Stop && iBind == BIND_MSG) {
+        bool IsValid;
 
-        if(!szMessage[0])
+        for(int i; i < strlen(szMessage); i++) {
+            if(IsValid = (szMessage[i] >= 33)) {
+                break;
+            }
+        }
+
+        if(!IsValid)
             now = Plugin_Handled;
     }
 
