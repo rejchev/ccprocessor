@@ -19,7 +19,7 @@ API key:
     ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY             21338615
+#define API_KEY             51374615
 
 #if !defined CORE
     #define API_OOD         "The plugin module uses an outdated API. You must update it."
@@ -61,6 +61,12 @@ enum
     BIND_MSG,
 
     BIND_MAX
+};
+
+// Temporarily, later there will be a separate interface for communication channels
+stock const char szMsgTypes[eMsg_MAX][] = 
+{
+    "<TEAM>", "<ALL>", "<CNAME>", "<RADIO>", "<SERVER>"
 };
 
 stock const char szBinds[BIND_MAX][] = 
@@ -139,9 +145,9 @@ forward Action cc_proc_RebuildString(const int mType, int sender, int recipient,
  *  @param pLevel       Replacement priority
  *  @param szValue      Value of part
  *  
- *  @noreturn
+ *  @return             true - Block sending/false - send
 */
-forward void cc_proc_RebuildString_Post(const int mType, int sender, int recipient, int part, int pLevel, const char[] szValue);
+forward bool cc_proc_RebuildString_Post(const int mType, int sender, int recipient, int part, int pLevel, const char[] szValue);
 
 /*
  *  Calls when capturing an engine message from the server

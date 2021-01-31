@@ -37,8 +37,7 @@ GlobalForward
 
 bool 
     g_bRTP,
-    g_bResetByMap,
-    g_bSpaceMsgs;
+    g_bResetByMap;
 
 int g_iMsgIdx;
 
@@ -47,7 +46,7 @@ public Plugin myinfo =
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.3.2",
+    version     = "3.3.3",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -79,7 +78,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     g_fwdRebuildClients     = 
         new GlobalForward("cc_proc_RebuildClients",     ET_Ignore, Param_Cell, Param_Cell, Param_Array, Param_CellByRef);
     g_fwdRebuildString_Post = 
-        new GlobalForward("cc_proc_RebuildString_Post", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
+        new GlobalForward("cc_proc_RebuildString_Post", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
     g_fwdMessageUID         = 
         new GlobalForward("cc_proc_MsgUniqueId",        ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Array, Param_Cell);
     g_fwdRebuildString      = 
@@ -161,16 +160,6 @@ void GetConfigFileByGame(char[] szConfig, int size)
     }
 }
 
-stock void GetLogFile(char[] szBuffer, int size)
-{
-    szBuffer[0] = 0;
-
-    static const char LOG_TEMPLATE[] = "logs/ccprocessor/day_%j.log";
-
-    FormatTime(szBuffer, size, LOG_TEMPLATE, GetTime());
-    BuildPath(Path_SM, szBuffer, size, szBuffer);
-}
-
 SMCParser CreateParser()
 {
     SMCParser smParser = new SMCParser();
@@ -182,10 +171,8 @@ SMCParser CreateParser()
     return smParser;
 }
 
-public void OnConfigsExecuted()
-{
-    if(game_mode)
-        game_mode.Flags |= FCVAR_REPLICATED;
+public void OnConfigsExecuted() {
+    if(game_mode) game_mode.Flags |= FCVAR_REPLICATED;
 }
 
 void ChangeModeValue(int[] clients, int count, const char[] value)
@@ -257,9 +244,6 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
         else if(!strcmp(sKey, "RTCP"))
             g_bRTP = view_as<bool>(StringToInt(sValue));
-            
-        else if(!strcmp(sKey, "SpaceMessages"))
-            g_bSpaceMsgs = view_as<bool>(StringToInt(sValue));
     }
 
     return SMCParse_Continue;
@@ -520,8 +504,6 @@ public any Native_DropPalette(Handle hPlugin, int iArgs)
 
 public int Native_CallBuilder(Handle hPlugin, int iArgs)
 {
-    // LOG_WRITE("Native_CallBuilder(%x)", hPlugin);
-
     int
         iClient = GetNativeCell(2),
         iType = GetNativeCell(1),
@@ -554,7 +536,8 @@ void Call_OnCompReading()
 
 Action Call_RebuildString(const int mType, const int sender, const int recipient, const int iBind, char[] szMessage, int iSize)
 {
-    Action now;
+    Action output;
+    bool block;
     int level;
 
     // Action Call
@@ -566,26 +549,13 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
     Call_PushCellRef(level);
     Call_PushStringEx(szMessage, iSize, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
     Call_PushCell(iSize);
-    Call_Finish(now);
-
-    BreakPoint(iBind, szMessage);
-
-    if(now != Plugin_Stop && iBind == BIND_MSG && !g_bSpaceMsgs) {
-        bool IsValid;
-
-        for(int i; i < strlen(szMessage); i++) {
-            if((IsValid = (szMessage[i] >= 33))) {
-                break;
-            }
-        }
-
-        if(!IsValid)
-            now = Plugin_Handled;
-    }
+    Call_Finish(output);
 
     // exclude post call
-    if(now == Plugin_Stop)
-        return now;
+    if(output == Plugin_Stop)
+        return output;
+
+    BreakPoint(iBind, szMessage);
 
     // post call
     Call_StartForward(g_fwdRebuildString_Post);
@@ -595,9 +565,13 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
     Call_PushCell(iBind);
     Call_PushCell(level);
     Call_PushString(szMessage);
-    Call_Finish();
+    Call_Finish(block);
 
-    return now;
+    if(output == Plugin_Continue && block) {
+        output++;
+    } 
+
+    return output;
 }
 
 void Call_RebuildClients(const int mType, int iClient, int[] clients, int &numClients)
