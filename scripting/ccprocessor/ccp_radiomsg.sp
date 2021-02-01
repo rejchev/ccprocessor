@@ -12,7 +12,7 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
         ReadRadioUsermessage(msg, buffer, sizeof(buffer), params, sizeof(params), sizeof(params[]));
     int i, a;
     int clients[MAXPLAYERS+1];
-    Action defMessage;
+    // Action defMessage;
 
     UpdateRecipients(players, clients, playersNum);
 
@@ -95,6 +95,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
 
         if(translated)
             Format(message, sizeof(message), "%T", message, clients[i]);
+        else FormatEx(message, sizeof(message), "{%i}", a+1);
 
         if(RebuildMessage(msgType, (sender << 3|team << 1|view_as<int>(alive)), clients[i], params[PARAMS_NAME], message, SZ(buffer), msgName)) {
             prepareDefMessge(MAX_PARAMS_RADIO, clients[i], buffer, sizeof(buffer));
