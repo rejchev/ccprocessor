@@ -32,9 +32,7 @@ public Action UserMessage_RadioText(UserMsg msg_id, Handle msg, const int[] play
         strcopy(params[(a = 2)], sizeof(params[]), buffer);
     }
 
-    if((defMessage = Call_OnDefMessage(params[a], TranslationPhraseExists(params[a]))) != Plugin_Changed) {
-        return defMessage;
-    }
+    Call_OnDefMessage(params[a], TranslationPhraseExists(params[a]));
 
     // StringMap message = new StringMap();
     g_mMessage.SetValue("sender", sender);
