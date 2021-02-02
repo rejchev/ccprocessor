@@ -23,13 +23,14 @@ install:
     - wget --input-file=http://sourcemod.net/smdrop/$SMVERSION/sourcemod-latest-linux
     - tar -xzf $(cat sourcemod-latest-linux)
 before_script:
-    - mkdir $BUILDIR && mkdir $BINDIR && cp $TRAVIS_BUILD_DIR'/LICENSE' $BUILDIR'/'
+    - mkdir $BUILDIR && mkdir $BINDIR && mkdir $BINDIR'/disabled/ccprocessor/debug' && cp $TRAVIS_BUILD_DIR'/LICENSE' $BUILDIR'/'
     - cp -R $SRCDIR $BUILDIR'/' && cp -R $CFGDIR $BUILDIR'/' && cp -R $LNGDIR $BUILDIR'/'
     - chmod +x $REMOTESRC/spcomp
     - cp -R -f $REMOTESRC'/include' $SRCDIR'/' && cp $REMOTESRC'/spcomp' $SRCDIR'/'
 
 script:
     - $SRCDIR'/spcomp' $SRCDIR'/ccprocessor.sp' -o2 -v1 -i=$SRCDIR'/include' -o=$BINDIR'/ccprocessor.smx'
+    - $SRCDIR'/spcomp' INCLUDE_DEBUG=1 $SRCDIR'/ccprocessor.sp' -o2 -v1 -i=$SRCDIR'/include' -o=$BINDIR'/disabled/ccprocessor/debug/ccprocessor.smx'
 
 before_deploy:
   - cd $BUILDIR && tar -czvf ccp-build-${TRAVIS_BUILD_NUMBER}.tar.gz *
