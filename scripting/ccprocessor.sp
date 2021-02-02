@@ -2,6 +2,10 @@
 
 #define CORE
 
+#if defined INCLUDE_DEBUG
+    #define DEBUG "[CCProcessor]"
+#endif
+
 #define TEAM_SERVER 0
 #define TEAM_SPEC   1
 #define TEAM_R      2
@@ -54,6 +58,10 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {    
+    #if defined DEBUG
+        DBUILD()
+    #endif
+
     umType = GetUserMessageType();
 
     HookUserMessage(GetUserMessageId("TextMsg"), UserMessage_TextMsg, true);
@@ -98,6 +106,10 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public void OnPluginStart()
 {
+    #if defined DEBUG
+        DWRITE("%s: OnPluginStart()", DEBUG)
+    #endif
+
     LoadTranslations("ccproc.phrases");
     LoadTranslations("ccp_defmessage.phrases");
 
@@ -115,30 +127,56 @@ public void OnPluginStart()
 
     game_mode.AddChangeHook(OnModChanged);
     game_mode.GetString(mode_default_value, sizeof(mode_default_value));
+
+    #if defined DEBUG
+        DWRITE("%s: Game Mode(%x): %s", DEBUG, game_mode, mode_default_value);
+    #endif
 }
 
 public void OnAllPluginsLoaded()
 {
     Call_StartForward(g_fwdAPIHandShake);
     Call_PushCell(API_KEY);
-    Call_Finish();
+
+    #if !defined DEBUG
+        Call_Finish();
+    #else
+        DWRITE("%s: Call(g_fwdAPIHandShake) code: %d", DEBUG, Call_Finish())
+    #endif
+    
 }
 
 public void OnModChanged(ConVar cvar, const char[] oldVal, const char[] newVal)
 {
     cvar.GetString(mode_default_value, sizeof(mode_default_value));
+
+    #if defined DEBUG
+        DWRITE("%s: Game Mode Changed(%x): %s", DEBUG, game_mode, mode_default_value);
+    #endif
 }
 
 public void OnMapStart()
 {
+    #if defined DEBUG
+        DBUILD()
+    #endif
+
+    #if defined DEBUG
+        DWRITE("%s: OnMapStart()", DEBUG);
+    #endif
+
     g_aPalette.Clear();
     g_szSection = NULL_STRING;
 
     static char szConfig[MESSAGE_LENGTH] = "configs/ccprocessor/";
     GetConfigFileByGame(szConfig, sizeof(szConfig));
-        
+
     if(!FileExists(szConfig))
         SetFailState("Where is my config: '%s' ", szConfig);
+    
+    #if defined DEBUG
+        DWRITE("%s: Game Config Path(): %s", DEBUG, szConfig);
+    #endif
 
     int iLine;
     if(CreateParser().ParseFile(szConfig, iLine) != SMCError_Okay)
@@ -173,6 +211,10 @@ SMCParser CreateParser()
 
 public void OnConfigsExecuted() {
     if(game_mode) game_mode.Flags |= FCVAR_REPLICATED;
+
+    #if defined DEBUG
+        DWRITE("%s: OnConfigsExecuted()", DEBUG);
+    #endif
 }
 
 void ChangeModeValue(int[] clients, int count, const char[] value)
@@ -182,6 +224,10 @@ void ChangeModeValue(int[] clients, int count, const char[] value)
 
     for(int i; i < count; i++)
     {
+        #if defined DEBUG
+            DWRITE("%s: ChangeModeValue(%N): %s", DEBUG, clients[i], value);
+        #endif
+
         if(IsFakeClient(clients[i]))
             SetFakeClientConVar(clients[i], "game_mode", value);
         
@@ -192,12 +238,22 @@ void ChangeModeValue(int[] clients, int count, const char[] value)
 SMCResult OnEnterSection(SMCParser smc, const char[] name, bool opt_quotes)
 {
     g_szSection[strlen(g_szSection)] = name[0];
+
+    #if defined DEBUG
+        DWRITE("%s: OnEnterSection(%x): %s", DEBUG, smc, name);
+    #endif
+
     return SMCParse_Continue;
 }
 
 SMCResult OnLeave(SMCParser smc)
 {
     g_szSection[strlen(g_szSection)-1] = 0;
+
+    #if defined DEBUG
+        DWRITE("%s: OnLeave From Section(%x)", DEBUG, smc);
+    #endif
+
     return SMCParse_Continue;
 }
 
@@ -207,6 +263,10 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
         return SMCParse_Continue;
 
     int iBuffer;
+
+    #if defined DEBUG
+        DWRITE("%s: OnKeyValue(%x): Key: %s, Value: %s", DEBUG, smc, sKey, sValue);
+    #endif
 
     // chat -> [p]alette
     if(g_szSection[1] == 'p' || g_szSection[1] == 'P')
@@ -253,6 +313,10 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
 {
     delete smc;
 
+    #if defined DEBUG
+        DWRITE("%s: OnCompReading(%x): Halted: %b, Failed: %b", DEBUG, smc, halted, failed);
+    #endif
+
     g_szSection = NULL_STRING;
 
     Call_OnCompReading();
@@ -266,6 +330,10 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
 
 void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
 {
+    #if defined DEBUG
+        DWRITE("%s: ReplaceColors(%b): %s", DEBUG, bToNullStr, szBuffer);
+    #endif
+
     char
         szKey[STATUS_LENGTH],
         szColor[STATUS_LENGTH];
@@ -281,10 +349,18 @@ void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
 
         i+=2;
     }
+
+    #if defined DEBUG
+        DWRITE("%s: ReplaceColors Output(%b): %s", DEBUG, bToNullStr, szBuffer);
+    #endif
 }
 
 void prepareDefMessge(int params, int recipient, char[] szMessage, int size)
 {
+    #if defined DEBUG
+        DWRITE("%s: prepareDefMessge(%i): \n \t\tMessage: %s \n \t\tRecipient: %N", DEBUG, params, szMessage, recipient);
+    #endif
+
     char szNum[8];
     if(szMessage[0] == '#')
         Format(szMessage, size, "%T", szMessage, recipient);
@@ -325,6 +401,19 @@ bool RebuildMessage(
     team = (msgType != eMsg_SERVER) ? (msgSender >> 1) & 0x03 : TEAM_SPEC;
 
     msgSender >>= 3;
+
+    #if defined DEBUG
+        DWRITE( \
+            "%s: RebuildMessage(%s): => \
+                \n\t\tType: %d \
+                \n\t\tSender: %N \
+                \n\t\tRecepient: %N \
+                \n\t\tName: %s \
+                \n\t\tMessage: %s \
+                \n\t\tTemplate: %s", \
+            DEBUG, option, msgType, msgSender, msgRecipient, name, msg, buffer\
+        );
+    #endif
     
     for(int i; i < BIND_MAX; i++)
     {
@@ -332,11 +421,29 @@ bool RebuildMessage(
 
         GetDefaultValue(i, msgRecipient, msgType, team, isAlive, name, msg, SZ(value));
         
-        if(Call_RebuildString(msgType, msgSender, msgRecipient, i, SZ(value)) != Plugin_Continue)
+        if(Call_RebuildString(msgType, msgSender, msgRecipient, i, SZ(value)) != Plugin_Continue) {
+            #if defined DEBUG
+                DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, msgRecipient);
+            #endif
+
             return false;
+        }
 
         ReplaceString(buffer, size, szBinds[i], value, true);
     }
+
+    #if defined DEBUG
+        DWRITE( \
+            "%s: RebuildMessage(%s) Output: => \
+                \n\t\tType: %d \
+                \n\t\tSender: %N \
+                \n\t\tRecepient: %N \
+                \n\t\tName: %s \
+                \n\t\tMessage: %s \
+                \n\t\tTemplate: %s", \
+            DEBUG, option, msgType, msgSender, msgRecipient, name, msg, buffer\
+        );
+    #endif
 
     return !(option[0] == 'd' && option[1] == 'e' && option[2] == 'v' && strlen(option) == 3);
 }
@@ -471,12 +578,6 @@ void UpdateRecipients(const any[] input, any[] output, int &count)
     count = a;        
 }
 
-stock void ClearCharArray(char[][] array, int size)
-{
-    for(int i; i < size; i++)
-        array[i][0] = 0;
-}
-
 public int Native_ReplaceColors(Handle hPlugin, int iArgs)
 {
     char szBuffer[MAX_LENGTH];
@@ -594,7 +695,6 @@ Action Call_OnDefMessage(const char[] szMessage, bool IsPhraseExists)
 
     Call_PushString(szMessage);
     Call_PushCell(IsPhraseExists);
-
     Call_Finish(Send);
 
     return Send;

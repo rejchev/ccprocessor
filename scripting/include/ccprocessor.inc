@@ -349,6 +349,28 @@ stock void StringToUppercase(char[] sText)
     }
 }
 
+#if defined DEBUG
+char g_szLog[MESSAGE_LENGTH];
+
+stock char[] GetDebugPath() {
+    char szBuffer[MESSAGE_LENGTH] = "logs/ccprocessor";
+    BuildPath(Path_SM, szBuffer, sizeof(szBuffer), szBuffer);
+
+    if(!DirExists(szBuffer))
+        CreateDirectory(szBuffer, 0x1ED);
+
+    char szLog[64];
+    FormatTime(szLog, sizeof(szLog), "/%j.log", GetTime());
+    Format(szBuffer, sizeof(szBuffer), "%s%s", szBuffer, szLog);
+
+    return szBuffer;    
+}
+
+#define DBUILD() g_szLog = GetDebugPath();
+#define DWRITE(%0,%1) LogToFileEx(g_szLog, %0, %1)
+
+#endif
+
 public SharedPlugin __pl_ccprocessor= 
 {
     name = "ccprocessor",
