@@ -37,7 +37,8 @@ GlobalForward
     g_fwdMessageUID,
     g_fwdAPIHandShake,
     g_fwdRebuildClients,
-    g_fwdRebuildString_Post;
+    g_fwdRebuildString_Post,
+    g_fwdMessageEnd;
 
 bool 
     g_bRTP,
@@ -50,7 +51,7 @@ public Plugin myinfo =
     name        = "CCProcessor",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.3.3",
+    version     = "3.3.4",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -83,6 +84,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
         new GlobalForward("cc_proc_SkipColorsInMsg",    ET_Hook, Param_Cell, Param_Cell);
     g_fwdOnDefMessage       = 
         new GlobalForward("cc_proc_OnDefMsg",           ET_Hook, Param_String, Param_Cell);
+    g_fwdMessageEnd       = 
+        new GlobalForward("cc_proc_MessageEnd",         ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
     g_fwdRebuildClients     = 
         new GlobalForward("cc_proc_RebuildClients",     ET_Ignore, Param_Cell, Param_Cell, Param_Array, Param_CellByRef);
     g_fwdRebuildString_Post = 
@@ -725,5 +728,13 @@ void Call_OnNewMessage(const int mType, const int sender, const char[] message, 
     Call_PushArray(clients, count);
     Call_PushCell(count);
 
+    Call_Finish();
+}
+
+void Call_MessageEnd(const int mType, const int sender) {
+    Call_StartForward(g_fwdMessageEnd);
+    Call_PushCell(mType);
+    Call_PushCell(sender);
+    Call_PushCell(g_iMsgIdx);
     Call_Finish();
 }

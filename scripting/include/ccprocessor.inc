@@ -19,7 +19,7 @@ API key:
     ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY             51374615
+#define API_KEY             75092137
 
 #if !defined CORE
     #define API_OOD         "The plugin module uses an outdated API. You must update it."
@@ -148,6 +148,17 @@ forward Action cc_proc_RebuildString(const int mType, int sender, int recipient,
  *  @return             true - Block sending/false - send
 */
 forward bool cc_proc_RebuildString_Post(const int mType, int sender, int recipient, int part, int pLevel, const char[] szValue);
+
+/*
+ *  Calls after message delivery to all recipients 
+ *  
+ *  @param mType        Message type
+ *  @param sender       Sender index
+ *  @param msgId        Message Unique Index
+ *  
+ *  @noreturn
+*/
+forward void cc_proc_MessageEnd(const int mType, const int sender, int msgId);
 
 /*
  *  Calls when capturing an engine message from the server

@@ -103,4 +103,5 @@ public void SayText_Completed(StringMap data)
     }
 
     ChangeModeValue(clients, playersNum, mode_default_value); 
+    Call_MessageEnd(msgType, sender);
 }

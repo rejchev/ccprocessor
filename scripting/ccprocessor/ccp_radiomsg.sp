@@ -128,6 +128,7 @@ public void RadioText_Completed(UserMsg msgid, bool send)
     }
 
     ChangeModeValue(clients, playersNum, mode_default_value);
+    Call_MessageEnd(msgType, sender);
 }
 
 int FindDisplayMessage(char[][] params, int count) {

@@ -68,7 +68,7 @@ public void TextMsg_Completed(StringMap data)
     delete data;
 
     Call_OnNewMessage(msgType, 0, params[PARAM_MESSAGE], clients, playersNum);
-    Call_RebuildClients(eMsg_SERVER, TEAM_SERVER, clients, playersNum);
+    Call_RebuildClients(msgType, TEAM_SERVER, clients, playersNum);
 
     UpdateRecipients(clients, clients, playersNum);
     ChangeModeValue(clients, playersNum, "0");
@@ -106,7 +106,8 @@ public void TextMsg_Completed(StringMap data)
         }
     }
 
-    ChangeModeValue(clients, playersNum, mode_default_value); 
+    ChangeModeValue(clients, playersNum, mode_default_value);
+    Call_MessageEnd(msgType, 0);
 }
 
 void ReadMessage(Handle msg, char[][] params, int count, int size)

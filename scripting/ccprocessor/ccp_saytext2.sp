@@ -103,6 +103,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     }
 
     ChangeModeValue(clients, playersNum, mode_default_value); 
+    Call_MessageEnd(messageType, iClient);
 }
 
 int ReadProtoMessage(Protobuf message, int &iMsgType, char[] szSenderName, int sn_size, char[] szSenderMsg, int sm_size)
