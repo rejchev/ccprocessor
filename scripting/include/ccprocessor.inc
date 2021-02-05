@@ -19,26 +19,11 @@ API key:
     ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY             75092137
+#define API_KEY             75091137
 
 #if !defined CORE
     #define API_OOD         "The plugin module uses an outdated API. You must update it."
 #endif
-
-// Message type
-enum
-{
-    eMsg_TEAM = 0,
-    eMsg_ALL,
-    eMsg_CNAME,
-
-    /* The bind '{MSG}' is not called for this type*/
-    eMsg_RADIO,	
-
-    eMsg_SERVER,
-    
-    eMsg_MAX
-};
 
 // Message template parts
 enum
@@ -63,12 +48,6 @@ enum
     BIND_MAX
 };
 
-// Temporarily, later there will be a separate interface for communication channels
-stock const char szMsgTypes[eMsg_MAX][] = 
-{
-    "<TEAM>", "<ALL>", "<CNAME>", "<RADIO>", "<SERVER>"
-};
-
 stock const char szBinds[BIND_MAX][] = 
 {
     "{PROTOTYPE}"   ,
@@ -83,45 +62,51 @@ stock const char szBinds[BIND_MAX][] =
 /*
  *  Skip colors in an unprepared message
  *
- *  @param mType        Message type
- *  @param iClient      Client index
+ *  @param indent       Message Indent
+ *  @param sender       Sender index
  *  
  *  @return             true - skipping
  *                      false - otherwise
 */
-forward bool cc_proc_SkipColorsInMsg(const int mType, int iClient);
+forward bool cc_proc_SkipColors(const char[] indent, int sender);
 
 /*
- *  Counter of processed messages.
- *  Called every time when message is ready to be sent
+ *  Call when new message arrives /\
  *  
- *  @param mType        Type of message
+ *  @param indent       Message Indent
  *  @param sender       Sender index
- *  @param msgId        Message ID
- *  @param message      Message
- *  @param clients      Recipient list
- *  @param count        Recipient count
+ *  @param msg_key      Message Key
+ *  @param players      Recipient list
+ *  @param playersNum   Rcipient count
  *  
- *  @noreturn
+ *  @return             true - allow msg / false - otherwise
 */
-forward void cc_proc_MsgUniqueId(int mType, int sender, int msgId, const char[] message, const int[] clients, int count);
+forward bool cc_proc_OnNewMessage(
+    const char[] indent, int sender, const char[] msg_key, const int[] players, int playersNum
+);
 
 /*
  *  Streaming output for editing the recipient list
  *  
- *  @param mType        Message type
- *  @param iClient      Real sender index
- *  @param clients[]    Recipient list (rewritable)
- *  @param &numClients  Number of recipients
+ *  @param mid          Message ID
+ *  @param indent       Message Indent
+ *  @param sender       Sender Index
+ *  @param msg_key      Message Key
+ *  @param players      Recipient list
+ *  @param &playersNum  Number of recipients
 
  *  @noreturn
 */
-forward void cc_proc_RebuildClients(const int mType, int iClient, int[] clients, int &numClients);
+forward void cc_proc_OnRebuildClients(
+    int mid, const char[] indent, int sender, 
+    const char[] msg_key, int[] players, int &playersNum 
+);
 
 /*
  *	Calls when building parts of the template
  *
- *  @param mType        Message type
+ *  @param mid          Message ID
+ *  @param indent       Message Indent
  *  @param sender       Sender index
  *  @param recipient    Recipient index
  *  @param part         Part of the message template
@@ -133,44 +118,57 @@ forward void cc_proc_RebuildClients(const int mType, int iClient, int[] clients,
  *                      Plugin_Handled  - build rejected (after post call),
  *                      Plugin_Stop     - build rejected immediately (with out post call)
 */
-forward Action cc_proc_RebuildString(const int mType, int sender, int recipient, int part, int &pLevel, char[] buffer, int size);
+forward Action cc_proc_OnRebuildString(
+    int mid, const char[] indent, int sender,
+    int recipient, int part, int &level, 
+    char[] buffer, int size
+);
 
 /*
  *  Call after build part of the template
  *  
- *  @param mType        Message type
+ *  @param mid          Message ID
+ *  @param indent       Message Indent
  *  @param sender       Sender index
  *  @param recipient    Recipient index
  *  @param part         Part of the message template
  *  @param pLevel       Replacement priority
- *  @param szValue      Value of part
+ *  @param value        Value
  *  
  *  @return             true - Block sending/false - send
 */
-forward bool cc_proc_RebuildString_Post(const int mType, int sender, int recipient, int part, int pLevel, const char[] szValue);
+forward bool cc_proc_OnRebuildString_Post(
+    int mid, const char[] indent, int sender,
+    int recipient, int part, int level,
+    const char[] value
+);
 
 /*
  *  Calls after message delivery to all recipients 
  *  
- *  @param mType        Message type
- *  @param sender       Sender index
- *  @param msgId        Message Unique Index
+ *  @param mid          Message ID
+ *  @param sender       Message Indent
+ *  @param sender       Sender Index
  *  
  *  @noreturn
 */
-forward void cc_proc_MessageEnd(const int mType, const int sender, int msgId);
+forward void cc_proc_OnMessageEnd(
+    int mid, const char[] indent, int sender
+);
 
 /*
  *  Calls when capturing an engine message from the server
  *  
- *  @param szMessage        Key of engine message (with symbol[0] = '#')
- *  @param IsPhraseExists   If key of engine message is exists
+ *  @param mid          Message ID
+ *  @param indent       Message Indent
+ *  @param sender       Sender Index
+ *  @param msg          Message
  *  
- *  @return                 Plugin_Changed	- send message for core processing
-                            Plugin_Continue - exclude engine message processing
-                            Plugin_Handled 	- exclude message sending by engine
+ *  @return             true - handle this / false - otherwise
 */
-forward Action cc_proc_OnDefMsg(const char[] szMessage, bool IsPhraseExists);
+forward bool cc_proc_HandleEngineMsg(
+    int mid, const char[] indent, int sender, const char[] msg
+);
 
 /*
  *  Calls when the config reading is completed
@@ -229,21 +227,32 @@ native int cc_get_APIKey();
 */
 native bool cc_is_APIEqual(const int api);
 
-/*
- *  Calling the internal message builder.
- *  Calls child forwards to get the current object settings.
- *  
- *  @param iClient      Client index
- *  @param mType        Message type
- *  @param um           Unique usermessage type (or. dev)
- *  @param szName       Username value
- *  @param szMessage    User message value
- *  @param szBuffer     Buffer to store
- *  @param size         Buffer size
- *  
- *  @noreturn
-*/
-native void cc_call_builder(int mType, int iClient, int iRecipient, const char[] um, const char[] szName, const char[] szMessage, char[] szBuffer, int size);
+native void ccp_UpdateRecipients(const int [] input, int[] output, int &playersNum);
+native bool ccp_SkipColors(const char[] indent, int sender);
+native void ccp_ChangeMode(const int[] players, int playersNum, const char[] value = NULL_STRING);
+
+native int  ccp_StartNewMessage(
+    const char[] indent, int sender, const char[] msg_key,
+    const int[] players, int playersNum
+);
+
+native void ccp_RebuildClients(
+    int mid, const char[] indent, int sender,
+    const char[] msg_key, int[] players, int &playersNum 
+);
+
+native bool ccp_RebuildMessage(
+    int mid, const char[] indent, int props,
+    int recipient, const char[] msg_key, 
+    char[] name, char[] msg, char[] buffer, int size
+);
+
+native bool ccp_PrepareMessage(
+    int mid, const char[] indent, int sender,
+    int recipient, int max_params, char[] buffer
+);
+
+native void ccp_EndMessage(int mid, const char[] indent, int sedner);
 
 stock int BreakPoint(int iBindType, char[] szValue)
 {
@@ -400,6 +409,13 @@ public void __pl_ccprocessor_SetNTVOptional()
     MarkNativeAsOptional("ccp_replaceColors");
     MarkNativeAsOptional("cc_get_APIKey");
     MarkNativeAsOptional("cc_is_APIEqual");
-    MarkNativeAsOptional("cc_call_builder");
+    MarkNativeAsOptional("ccp_UpdateRecipients");
+    MarkNativeAsOptional("ccp_SkipColors");
+    MarkNativeAsOptional("ccp_ChangeMode");
+    MarkNativeAsOptional("ccp_StartNewMessage");
+    MarkNativeAsOptional("ccp_RebuildClients");
+    MarkNativeAsOptional("ccp_RebuildMessage");
+    MarkNativeAsOptional("ccp_PrepareMessage");
+    MarkNativeAsOptional("ccp_EndMessage");
 }
 #endif

@@ -6,24 +6,12 @@
     #define DEBUG "[CCProcessor]"
 #endif
 
-#define TEAM_SERVER 0
-#define TEAM_SPEC   1
-#define TEAM_R      2
-#define TEAM_B      3
-
 #include <ccprocessor>
-
-UserMessageType umType;
-
-StringMap 
-    g_mMessage;
 
 ArrayList
     g_aPalette;
 
-char 
-    msgPrototype[eMsg_MAX][MESSAGE_LENGTH],
-    g_szSection[4];
+char g_szSection[4];
 
 ConVar game_mode;
 
@@ -32,9 +20,9 @@ char mode_default_value[8];
 GlobalForward
     g_fwdSkipColors,
     g_fwdRebuildString,
-    g_fwdOnDefMessage,
+    g_fwdOnEngineMsg,
     g_fwdConfigParsed,
-    g_fwdMessageUID,
+    g_fwdNewMessage,
     g_fwdAPIHandShake,
     g_fwdRebuildClients,
     g_fwdRebuildString_Post,
@@ -44,56 +32,94 @@ bool
     g_bRTP,
     g_bResetByMap;
 
-int g_iMsgIdx;
+int g_iMessageCount;
+int g_iMsgInProgress = -1;
 
 public Plugin myinfo = 
 {
-    name        = "CCProcessor",
+    name        = "[CCP] Core",
     author      = "nullent?",
     description = "Color chat processor",
-    version     = "3.3.4",
+    version     = "3.4.0",
     url         = "discord.gg/ChTyPUG"
 };
 
 #define SZ(%0) %0, sizeof(%0)
 
-public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
-{    
+#include "ccprocessor/default.sp"
+
+public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {    
     #if defined DEBUG
         DBUILD()
     #endif
 
-    umType = GetUserMessageType();
-
-    HookUserMessage(GetUserMessageId("TextMsg"), UserMessage_TextMsg, true);
-    HookUserMessage(GetUserMessageId("SayText"), UserMessage_SayText, true);
-    HookUserMessage(GetUserMessageId("SayText2"), UserMessage_SayText2, true, SayText2_Completed);
-    HookUserMessage(GetUserMessageId("RadioText"), UserMessage_RadioText, true, RadioText_Completed);
-
     CreateNative("cc_get_APIKey",                       Native_GetAPIKey);
     CreateNative("cc_is_APIEqual",                      Native_IsAPIEqual);
     CreateNative("cc_drop_palette",                     Native_DropPalette);
-    CreateNative("cc_call_builder",                     Native_CallBuilder);
     CreateNative("ccp_replaceColors",                   Native_ReplaceColors);
 
-    g_fwdConfigParsed       = 
-        new GlobalForward("cc_config_parsed",           ET_Ignore);
-    g_fwdAPIHandShake       = 
-        new GlobalForward("cc_proc_APIHandShake",       ET_Ignore, Param_Cell);
-    g_fwdSkipColors         = 
-        new GlobalForward("cc_proc_SkipColorsInMsg",    ET_Hook, Param_Cell, Param_Cell);
-    g_fwdOnDefMessage       = 
-        new GlobalForward("cc_proc_OnDefMsg",           ET_Hook, Param_String, Param_Cell);
-    g_fwdMessageEnd       = 
-        new GlobalForward("cc_proc_MessageEnd",         ET_Ignore, Param_Cell, Param_Cell, Param_Cell);
-    g_fwdRebuildClients     = 
-        new GlobalForward("cc_proc_RebuildClients",     ET_Ignore, Param_Cell, Param_Cell, Param_Array, Param_CellByRef);
-    g_fwdRebuildString_Post = 
-        new GlobalForward("cc_proc_RebuildString_Post", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
-    g_fwdMessageUID         = 
-        new GlobalForward("cc_proc_MsgUniqueId",        ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Array, Param_Cell);
-    g_fwdRebuildString      = 
-        new GlobalForward("cc_proc_RebuildString",      ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell);
+    CreateNative("ccp_UpdateRecipients",                Native_UpdateRecipients);
+    CreateNative("ccp_SkipColors",                      Native_SkipColors);
+    CreateNative("ccp_ChangeMode",                      Native_ChangeMode);
+    CreateNative("ccp_StartNewMessage",                 Native_StartNewMessage);
+    CreateNative("ccp_RebuildClients",                  Native_RebuildClients);
+    CreateNative("ccp_RebuildMessage",                  Native_RebuildMessage);
+    CreateNative("ccp_PrepareMessage",                  Native_PrepareMessage);
+    CreateNative("ccp_EndMessage",                      Native_EndMessage);
+    
+    // void()
+    g_fwdConfigParsed = new GlobalForward(
+        "cc_config_parsed", 
+        ET_Ignore
+    );
+
+    // void(const int key)
+    g_fwdAPIHandShake = new GlobalForward(
+        "cc_proc_APIHandShake", 
+        ET_Ignore, Param_Cell
+    );
+
+    // bool(const char[] indent, int sender)
+    g_fwdSkipColors = new GlobalForward(
+        "cc_proc_SkipColors", 
+        ET_Event, Param_String, Param_Cell
+    );
+
+    // bool(int id, const char[] indent, int sender, const char[] msg_key?)
+    g_fwdOnEngineMsg = new GlobalForward(
+        "cc_proc_HandleEngineMsg",
+        ET_Event, Param_String, Param_Cell, Param_String, Param_Cell
+    );
+
+    // void(int id, const char[] indent, int sender)
+    g_fwdMessageEnd = new GlobalForward(
+        "cc_proc_OnMessageEnd",
+        ET_Ignore, Param_Cell, Param_String, Param_Cell
+    );
+
+    // void(int id, const char[] indent, int sender, const char[] msg_key, int[] players, int count)
+    g_fwdRebuildClients = new GlobalForward(
+        "cc_proc_OnRebuildClients",
+        ET_Ignore, Param_Cell, Param_String, Param_Cell, Param_String, Param_Array, Param_CellByRef
+    );
+    
+    // bool(const char[] indent, int sender, const char[] msg_key, int[] players, int count) 
+    g_fwdNewMessage = new GlobalForward(
+        "cc_proc_OnNewMessage",
+        ET_Event, Param_String, Param_Cell, Param_String, Param_Array, Param_Cell
+    );
+    
+    // bool(int id, const char[] indent, int sender, int recipient, int part, int level, const char[] value)
+    g_fwdRebuildString_Post = new GlobalForward(
+        "cc_proc_OnRebuildString_Post",
+        ET_Hook, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String
+    );
+    
+    // Action(int id, const char[] indent, int sender, int recipient, int part, int &level, char[] value, int size)
+    g_fwdRebuildString = new GlobalForward(
+        "cc_proc_OnRebuildString",
+        ET_Hook, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
+    );
 
     RegPluginLibrary("ccprocessor");
 
@@ -101,11 +127,6 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     return APLRes_Success;
 }
-
-#include "ccprocessor/ccp_saytext2.sp"
-#include "ccprocessor/ccp_saytext.sp"
-#include "ccprocessor/ccp_textmsg.sp"
-#include "ccprocessor/ccp_radiomsg.sp"
 
 public void OnPluginStart()
 {
@@ -117,12 +138,9 @@ public void OnPluginStart()
     LoadTranslations("ccp_defmessage.phrases");
 
     g_aPalette = new ArrayList(STATUS_LENGTH, 0);
-    g_mMessage = new StringMap();
-
-    {
-        if(!DirExists("/cfg/ccprocessor"))
-            CreateDirectory("/cfg/ccprocessor", 0x1ED);
-    }
+ 
+    if(!DirExists("/cfg/ccprocessor"))
+        CreateDirectory("/cfg/ccprocessor", 0x1ED);
 
     game_mode = FindConVar("game_mode");
     if(!game_mode)
@@ -220,24 +238,6 @@ public void OnConfigsExecuted() {
     #endif
 }
 
-void ChangeModeValue(int[] clients, int count, const char[] value)
-{
-    if(!game_mode)
-        return;
-
-    for(int i; i < count; i++)
-    {
-        #if defined DEBUG
-            DWRITE("%s: ChangeModeValue(%N): %s", DEBUG, clients[i], value);
-        #endif
-
-        if(IsFakeClient(clients[i]))
-            SetFakeClientConVar(clients[i], "game_mode", value);
-        
-        else game_mode.ReplicateToClient(clients[i], value);
-    }
-}
-
 SMCResult OnEnterSection(SMCParser smc, const char[] name, bool opt_quotes)
 {
     g_szSection[strlen(g_szSection)] = name[0];
@@ -293,16 +293,7 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
     else
     {
-        iBuffer =   (!strcmp(sKey, "Channel_Team"))         ? eMsg_TEAM     : 
-                    (!strcmp(sKey, "Channel_All"))          ? eMsg_ALL      : 
-                    (!strcmp(sKey, "Channel_NameChange"))   ? eMsg_CNAME    : 
-                    (!strcmp(sKey, "Channel_Server"))       ? eMsg_SERVER   :
-                    (!strcmp(sKey, "Channel_Radio"))        ? eMsg_RADIO    : -1;
-        
-        if(iBuffer != -1)
-            strcopy(msgPrototype[iBuffer], sizeof(msgPrototype[]), sValue);
-
-        else if(!strcmp(sKey, "UIDByMap"))
+        if(!strcmp(sKey, "UIDByMap"))
             g_bResetByMap = view_as<bool>(StringToInt(sValue));
 
         else if(!strcmp(sKey, "RTCP"))
@@ -328,111 +319,169 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
         SetFailState("There was a problem reading the configuration file");
 
     if(g_bResetByMap)
-        g_iMsgIdx = 0;
+        g_iMessageCount = 0;
 }
 
-void ReplaceColors(char[] szBuffer, int iSize, bool bToNullStr)
-{
-    #if defined DEBUG
-        DWRITE("%s: ReplaceColors(%b): %s", DEBUG, bToNullStr, szBuffer);
-    #endif
+public int Native_UpdateRecipients(Handle hPlugin, int params) {
+    int players[MAXPLAYERS+1];
+    int output[MAXPLAYERS+1];
+    int playersNum = GetNativeCellRef(3);
+    GetNativeArray(1, players, playersNum);
 
-    char
-        szKey[STATUS_LENGTH],
-        szColor[STATUS_LENGTH];
-
-    int i;
-    while(i < g_aPalette.Length) {
-        g_aPalette.GetString(i, szKey, sizeof(szKey));
-        g_aPalette.GetString(i+1, szColor, sizeof(szColor));
-
-        ReplaceString(szBuffer, iSize, szKey, (!bToNullStr) ? szColor : NULL_STRING, true);
-        if(bToNullStr)
-            ReplaceString(szBuffer, iSize, szColor, NULL_STRING, true);
-
-        i+=2;
+    int a;
+    for(int i; i < playersNum; i++) {
+        if(IsClientConnected(players[i]) 
+        && (IsClientSourceTV(players[i]) || !IsFakeClient(players[i]))) {
+            output[a++] = players[i];  
+        }
     }
 
-    #if defined DEBUG
-        DWRITE("%s: ReplaceColors Output(%b): %s", DEBUG, bToNullStr, szBuffer);
-    #endif
+    SetNativeArray(2, output, a);
+    SetNativeCellRef(3, a);   
 }
 
-void prepareDefMessge(int params, int recipient, char[] szMessage, int size)
-{
-    #if defined DEBUG
-        DWRITE("%s: prepareDefMessge(%i): \n \t\tMessage: %s \n \t\tRecipient: %N", DEBUG, params, szMessage, recipient);
-    #endif
+public int Native_SkipColors(Handle hPlugin, int params) {
+    char szIndent[64];
+    GetNativeString(1, szIndent, sizeof(szIndent));
 
-    char szNum[8];
-    if(szMessage[0] == '#')
-        Format(szMessage, size, "%T", szMessage, recipient);
+    return Call_IsSkipColors(szIndent, GetNativeCell(2));    
 
-    if(!params) {
+}
+
+public int Native_ChangeMode(Handle hPlugin, int params) {
+    if(!game_mode) {
         return;
     }
-    
-    for(int i = 1; i < params; i++)
-    {
-        FormatEx(szNum, sizeof(szNum), "{%i}", i);
-        ReplaceString(szMessage, size, szNum, (i == 1) ? "%s1" : (i == 2) ? "%s2" : (i == 3) ? "%s3" : "%s4");
+
+    int players[MAXPLAYERS+1];
+    int playersNum = GetNativeCell(2);
+    GetNativeArray(1, players, playersNum);
+
+    char szValue[4];
+    GetNativeString(3, szValue, sizeof(szValue));
+
+    if(!szValue[0]) {
+        strcopy(szValue, sizeof(szValue), mode_default_value);
+    }
+
+    for(int i; i < playersNum; i++) {
+        #if defined DEBUG
+            DWRITE("%s: ChangeModeValue(%N): %s", DEBUG, players[i], szValue);
+        #endif
+
+        if(IsFakeClient(players[i]))
+            SetFakeClientConVar(players[i], "game_mode", szValue);
+        
+        else game_mode.ReplicateToClient(players[i], szValue);
     }
 }
 
-// Edited
-bool RebuildMessage(
-    int msgType,
-    int msgSender,
-    int msgRecipient,
+public int Native_StartNewMessage(Handle hPlugin, int params) {
+    if(g_iMsgInProgress != -1) {
+        return -1;
+    }
 
-    const char[] name,
-    const char[] msg,
+    char szIndent[64];
+    GetNativeString(1, SZ(szIndent));
 
-    char[] buffer,
-    int size,
+    int sender = GetNativeCell(2);
 
-    const char[] option = NULL_STRING
-)
-{
-    FormatEx(buffer, size, "%c %s", 1, szBinds[BIND_PROTOTYPE]);
+    char szMsgName[NAME_LENGTH];
+    GetNativeString(3, SZ(szMsgName));
+
+    int players[MAXPLAYERS+1];
+    int playersNum = GetNativeCell(5);
+    GetNativeArray(4, players, playersNum);
+
+    if(!Call_NewMessage(szIndent, sender, szMsgName, players, playersNum)) {
+        return -1;
+    }
+
+    g_iMessageCount++;
+    g_iMsgInProgress = g_iMessageCount;
+
+    return g_iMsgInProgress;
+}
+
+public int Native_RebuildClients(Handle hPlugin, int params) {
+    int id = GetNativeCell(1);
     
-    static bool isAlive;
-    static int team;
-    static char value[MESSAGE_LENGTH];
+    char szIndent[64];
+    GetNativeString(2, SZ(szIndent));
 
-    isAlive = (msgType != eMsg_SERVER) ? view_as<bool>(msgSender & 0x01) : false;
-    team = (msgType != eMsg_SERVER) ? (msgSender >> 1) & 0x03 : TEAM_SPEC;
+    int sender = GetNativeCell(3);
 
-    msgSender >>= 3;
+    char szMessage[64];
+    GetNativeString(4, SZ(szMessage));
+
+    int playersNum = GetNativeCellRef(6);
+    int players[MAXPLAYERS+1];
+    GetNativeArray(5, players, playersNum);
+
+    Call_RebuildClients(id, szIndent, sender, szMessage, players, playersNum);
+
+    SetNativeArray(5, players, playersNum);
+    SetNativeCellRef(6, playersNum);
+}
+
+public int Native_RebuildMessage(Handle hPlugin, int params) {
+    int id = GetNativeCell(1);
+    
+    char szIndent[64];
+    GetNativeString(2, SZ(szIndent));
+
+    int sender = GetNativeCell(3);
+    int recipient = GetNativeCell(4);
+
+    char szMsgKey[64];
+    GetNativeString(5, SZ(szMsgKey));
+
+    char szName[NAME_LENGTH];
+    GetNativeString(6, SZ(szName));
+
+    char szMessage[MESSAGE_LENGTH];
+    GetNativeString(7, SZ(szMessage));
+
+    char szBuffer[MAX_LENGTH];
+    GetNativeString(8, SZ(szBuffer));
+
+    bool    isAlive;
+    int     team
+    char    value[MESSAGE_LENGTH];
+
+    FormatEx(SZ(szBuffer), "%c %T", 1, szMsgKey);
+
+    isAlive =   view_as<bool>(sender & 0x01);
+    team    =   (sender >> 1) & 0x03;
+    sender  >>= 3;
 
     #if defined DEBUG
         DWRITE( \
             "%s: RebuildMessage(%s): => \
-                \n\t\tType: %d \
+                \n\t\tID: %d \
                 \n\t\tSender: %N \
                 \n\t\tRecepient: %N \
                 \n\t\tName: %s \
                 \n\t\tMessage: %s \
                 \n\t\tTemplate: %s", \
-            DEBUG, option, msgType, msgSender, msgRecipient, name, msg, buffer\
+            DEBUG, szIndent, id, sender, recipient, szName, szMessage, szBuffer\
         );
     #endif
     
-    for(int i; i < BIND_MAX; i++)
-    {
+    for(int i; i < BIND_MAX; i++) {
         value = NULL_STRING;
 
-        GetDefaultValue(i, msgRecipient, msgType, team, isAlive, name, msg, SZ(value));
+        GetDefaultValue(szIndent, sender, team, isAlive, recipient, i, szName, szMessage, SZ(value));
         
-        if(Call_RebuildString(msgType, msgSender, msgRecipient, i, SZ(value)) != Plugin_Continue) {
+        if(Call_RebuildString(id, szIndent, sender, recipient, i, SZ(value)) != Plugin_Continue) {
             #if defined DEBUG
-                DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, msgRecipient);
+                DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, recipient);
             #endif
 
             return false;
         }
 
-        ReplaceString(buffer, size, szBinds[i], value, true);
+        ReplaceString(SZ(szBuffer), szBinds[i], value, true);
     }
 
     #if defined DEBUG
@@ -444,192 +493,117 @@ bool RebuildMessage(
                 \n\t\tName: %s \
                 \n\t\tMessage: %s \
                 \n\t\tTemplate: %s", \
-            DEBUG, option, msgType, msgSender, msgRecipient, name, msg, buffer\
+            DEBUG, szIndent, id, sender, recipient, szName, szMessage, szBuffer\
         );
     #endif
 
-    return !(option[0] == 'd' && option[1] == 'e' && option[2] == 'v' && strlen(option) == 3);
+    SetNativeString(6, SZ(szName));
+    SetNativeString(7, SZ(szMessage));
+    SetNativeString(8, SZ(szBuffer));
+    return true;
 }
 
-void GetDefaultValue(int iBind, int iLangValue, int iMessageType, int iSenderTeam, bool bAlive, const char[] szName, const char[] szMessage, char[] szBuffer, int size)
-{
-    switch(iBind)
-    {
-        case BIND_PROTOTYPE: {
-            strcopy(szBuffer, size, msgPrototype[iMessageType]);
-        }
-        case BIND_STATUS_CO, BIND_STATUS: {
-            GetStatusDefault(iBind, iLangValue, iMessageType, bAlive, szBuffer, size);
-        }
-        case BIND_TEAM_CO, BIND_TEAM: {
-            GetTeamDefault(iBind, iLangValue, iSenderTeam, iMessageType, szBuffer, size);
-        }
-        case BIND_PREFIX_CO, BIND_PREFIX: {
-            GetPrefixDefault(iBind, iLangValue, iMessageType, szBuffer, size);
-        }
-        case BIND_NAME_CO, BIND_NAME: {
-            GetNameDefault(iBind, iLangValue, iMessageType, szName, szBuffer, size);
-        }
-        case BIND_MSG_CO, BIND_MSG: {
-            GetMsgDefault(iBind, iLangValue, iMessageType, szMessage, szBuffer, size);
-        }
-    }        
-}
+public int Native_PrepareMessage(Handle hPlugin, int params) {
+    int id = GetNativeCell(1);
 
-void GetStatusDefault(int part, int lang, int mtype, bool alive, char[] szBuffer, int size) {
+    char szIndent[64];
+    GetNativeString(2, SZ(szIndent));
 
-    // DEF_{BIND}
-    FormatBind("DEF_", part, 'u', szBuffer, size);
+    int sender = GetNativeCell(3);
+    int recipient = GetNativeCell(4)
+    int max_params = GetNativeCell(5);
 
-    // DEF_{BIND}_{ALIVE}
-    Format(szBuffer, size, "%s_%s", szBuffer, (
-        (alive) ? "A" : "D"
-    ));
+    char szBuffer[MAX_LENGTH];
+    GetNativeString(6, SZ(szBuffer));
 
-    // DEF_{BIND}_D_S
-    if(mtype == eMsg_SERVER) {
-        Format(szBuffer, size, "%s_S", szBuffer);
+    char szNum[8];
+    if(szBuffer[0] == '#') {
+        if(!Call_HandleEngineMsg(id, szIndent, sender, szBuffer)) {
+            return false;
+        }
+
+        if(TranslationPhraseExists(szBuffer)) {
+            Format(SZ(szBuffer), "%T", szBuffer, recipient);
+        }
     }
 
-    Format(szBuffer, size, "%T", szBuffer, lang);
-}
-
-void GetTeamDefault(int part, int iLangI, int iTeam, int iType, char[] szBuffer, int size) {
-
-    // DEF_{BIND}
-    FormatBind("DEF_", part, 'u', szBuffer, size);
-
-    // DEF_{BIND}_{TYPE}
-    Format(szBuffer, size, "%s_%s", szBuffer, (
-        (iType == eMsg_TEAM)    ? "P" : 
-        (iType == eMsg_ALL)     ? "A" :
-        (iType == eMsg_CNAME)   ? "C" :
-        (iType == eMsg_RADIO)   ? "R" : "S"
-    ));
-
-    // DEF_{BIND}_{TYPE}_{TEAM}
-    Format(szBuffer, size, "%s_%s", szBuffer, (
-        (iTeam == TEAM_B) ? "B" : (iTeam == TEAM_R) ? "R" : "S"
-    ));
-
-    if(!TranslationPhraseExists(szBuffer)) {
-        szBuffer[0] = 0;
-        return;
+    if(max_params) {
+        for(int i = 1; i <= max_params; i++) {
+            FormatEx(szNum, sizeof(szNum), "{%i}", i);
+            ReplaceString(
+                SZ(szBuffer), szNum, 
+                (i == 1) ? "%s1" 
+                : (i == 2) ? "%s2" 
+                : (i == 3) ? "%s3" 
+                : (i == 4) ? "%s4" 
+                : "%s5"
+            );
+        }
     }
     
-    Format(szBuffer, size, "%T", szBuffer, iLangI);
+    SetNativeString(6, SZ(szBuffer));
+    return true;
 }
 
-void GetPrefixDefault(int part, int lang, int mtype, char[] szBuffer, int size) {
-    // DEF_{BIND}
-    FormatBind("DEF_", part, 'u', szBuffer, size);
+public int Native_EndMessage(Handle hPlugin, int params) {
+    int id = GetNativeCell(1);
+    
+    char szIndent[64];
+    GetNativeString(2, SZ(szIndent));
 
-    // DEF_{BIND}_{SENDER}
-    Format(szBuffer, size, "%s_%s", szBuffer, (
-        (mtype != eMsg_SERVER) ? "U" : "S"
-    ));
+    int sender = GetNativeCell(3);
 
-    Format(szBuffer, size, "%T", szBuffer, lang);
-}
+    Call_MessageEnd(id, szIndent, sender);
 
-void GetNameDefault(int part, int lang, int mtype, const char[] name, char[] szBuffer, int size) {
-    if(part == BIND_NAME) {
-        strcopy(szBuffer, size, name);
-        return;
-    }
-
-    // DEF_{BIND}
-    FormatBind("DEF_", part, 'u', szBuffer, size);
-
-    // DEF_{BIND}_{SENDER}
-    Format(szBuffer, size, "%s_%s", szBuffer, (
-        (mtype != eMsg_SERVER) ? "U" : "S"
-    ));
-
-    Format(szBuffer, size, "%T", szBuffer, lang);
-}
-
-void GetMsgDefault(int part, int lang, int mtype, const char[] msg, char[] szBuffer, int size) {
-    if(part == BIND_MSG) {
-        strcopy(szBuffer, size, msg);
-        return;
-    }
-
-    // DEF_{BIND}
-    FormatBind("DEF_", part, 'u', szBuffer, size);
-
-    // DEF_{BIND}_{SENDER}
-    Format(szBuffer, size, "%s_%s", szBuffer, (
-        (mtype != eMsg_SERVER) ? "U" : "S"
-    ));
-
-    Format(szBuffer, size, "%T", szBuffer, lang);
-}
-
-void UpdateRecipients(const any[] input, any[] output, int &count)
-{
-    int a;
-
-    for(int i; i < count; i++) {
-        if(!IsClientConnected(input[i]) || (IsFakeClient(input[i]) && !IsClientSourceTV(input[i]))) {
-            continue;
-        }
-
-        output[a++] = input[i];  
-    }
-
-    count = a;        
+    g_iMsgInProgress = -1;
 }
 
 public int Native_ReplaceColors(Handle hPlugin, int iArgs)
 {
     char szBuffer[MAX_LENGTH];
-    GetNativeString(1, SZ(szBuffer));
+    GetNativeString(1, szBuffer, sizeof(szBuffer));
 
-    ReplaceColors(SZ(szBuffer), view_as<bool>(GetNativeCell(2)));
+    bool allTags = view_as<bool>(GetNativeCell(2));
+    
+    #if defined DEBUG
+        DWRITE("%s: ReplaceColors(%b): %s", DEBUG, allTags, szBuffer);
+    #endif
+
+    if(!szBuffer[0]) {
+        return;
+    }
+
+    char szKey[STATUS_LENGTH], szColor[STATUS_LENGTH];
+
+    int i;
+    while(i < g_aPalette.Length) {
+        g_aPalette.GetString(i, szKey, sizeof(szKey));
+        g_aPalette.GetString(i+1, szColor, sizeof(szColor));
+
+        ReplaceString(SZ(szBuffer), szKey, (!allTags) ? szColor : NULL_STRING, true);
+        if(allTags)
+            ReplaceString(SZ(szBuffer), szColor, NULL_STRING, true);
+
+        i+=2;
+    }
+
+    #if defined DEBUG
+        DWRITE("%s: ReplaceColors Output(%b): %s", DEBUG, allTags, szBuffer);
+    #endif
 
     SetNativeString(1, SZ(szBuffer));
 }
 
-public int Native_GetAPIKey(Handle hPlugin, int iArgs)
-{
+public int Native_GetAPIKey(Handle hPlugin, int iArgs) {
     return API_KEY;
 }
 
-public int Native_IsAPIEqual(Handle hPlugin, int iArgs)
-{
+public int Native_IsAPIEqual(Handle hPlugin, int iArgs) {
     return GetNativeCell( 1 ) == API_KEY;
 }
 
-public any Native_DropPalette(Handle hPlugin, int iArgs)
-{
+public any Native_DropPalette(Handle hPlugin, int iArgs) {
     return g_aPalette;
-}
-
-public int Native_CallBuilder(Handle hPlugin, int iArgs)
-{
-    int
-        iClient = GetNativeCell(2),
-        iType = GetNativeCell(1),
-        iRecipient = GetNativeCell(3);
-    
-    char
-        szName[NAME_LENGTH],
-        szMessage[MESSAGE_LENGTH],
-        szBuffer[MAX_LENGTH],
-        szUM[64];
-    
-    // Not now
-    // GetNativeString(3, szUM, sizeof(szUM));
-    if(!szUM[0])
-        szUM = "dev";
-
-    GetNativeString(5, szName, sizeof(szName));
-    GetNativeString(6, szMessage, sizeof(szMessage));
-
-    RebuildMessage(iType, iClient, iRecipient, szName, szMessage, szBuffer, sizeof(szBuffer), szUM);
-
-    SetNativeString(7, szBuffer, sizeof(szBuffer));
 }
 
 void Call_OnCompReading()
@@ -638,18 +612,22 @@ void Call_OnCompReading()
     Call_Finish();
 }
 
-Action Call_RebuildString(const int mType, const int sender, const int recipient, const int iBind, char[] szMessage, int iSize)
-{
+Action Call_RebuildString(
+    int id, const char[] indent,
+    int sender, int recipient,
+    int part, char[] szMessage, int iSize
+) {
     Action output;
     bool block;
     int level;
 
     // Action Call
     Call_StartForward(g_fwdRebuildString);
-    Call_PushCell(mType);
+    Call_PushCell(id);
+    Call_PushString(indent);
     Call_PushCell(sender);
     Call_PushCell(recipient);
-    Call_PushCell(iBind);
+    Call_PushCell(part);
     Call_PushCellRef(level);
     Call_PushStringEx(szMessage, iSize, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
     Call_PushCell(iSize);
@@ -659,14 +637,15 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
     if(output == Plugin_Stop)
         return output;
 
-    BreakPoint(iBind, szMessage);
+    BreakPoint(part, szMessage);
 
     // post call
     Call_StartForward(g_fwdRebuildString_Post);
-    Call_PushCell(mType);
+    Call_PushCell(id);
+    Call_PushString(indent);
     Call_PushCell(sender);
     Call_PushCell(recipient);
-    Call_PushCell(iBind);
+    Call_PushCell(part);
     Call_PushCell(level);
     Call_PushString(szMessage);
     Call_Finish(block);
@@ -678,63 +657,63 @@ Action Call_RebuildString(const int mType, const int sender, const int recipient
     return output;
 }
 
-void Call_RebuildClients(const int mType, int iClient, int[] clients, int &numClients)
-{
+void Call_RebuildClients(
+    int id, const char[] indent, 
+    int sender, const char[] msg_key, 
+    int[] clients, int &numClients
+) {
     Call_StartForward(g_fwdRebuildClients);
-
-    Call_PushCell(mType);
-    Call_PushCell(iClient);
+    Call_PushCell(id);
+    Call_PushString(indent);
+    Call_PushCell(sender);
+    Call_PushString(msg_key);
     Call_PushArrayEx(clients, numClients, SM_PARAM_COPYBACK);
     Call_PushCellRef(numClients);
-
     Call_Finish();
 }
 
-Action Call_OnDefMessage(const char[] szMessage, bool IsPhraseExists)
-{
-    Action Send = (IsPhraseExists) ? Plugin_Changed : Plugin_Continue;
+bool Call_HandleEngineMsg(int id, const char[] indent, int sender, const char[] buffer) {
+    bool handle = true;
 
-    Call_StartForward(g_fwdOnDefMessage);
+    Call_StartForward(g_fwdOnEngineMsg);
+    Call_PushCell(id);
+    Call_PushString(indent);
+    Call_PushCell(sender);
+    Call_PushString(buffer);
+    Call_Finish(handle);
 
-    Call_PushString(szMessage);
-    Call_PushCell(IsPhraseExists);
-    Call_Finish(Send);
-
-    return Send;
+    return handle;
 }
 
-bool Call_IsSkipColors(const int mType, int iClient)
-{
+bool Call_IsSkipColors(const char[] indent, int sender) {
     bool skip = g_bRTP;
 
     Call_StartForward(g_fwdSkipColors);
-    Call_PushCell(mType);
-    Call_PushCell(iClient);
+    Call_PushString(indent);
+    Call_PushCell(sender);
     Call_Finish(skip);
 
     return skip;
 }
 
-void Call_OnNewMessage(const int mType, const int sender, const char[] message, const int[] clients, int count)
-{
-    g_iMsgIdx++;
+bool Call_NewMessage(const char[] indent, int sender, const char[] msg_key, int[] players, int playersNum) {
+    bool start = true;
 
-    Call_StartForward(g_fwdMessageUID);
-    
-    Call_PushCell(mType);
+    Call_StartForward(g_fwdNewMessage);   
+    Call_PushString(indent);
     Call_PushCell(sender);
-    Call_PushCell(g_iMsgIdx);
-    Call_PushString(message);
-    Call_PushArray(clients, count);
-    Call_PushCell(count);
+    Call_PushString(msg_key);
+    Call_PushArray(players, playersNum);
+    Call_PushCell(playersNum);
+    Call_Finish(start);
 
-    Call_Finish();
+    return start
 }
 
-void Call_MessageEnd(const int mType, const int sender) {
+void Call_MessageEnd(int id, const char[] indent, int sender) {
     Call_StartForward(g_fwdMessageEnd);
-    Call_PushCell(mType);
+    Call_PushCell(id);
+    Call_PushString(indent);
     Call_PushCell(sender);
-    Call_PushCell(g_iMsgIdx);
     Call_Finish();
 }
