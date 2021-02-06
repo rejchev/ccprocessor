@@ -109,7 +109,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
             continue;
         }
 
-        ccp_PrepareMessage(id, indent, sender, players[i], MAX_PARAMS, szBuffer);
+        ccp_PrepareMessage(indent, sender, players[i], MAX_PARAMS, szBuffer);
         ccp_replaceColors(szBuffer, false);
 
         uMessage = StartMessageOne("SayText2", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
