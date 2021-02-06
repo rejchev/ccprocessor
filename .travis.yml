@@ -21,7 +21,7 @@ install:
     - tar -xzf $(cat sourcemod-latest-linux)
 before_script:
     - cp -R -f $INCLUDES $SOURCES_SM
-    - chmod +x $SPSRC/spcomp
+    - chmod +x $SOURCES_SM/spcomp
     - chmod +x $TRAVIS_BUILD_DIR/travis/compile.sh
     - chmod +x $TRAVIS_BUILD_DIR/travis/package.sh
 script:
