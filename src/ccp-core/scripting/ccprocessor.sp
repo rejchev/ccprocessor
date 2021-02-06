@@ -46,7 +46,7 @@ public Plugin myinfo =
 
 #define SZ(%0) %0, sizeof(%0)
 
-#include "ccprocessor/default.sp"
+#include "ccprocessor/defaults.sp"
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {    
     #if defined DEBUG
@@ -66,6 +66,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("ccp_RebuildMessage",                  Native_RebuildMessage);
     CreateNative("ccp_PrepareMessage",                  Native_PrepareMessage);
     CreateNative("ccp_EndMessage",                      Native_EndMessage);
+    CreateNative("ccp_EngineMsgRequest",                Native_EngineMessageReq);
     
     // void()
     g_fwdConfigParsed = new GlobalForward(
@@ -85,10 +86,10 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
         ET_Event, Param_String, Param_Cell
     );
 
-    // bool(int id, const char[] indent, int sender, const char[] msg_key?)
+    // bool(const char[] indent, int sender, const char[] msg_key?)
     g_fwdOnEngineMsg = new GlobalForward(
         "cc_proc_HandleEngineMsg",
-        ET_Event, Param_String, Param_Cell, Param_String, Param_Cell
+        ET_Event, Param_String, Param_Cell, Param_String
     );
 
     // void(int id, const char[] indent, int sender)
@@ -134,8 +135,8 @@ public void OnPluginStart()
         DWRITE("%s: OnPluginStart()", DEBUG)
     #endif
 
-    LoadTranslations("ccproc.phrases");
-    LoadTranslations("ccp_defmessage.phrases");
+    LoadTranslations("ccp_core.phrases");
+    LoadTranslations("ccp_engine.phrases");
 
     g_aPalette = new ArrayList(STATUS_LENGTH, 0);
  
@@ -322,6 +323,18 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
         g_iMessageCount = 0;
 }
 
+public int Native_EngineMessageReq(Handle hPlugin, int params) {
+    char szIndent[64];
+    GetNativeString(1, SZ(szIndent));
+
+    int sender = GetNativeCell(2);
+
+    char szMessage[MESSAGE_LENGTH];
+    GetNativeString(3, SZ(szMessage));
+
+    return Call_HandleEngineMsg(szIndent, sender, szMessage);
+}
+
 public int Native_UpdateRecipients(Handle hPlugin, int params) {
     int players[MAXPLAYERS+1];
     int output[MAXPLAYERS+1];
@@ -504,21 +517,19 @@ public int Native_RebuildMessage(Handle hPlugin, int params) {
 }
 
 public int Native_PrepareMessage(Handle hPlugin, int params) {
-    int id = GetNativeCell(1);
-
     char szIndent[64];
-    GetNativeString(2, SZ(szIndent));
+    GetNativeString(1, SZ(szIndent));
 
-    int sender = GetNativeCell(3);
-    int recipient = GetNativeCell(4)
-    int max_params = GetNativeCell(5);
+    int sender = GetNativeCell(2);
+    int recipient = GetNativeCell(3)
+    int max_params = GetNativeCell(4);
 
     char szBuffer[MAX_LENGTH];
-    GetNativeString(6, SZ(szBuffer));
+    GetNativeString(5, SZ(szBuffer));
 
     char szNum[8];
     if(szBuffer[0] == '#') {
-        if(!Call_HandleEngineMsg(id, szIndent, sender, szBuffer)) {
+        if(!Call_HandleEngineMsg(szIndent, sender, szBuffer)) {
             return false;
         }
 
@@ -541,7 +552,7 @@ public int Native_PrepareMessage(Handle hPlugin, int params) {
         }
     }
     
-    SetNativeString(6, SZ(szBuffer));
+    SetNativeString(5, SZ(szBuffer));
     return true;
 }
 
@@ -672,11 +683,10 @@ void Call_RebuildClients(
     Call_Finish();
 }
 
-bool Call_HandleEngineMsg(int id, const char[] indent, int sender, const char[] buffer) {
+bool Call_HandleEngineMsg(const char[] indent, int sender, const char[] buffer) {
     bool handle = true;
 
     Call_StartForward(g_fwdOnEngineMsg);
-    Call_PushCell(id);
     Call_PushString(indent);
     Call_PushCell(sender);
     Call_PushString(buffer);

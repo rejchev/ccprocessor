@@ -10,12 +10,9 @@ language: c
 
 env:
   global:
-    - REMOTESRC=addons/sourcemod/scripting
-    - BUILDIR=$TRAVIS_BUILD_DIR/sourcemod
-    - SRCDIR=$TRAVIS_BUILD_DIR/scripting
-    - CFGDIR=$TRAVIS_BUILD_DIR/configs
-    - LNGDIR=$TRAVIS_BUILD_DIR/translations
-    - BINDIR=$BUILDIR/plugins
+    - SOURCES=$TRAVIS_BUILD_DIR/src
+    - SOURCES_SM=$TRAVIS_BUILD_DIR/addons/sourecemod/scripting
+    - INCLUDES=$TRAVIS_BUILD_DIR/include
   jobs:
     - SMVERSION=1.10
 
@@ -23,24 +20,22 @@ install:
     - wget --input-file=http://sourcemod.net/smdrop/$SMVERSION/sourcemod-latest-linux
     - tar -xzf $(cat sourcemod-latest-linux)
 before_script:
-    - mkdir $BUILDIR && mkdir $BINDIR && cp $TRAVIS_BUILD_DIR'/LICENSE' $BUILDIR'/'
-    - mkdir $BINDIR'/disabled' && mkdir $BINDIR'/disabled/ccprocessor' && mkdir $BINDIR'/disabled/ccprocessor/debug'
-    - cp -R $SRCDIR $BUILDIR'/' && cp -R $CFGDIR $BUILDIR'/' && cp -R $LNGDIR $BUILDIR'/'
-    - chmod +x $REMOTESRC/spcomp
-    - cp -R -f $REMOTESRC'/include' $SRCDIR'/' && cp $REMOTESRC'/spcomp' $SRCDIR'/'
-
+    - cp -R -f $INCLUDES $SOURCES_SM
+    - chmod +x $SPSRC/spcomp
+    - chmod +x $TRAVIS_BUILD_DIR/travis/compile.sh
+    - chmod +x $TRAVIS_BUILD_DIR/travis/package.sh
 script:
-    - $SRCDIR'/spcomp' $SRCDIR'/ccprocessor.sp' -o2 -v1 -i=$SRCDIR'/include' -o=$BINDIR'/ccprocessor.smx'
-    - $SRCDIR'/spcomp' INCLUDE_DEBUG=1 $SRCDIR'/ccprocessor.sp' -o2 -v1 -i=$SRCDIR'/include' -o=$BINDIR'/disabled/ccprocessor/debug/ccprocessor.smx'
+    - bash ./travis/compile.sh $SOURCES $SOURCES_SM || exit 1
 
 before_deploy:
-  - cd $BUILDIR && tar -czvf ccp-build-${TRAVIS_BUILD_NUMBER}.tar.gz *
-  
+    - bash ./travis/package.sh $SOURCES ${TRAVIS_BUILD_NUMBER} || exit 1
+
 deploy:
   provider: releases
   token:
     secure: Psj4P1giX7Un/R7TPsPdMkuDiHTcVWTgCuQfVWMe1nFrLqeC0Uc59CpvhRaRs/+DpL6j8WHDWLhKpoX7c0UDWgaKy9FAGs0iXROXHKaJ20YrWomeaWBZNFseNcfOmiSmLzxVZ92sQJxwgzjaH5fjhc+I4kXoxKyf166yxyZzVVroZ+WNUNaOxcX+azz3i7XMAXD+57VF9Cc7mZs/z2mNF8HoQPKIN1QQ0QcVNqRMtJ0ZoUn+sKHQecGxtNirl0lc4RC4HRWt0ojSchszOVEzfHgvvnN82t1F86jFz8/YiHwDTyaYhjL6CLNX/f1yil2u3syhib6U/sKjnyLL4vkKrvk+8zpMDdu/1LUc3PkzX5xp/WzcTWzK5dMQTqTliiJVwCyfZa2Q/jtUVJULp7Moir3uZJN+8hJuqVtjRMBsZSw2iU2tw3Bn6DWPPQgQVUfd0ixGj8Dx9bSV0whiRSnCaxxjq9e1QI4ONro3sWpUE1pmN6JF41tfzCCX2gRr6aGKd9pJiw8pLwPRD0u6HEasX7lxeBf7nsjJWXABeZVYr1O1vyOTriQ1fvkVStg1feDAIb9LtgV5rMLmpM5u3OWTSGUS9/W2elrZX1EPkUvcQ6jpOf6M1J/MK0dzAi2gzwY1B3XI3zGJgq87kU+c6h8xf/kclB/boO/6r1ZOcn2QoCA=
-  file: ccp-build-${TRAVIS_BUILD_NUMBER}.tar.gz
+  file_glob: true
+  file: $SOURCES/*
   skip_cleanup: true
   on:
     tags: true

@@ -72,7 +72,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     char szMsgName[MESSAGE_LENGTH], params[MAX_PARAMS][MESSAGE_LENGTH], szBuffer[MAX_LENGTH];
     for(int i; i < MAX_PARAMS; i++) {
         FormatEx(szMsgName, sizeof(szMsgName), "params[%i]", i);
-        g_mMessage.GetString(szMsgName, params[i++], sizeof(params[]));
+        g_mMessage.GetString(szMsgName, params[i], sizeof(params[]));
     }
 
     g_mMessage.GetString("msg_name", szMsgName, sizeof(szMsgName));
