@@ -11,7 +11,7 @@ language: c
 env:
   global:
     - SOURCES=$TRAVIS_BUILD_DIR/src
-    - SOURCES_SM=$TRAVIS_BUILD_DIR/addons/sourecemod/scripting
+    - SOURCES_SM=$TRAVIS_BUILD_DIR/addons/sourcemod/scripting
     - INCLUDES=$TRAVIS_BUILD_DIR/include
   jobs:
     - SMVERSION=1.10
