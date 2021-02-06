@@ -73,17 +73,19 @@ forward bool cc_proc_SkipColors(const char[] indent, int sender);
 /*
  *  Call when new message arrives /\
  *  
- *  @param indent       Message Indent
  *  @param sender       Sender index
  *  @param temp_key     Template Key
  *  @param msg          Message
+ *  @param indent       Message Indent
+ *  @param size         Max Size
  *  @param players      Recipient list
  *  @param playersNum   Rcipient count
  *  
  *  @return             true - allow msg / false - otherwise
 */
 forward bool cc_proc_OnNewMessage(
-    const char[] indent, int sender, const char[] temp_key, const char[] msg, const int[] players, int playersNum
+    int sender, const char[] temp_key, const char[] msg, 
+    char[] indent, int size, const int[] players, int playersNum
 );
 
 /*
@@ -233,8 +235,9 @@ native bool ccp_SkipColors(const char[] indent, int sender);
 native void ccp_ChangeMode(const int[] players, int playersNum, const char[] value = NULL_STRING);
 
 native int  ccp_StartNewMessage(
-    const char[] indent, int sender, const char[] msg_key, 
-    const char[] msg, const int[] players, int playersNum
+    int sender, const char[] msg_key, 
+    const char[] msg, char[] indent, int size, 
+    const int[] players, int playersNum
 );
 
 native void ccp_RebuildClients(

@@ -104,10 +104,10 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
         ET_Ignore, Param_Cell, Param_String, Param_Cell, Param_String, Param_Array, Param_CellByRef
     );
     
-    // bool(const char[] indent, int sender, const char[] template, const char[] msg, int[] players, int count) 
+    // bool(int sender, const char[] template, const char[] msg, char[] ident, int size, int[] players, int count) 
     g_fwdNewMessage = new GlobalForward(
         "cc_proc_OnNewMessage",
-        ET_Event, Param_String, Param_Cell, Param_String, Param_String, Param_Array, Param_Cell
+        ET_Event, Param_Cell, Param_String, Param_String, Param_String, Param_Cell, Param_Array, Param_Cell
     );
     
     // bool(int id, const char[] indent, int sender, int recipient, int part, int level, const char[] value)
@@ -409,12 +409,14 @@ public int Native_StartNewMessage(Handle hPlugin, int params) {
     int playersNum = GetNativeCell(6);
     GetNativeArray(5, players, playersNum);
 
-    if(!Call_NewMessage(szIndent, sender, szTemplate, szMessage, players, playersNum)) {
+    if(!Call_NewMessage(sender, szTemplate, szMessage, SZ(szIndent), players, playersNum)) {
         return -1;
     }
 
     g_iMessageCount++;
     g_iMsgInProgress = g_iMessageCount;
+
+    SetNativeString(1, SZ(szIndent));
 
     return g_iMsgInProgress;
 }
@@ -713,14 +715,15 @@ bool Call_IsSkipColors(const char[] indent, int sender) {
     return skip;
 }
 
-bool Call_NewMessage(const char[] indent, int sender, const char[] msg_key, const char[] msg, int[] players, int playersNum) {
+bool Call_NewMessage(int sender, const char[] msg_key, const char[] msg, char[] indent, int size, int[] players, int playersNum) {
     bool start = true;
 
     Call_StartForward(g_fwdNewMessage);   
-    Call_PushString(indent);
     Call_PushCell(sender);
     Call_PushString(msg_key);
     Call_PushString(msg);
+    Call_PushStringEx(indent, size, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+    Call_PushCell(size);
     Call_PushArray(players, playersNum);
     Call_PushCell(playersNum);
     Call_Finish(start);

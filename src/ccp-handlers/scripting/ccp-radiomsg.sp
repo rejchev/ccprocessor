@@ -20,7 +20,7 @@ UserMessageType umType;
 
 StringMap g_mMessage;
 
-static const char indent[] = "RT";
+static const char indent_def[] = "RT";
 static const char template[] = "#Game_Chat_Radio"
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -54,7 +54,7 @@ public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players,
     FormatEx(SZ(szComp), "params[%i]", a);
     g_mMessage.GetString(szComp, SZ(szBuffer));
 
-    if(!ccp_EngineMsgRequest(indent, sender, szBuffer)) {
+    if(!ccp_EngineMsgRequest(indent_def, sender, szBuffer)) {
         g_mMessage.Clear();
         return Plugin_Continue;
     }
@@ -89,6 +89,8 @@ public void AfterMessage(UserMsg msgid, bool send)
         g_mMessage.GetString(szMsgKey, params[i], sizeof(params[]));
     }
 
+    char indent[NAME_LENGTH];
+    strcopy(SZ(indent), indent_def);
     g_mMessage.GetString("msg_name", szMsgKey, sizeof(szMsgKey));
 
     int playersNum;
@@ -104,7 +106,7 @@ public void AfterMessage(UserMsg msgid, bool send)
     bool alive = IsPlayerAlive(sender);
 
     int id;
-    if((id = ccp_StartNewMessage(indent, sender, szMsgKey, params[display], players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(sender, szMsgKey, params[display], SZ(indent), players, playersNum)) == -1) {
         return;
     }
 

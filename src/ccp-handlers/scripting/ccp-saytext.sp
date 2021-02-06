@@ -18,7 +18,7 @@ public Plugin myinfo =
 UserMessageType umType;
 StringMap g_mMessage;
 
-static const char indent[] = "ST";
+static const char indent_def[] = "ST";
 static const char template[] = "#Game_Chat_Server";
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -52,7 +52,7 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
     g_mMessage.SetArray("players", clients, playersNum, true);
     g_mMessage.SetValue("playersNum", playersNum, true);
 
-    if(szMessage[0] == '#' && !ccp_EngineMsgRequest(indent, 0, szMessage)) {
+    if(szMessage[0] == '#' && !ccp_EngineMsgRequest(indent_def, 0, szMessage)) {
         g_mMessage.Clear();
         return Plugin_Continue;
     }
@@ -80,8 +80,11 @@ public void AfterMessage(UserMsg msg_id, bool bSend)
 
     g_mMessage.Clear();
 
+    char indent[NAME_LENGTH];
+    strcopy(SZ(indent), indent_def);
+
     int id;
-    if((id = ccp_StartNewMessage(indent, sender, template, szMessage, players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(sender, template, szMessage, SZ(indent), players, playersNum)) == -1) {
         return;
     }
 

@@ -19,7 +19,7 @@ UserMessageType umType;
 
 StringMap g_mMessage;
 
-static const char indent[][] = {"STP", "STA"};
+static const char indent_def[][] = {"STP", "STA"};
 static const char templates[][] = {"#Game_Chat_Team", "#Game_Chat_Public"};
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
@@ -58,7 +58,7 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
     ccp_replaceColors(szName, true);
     g_mMessage.SetString("params[0]", szName, true);
 
-    if(!ccp_SkipColors(indent[allChat], sender)) {
+    if(!ccp_SkipColors(indent_def[allChat], sender)) {
         ccp_replaceColors(szMessage, true);
         g_mMessage.SetString("params[1]", szMessage, true);
     }
@@ -99,12 +99,15 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
     g_mMessage.Clear();
 
+    char indent[NAME_LENGTH];
+    strcopy(SZ(indent), indent_def[allChat]);
+
     int id;
-    if((id = ccp_StartNewMessage(indent[allChat], sender, templates[allChat], params[1], players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(sender, templates[allChat], params[1], SZ(indent), players, playersNum)) == -1) {
         return;
     }
 
-    ccp_RebuildClients(id, indent[allChat], sender, templates[allChat], players, playersNum);
+    ccp_RebuildClients(id, indent, sender, templates[allChat], players, playersNum);
     ccp_UpdateRecipients(players, players, playersNum);
     ccp_ChangeMode(players, playersNum, "0");
 
@@ -112,11 +115,11 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     for(int i, j; i < playersNum; i++) {
         j = (sender << 3|team << 1|view_as<int>(alive));
 
-        if(!ccp_RebuildMessage(id, indent[allChat], j, players[i], templates[allChat], params[0], params[1], SZ(szBuffer))) {
+        if(!ccp_RebuildMessage(id, indent, j, players[i], templates[allChat], params[0], params[1], SZ(szBuffer))) {
             continue;
         }
 
-        ccp_PrepareMessage(indent[allChat], sender, players[i], MAX_PARAMS, szBuffer);
+        ccp_PrepareMessage(indent, sender, players[i], MAX_PARAMS, szBuffer);
         ccp_replaceColors(szBuffer, false);
 
         uMessage = StartMessageOne("SayText2", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
@@ -145,7 +148,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     }
 
     ccp_ChangeMode(players, playersNum); 
-    ccp_EndMessage(id, indent[allChat], sender);
+    ccp_EndMessage(id, indent, sender);
 }
 
 void ReadUserMessage(Handle msg, StringMap params) {
