@@ -81,7 +81,7 @@ public void AfterMessage(UserMsg msg_id, bool bSend)
     g_mMessage.Clear();
 
     int id;
-    if((id = ccp_StartNewMessage(indent, sender, template, players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(indent, sender, template, szMessage, players, playersNum)) == -1) {
         return;
     }
 

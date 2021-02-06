@@ -100,7 +100,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     g_mMessage.Clear();
 
     int id;
-    if((id = ccp_StartNewMessage(indent[allChat], sender, templates[allChat], players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(indent[allChat], sender, templates[allChat], params[1], players, playersNum)) == -1) {
         return;
     }
 

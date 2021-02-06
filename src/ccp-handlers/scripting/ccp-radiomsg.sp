@@ -104,7 +104,7 @@ public void AfterMessage(UserMsg msgid, bool send)
     bool alive = IsPlayerAlive(sender);
 
     int id;
-    if((id = ccp_StartNewMessage(indent, sender, szMsgKey, players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(indent, sender, szMsgKey, params[display], players, playersNum)) == -1) {
         return;
     }
 

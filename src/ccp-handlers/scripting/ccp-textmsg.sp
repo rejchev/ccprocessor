@@ -75,7 +75,7 @@ public void TextMsg_Completed(StringMap g_mMessage)
     delete g_mMessage;
 
     int id;
-    if((id = ccp_StartNewMessage(indent, sender, template, players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(indent, sender, template, params[PARAM_MESSAGE], players, playersNum)) == -1) {
         return;
     }
 
