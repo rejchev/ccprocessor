@@ -1,229 +1,28 @@
 "Phrases"
 {
 
-    // Templates CSGO,CSTRIKE: SayText2
-    "Cstrike_Chat_CT_Loc"
+    // Templates: SayText2
+    "#Game_Chat_Team"
     {
         // {1} name
         // {2} message
         // {3} location
+
         "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "Cstrike_Chat_CT"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "Cstrike_Chat_T_Loc"
+    "#Game_Chat_Public"
     {
         // {1} name
         // {2} message
         // {3} location
+
         "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "Cstrike_Chat_T"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "Cstrike_Chat_CT_Dead"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "Cstrike_Chat_T_Dead"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "Cstrike_Chat_Spec"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "Cstrike_Chat_All"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "Cstrike_Chat_AllDead"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "Cstrike_Chat_AllSpec"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#Cstrike_Name_Change"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {NAMECO}{NAME} {W}=> {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {NAMECO}{NAME} {W}=> {MSGCO}{MSG}"
-    }
-
-    // Templates L4D2, L4D: SayText2
-    "#L4D_Chat_Infected"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#L4D_Chat_Survivor"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#L4D_Chat_Infected_Dead"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#L4D_Chat_Survivor_Dead"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#L4D_Chat_Spec"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#L4D_Chat_All"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#L4D_Chat_AllDead"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#L4D_Chat_AllSpec"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    // Templates TF2: SayText2
-    "#TF_Chat_Team_Loc"
-    {
-        // {1} name
-        // {2} message
-        // {3} location
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#TF_Chat_Team"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#TF_Chat_Team_Dead"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#TF_Chat_Spec"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#TF_Chat_All"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#TF_Chat_AllDead"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#TF_Chat_AllSpec"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    "#TF_Chat_Coach"
-    {
-        // {1} name
-        // {2} message
-        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
-    }
-
-    // Templates CSGO, CSTRIKE: RadioText
+    // Templates: RadioText
     "#Cstrike_TitlesTXT_Game_radio"
     {
         "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"

@@ -21,6 +21,7 @@ UserMessageType umType;
 StringMap g_mMessage;
 
 static const char indent[] = "RT";
+static const char template[] = "#Game_Chat_Radio"
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {    

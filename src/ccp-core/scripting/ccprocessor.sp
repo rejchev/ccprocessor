@@ -446,8 +446,8 @@ public int Native_RebuildMessage(Handle hPlugin, int params) {
     int sender = GetNativeCell(3);
     int recipient = GetNativeCell(4);
 
-    char szMsgKey[64];
-    GetNativeString(5, SZ(szMsgKey));
+    char szTemplate[64];
+    GetNativeString(5, SZ(szTemplate));
 
     char szName[NAME_LENGTH];
     GetNativeString(6, SZ(szName));
@@ -458,15 +458,13 @@ public int Native_RebuildMessage(Handle hPlugin, int params) {
     char szBuffer[MAX_LENGTH];
     GetNativeString(8, SZ(szBuffer));
 
-    bool    isAlive;
-    int     team
+    int     backup;
     char    value[MESSAGE_LENGTH];
 
-    isAlive =   view_as<bool>(sender & 0x01);
-    team    =   (sender >> 1) & 0x03;
+    backup  =   sender;
     sender  >>= 3;
 
-    FormatEx(SZ(szBuffer), "%c %T", 1, szMsgKey, sender);
+    FormatEx(SZ(szBuffer), "%s", szBinds[BIND_PROTOTYPE]);
 
     #if defined DEBUG
         DWRITE( \
@@ -481,10 +479,18 @@ public int Native_RebuildMessage(Handle hPlugin, int params) {
         );
     #endif
     
-    for(int i = 1; i < BIND_MAX; i++) {
+    for(int i; i < BIND_MAX; i++) {
         value = NULL_STRING;
 
-        GetDefaultValue(szIndent, sender, team, isAlive, recipient, i, szName, szMessage, SZ(value));
+        GetDefaultValue(
+            szIndent, backup, recipient, i, 
+            (i == BIND_NAME) 
+                ? szName 
+                : (i == BIND_MSG) 
+                    ? szMessage
+                    : szTemplate, 
+            SZ(value)
+        );
         
         if(Call_RebuildString(id, szIndent, sender, recipient, i, SZ(value)) != Plugin_Continue) {
             #if defined DEBUG
@@ -532,21 +538,19 @@ public int Native_PrepareMessage(Handle hPlugin, int params) {
         if(!Call_HandleEngineMsg(szIndent, sender, szBuffer)) {
             return false;
         }
-
-        if(TranslationPhraseExists(szBuffer)) {
-            Format(SZ(szBuffer), "%T", szBuffer, recipient);
-        }
+        
+        Format(SZ(szBuffer), "%T", szBuffer, recipient);
     }
 
     if(max_params) {
-        for(int i = 1; i <= max_params; i++) {
-            FormatEx(szNum, sizeof(szNum), "{%i}", i);
+        for(int i; i < max_params; i++) {
+            FormatEx(szNum, sizeof(szNum), "{%i}", i+1);
             ReplaceString(
                 SZ(szBuffer), szNum, 
-                (i == 1) ? "%s1" 
-                : (i == 2) ? "%s2" 
-                : (i == 3) ? "%s3" 
-                : (i == 4) ? "%s4" 
+                (i == 0) ? "%s1" 
+                : (i == 1) ? "%s2" 
+                : (i == 2) ? "%s3" 
+                : (i == 3) ? "%s4" 
                 : "%s5"
             );
         }
@@ -684,7 +688,7 @@ void Call_RebuildClients(
 }
 
 bool Call_HandleEngineMsg(const char[] indent, int sender, const char[] buffer) {
-    bool handle = true;
+    bool handle = TranslationPhraseExists(buffer);
 
     Call_StartForward(g_fwdOnEngineMsg);
     Call_PushString(indent);

@@ -109,7 +109,7 @@
         // ------ Radio chat (optional) ----- //
 
         // -- Blue team color
-        "DEF_TEAMCO_R_B"
+        "DEF_TEAMCO_RT_B"
         {
             "ru"                "{GO}"
             "en"                "{GO}"
@@ -117,7 +117,7 @@
         }
 
         // -- Red team color
-        "DEF_TEAMCO_R_R"
+        "DEF_TEAMCO_RT_R"
         {
             "ru"                "{GO}"
             "en"                "{GO}"
@@ -125,7 +125,7 @@
         }
 
         // -- Spec team color
-        "DEF_TEAMCO_R_S"
+        "DEF_TEAMCO_RT_S"
         {
             "ru"                "{GO}"
             "en"                "{GO}"
@@ -135,7 +135,7 @@
         // ------ Server chat (optional) ----- //
 
         // -- Blue team color
-        "DEF_TEAMCO_S_B"
+        "DEF_TEAMCO_TM_B"
         {
             "ru"                "{GO}"
             "en"                "{GO}"
@@ -143,7 +143,7 @@
         }
 
         // -- Red team color
-        "DEF_TEAMCO_S_R"
+        "DEF_TEAMCO_TM_R"
         {
             "ru"                "{GO}"
             "en"                "{GO}"
@@ -151,7 +151,31 @@
         }
 
         // -- Spec team color
-        "DEF_TEAMCO_S_S"
+        "DEF_TEAMCO_TM_S"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // -- Blue team color
+        "DEF_TEAMCO_ST_B"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // -- Red team color
+        "DEF_TEAMCO_ST_R"
+        {
+            "ru"                "{GO}"
+            "en"                "{GO}"
+            "pl"                "{GO}"
+        }
+
+        // -- Spec team color
+        "DEF_TEAMCO_ST_S"
         {
             "ru"                "{GO}"
             "en"                "{GO}"
@@ -241,7 +265,7 @@
         // ------ Radio chat (optional) ----- //
 
         // -- Blue team
-        "DEF_TEAM_R_B"
+        "DEF_TEAM_RT_B"
         {
             "ru"                "(RADIO)"
             "en"                "(RADIO)"
@@ -249,7 +273,7 @@
         }
 
         // -- Red team
-        "DEF_TEAM_R_R"
+        "DEF_TEAM_RT_R"
         {
             "ru"                "(RADIO)"
             "en"                "(RADIO)"
@@ -257,7 +281,7 @@
         }
 
         // -- Spec team
-        "DEF_TEAM_R_S"
+        "DEF_TEAM_RT_S"
         {
             "ru"                "(RADIO)"
             "en"                "(RADIO)"
@@ -267,7 +291,7 @@
         // ------ Server chat (optional) ----- //
 
         // // -- Blue team
-        // "DEF_TEAM_S_B"
+        // "DEF_TEAM_TM_B"
         // {
         //     "ru"                "(RADIO)"
         //     "en"                "(RADIO)"
@@ -275,7 +299,7 @@
         // }
 
         // // -- Red team
-        // "DEF_TEAM_S_R"
+        // "DEF_TEAM_TM_R"
         // {
         //     "ru"                "(RADIO)"
         //     "en"                "(RADIO)"
@@ -283,7 +307,15 @@
         // }
 
         // -- Spec team
-        "DEF_TEAM_S_S"
+        "DEF_TEAM_TM_S"
+        {
+            "ru"                "(SYS)"
+            "en"                "(SYS)"
+            "pl"                "(SYS)"
+        }
+
+        // -- Spec team
+        "DEF_TEAM_ST_S"
         {
             "ru"                "(SYS)"
             "en"                "(SYS)"
@@ -292,29 +324,29 @@
 
         // ------ Name change (optional) ----- //
 
-        // -- Blue team
-        "DEF_TEAM_C_B"
-        {
-            "ru"                "(SET)"
-            "en"                "(SET)"
-            "pl"                "(SET)"
-        }
+        // // -- Blue team
+        // "DEF_TEAM_C_B"
+        // {
+        //     "ru"                "(SET)"
+        //     "en"                "(SET)"
+        //     "pl"                "(SET)"
+        // }
 
-        // -- Red team
-        "DEF_TEAM_C_R"
-        {
-            "ru"                "(SET)"
-            "en"                "(SET)"
-            "pl"                "(SET)"
-        }
+        // // -- Red team
+        // "DEF_TEAM_C_R"
+        // {
+        //     "ru"                "(SET)"
+        //     "en"                "(SET)"
+        //     "pl"                "(SET)"
+        // }
 
-        // -- Spec team
-        "DEF_TEAM_C_S"
-        {
-            "ru"                "(SET)"
-            "en"                "(SET)"
-            "pl"                "(SET)"
-        }
+        // // -- Spec team
+        // "DEF_TEAM_C_S"
+        // {
+        //     "ru"                "(SET)"
+        //     "en"                "(SET)"
+        //     "pl"                "(SET)"
+        // }
     
     // ------------ Prefix color ----------- //
 
@@ -388,6 +420,7 @@
         "pl"                "{W}"
     }
 
+    // Colors
     "{W}"
     {
         "ru"                "{W}Белый"
@@ -500,13 +533,7 @@
         "pl"                "{GO}Złoty"
     }
 
-    "ccp_disable"
-    {
-        "ru"                "Убрать"
-        "en"                "Remove"
-        "pl"                "Usuń"
-    }
-
+    // Template parts
     "{PROTOTYPE}"
     {
         "ru"                "Шаблон"
@@ -545,28 +572,28 @@
     "{PREFIXCO}"
     {
         "ru"                "Цвет префикса"
-        "en"                "Prefix Color"
+        "en"                "Chat tag color"
         "pl"                "Kolor prefiksu"
     }
 
     "{PREFIX}"
     {
         "ru"                "Префикс"
-        "en"                "Prefiks"
+        "en"                "Chat tag"
         "pl"                "Prefiks"
     }
 
     "{NAMECO}"
     {
         "ru"                "Цвет прозвища"
-        "en"                "Nickname color"
+        "en"                "Username color"
         "pl"                "Kolor pseudonimu"
     }
 
     "{NAME}"
     {
         "ru"                "Прозвище"
-        "en"                "Nickname"
+        "en"                "Username"
         "pl"                "Przezwisko"
     }
 

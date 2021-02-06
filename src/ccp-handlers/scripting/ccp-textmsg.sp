@@ -97,7 +97,7 @@ public void TextMsg_Completed(StringMap g_mMessage)
 
         ccp_replaceColors(szBuffer, false);
 
-        uMessage = StartMessageOne("SayText2", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
+        uMessage = StartMessageOne("TextMsg", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
         if(!uMessage) {
             continue;
         }

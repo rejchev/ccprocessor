@@ -20,6 +20,7 @@ UserMessageType umType;
 StringMap g_mMessage;
 
 static const char indent[][] = {"STP", "STA"};
+static const char templates[][] = {"#Game_Chat_Team", "#Game_Chat_Public"};
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {    
@@ -99,11 +100,11 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     g_mMessage.Clear();
 
     int id;
-    if((id = ccp_StartNewMessage(indent[allChat], sender, szMsgName, players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(indent[allChat], sender, templates[allChat], players, playersNum)) == -1) {
         return;
     }
 
-    ccp_RebuildClients(id, indent[allChat], sender, szMsgName, players, playersNum);
+    ccp_RebuildClients(id, indent[allChat], sender, templates[allChat], players, playersNum);
     ccp_UpdateRecipients(players, players, playersNum);
     ccp_ChangeMode(players, playersNum, "0");
 
@@ -111,7 +112,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     for(int i, j; i < playersNum; i++) {
         j = (sender << 3|team << 1|view_as<int>(alive));
 
-        if(!ccp_RebuildMessage(id, indent[allChat], j, players[i], szMsgName, params[0], params[1], szBuffer, sizeof(szBuffer))) {
+        if(!ccp_RebuildMessage(id, indent[allChat], j, players[i], templates[allChat], params[0], params[1], SZ(szBuffer))) {
             continue;
         }
 
@@ -154,14 +155,7 @@ void ReadUserMessage(Handle msg, StringMap params) {
                     ? BfReadByte(msg) 
                     : PbReadInt(msg, "ent_idx");
     params.SetValue("ent_idx", sender);
-    
-    // bool IsChat = view_as<bool>();
-    params.SetValue(
-        "chat", 
-        (!umType) ? BfReadByte(msg) : PbReadInt(msg, "chat"), 
-        true
-    );
-    
+
     char szMsgName[MESSAGE_LENGTH];
     if(!umType) {
         BfReadString(msg, szMsgName, sizeof(szMsgName));
