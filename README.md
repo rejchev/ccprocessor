@@ -50,6 +50,14 @@ You can edit already boring radio commands. <br>
 - Sourcemod 1.10 
     - [Windows](http://sourcemod.net/latest.php?os=windows&version=1.10)
     - [Linux](http://sourcemod.net/latest.php?os=linux&version=1.10)
+
+## Handlers
+Handler Name | Message identifier | Package
+------------ | ------------------ | -------
+|  `SayText2`  | `STA` = Public chat, `STP` = Team chat  | `ccp-saytext2.smx` |
+|  `TextMsg`   | `TM` = Server chat | `ccp-textmsg.smx`  |
+|  `SayText`   | `ST` = Server chat | `ccp-saytext.smx`  |
+|  `RadioText` | `RT` = Radio chat  | `ccp-radiomsg.smx` |
     
 ## [Supported Modules](https://github.com/nyood/ccp-modules)
 
