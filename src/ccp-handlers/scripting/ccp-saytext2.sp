@@ -19,7 +19,7 @@ UserMessageType umType;
 
 StringMap g_mMessage;
 
-static const char indent[] = "ST2";
+static const char indent[][] = {"STP", "STA"};
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {    
@@ -45,6 +45,9 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
     int sender;
     g_mMessage.GetValue("ent_idx", sender);
 
+    int allChat;
+    g_mMessage.GetValue("allchat", allChat);
+
     char szName[NAME_LENGTH];
     g_mMessage.GetString("params[0]", szName, sizeof(szName));
 
@@ -54,7 +57,7 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
     ccp_replaceColors(szName, true);
     g_mMessage.SetString("params[0]", szName, true);
 
-    if(!ccp_SkipColors(indent, sender)) {
+    if(!ccp_SkipColors(indent[allChat], sender)) {
         ccp_replaceColors(szMessage, true);
         g_mMessage.SetString("params[1]", szMessage, true);
     }
@@ -90,14 +93,17 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     bool alive;
     alive = (sender) ? IsPlayerAlive(sender) : false;
 
+    int allChat;
+    g_mMessage.GetValue("allchat", allChat);
+
     g_mMessage.Clear();
 
     int id;
-    if((id = ccp_StartNewMessage(indent, sender, szMsgName, players, playersNum)) == -1) {
+    if((id = ccp_StartNewMessage(indent[allChat], sender, szMsgName, players, playersNum)) == -1) {
         return;
     }
 
-    ccp_RebuildClients(id, indent, sender, szMsgName, players, playersNum);
+    ccp_RebuildClients(id, indent[allChat], sender, szMsgName, players, playersNum);
     ccp_UpdateRecipients(players, players, playersNum);
     ccp_ChangeMode(players, playersNum, "0");
 
@@ -105,11 +111,11 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     for(int i, j; i < playersNum; i++) {
         j = (sender << 3|team << 1|view_as<int>(alive));
 
-        if(!ccp_RebuildMessage(id, indent, j, players[i], szMsgName, params[0], params[1], szBuffer, sizeof(szBuffer))) {
+        if(!ccp_RebuildMessage(id, indent[allChat], j, players[i], szMsgName, params[0], params[1], szBuffer, sizeof(szBuffer))) {
             continue;
         }
 
-        ccp_PrepareMessage(indent, sender, players[i], MAX_PARAMS, szBuffer);
+        ccp_PrepareMessage(indent[allChat], sender, players[i], MAX_PARAMS, szBuffer);
         ccp_replaceColors(szBuffer, false);
 
         uMessage = StartMessageOne("SayText2", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
@@ -138,7 +144,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     }
 
     ccp_ChangeMode(players, playersNum); 
-    ccp_EndMessage(id, indent, sender);
+    ccp_EndMessage(id, indent[allChat], sender);
 }
 
 void ReadUserMessage(Handle msg, StringMap params) {
@@ -164,15 +170,18 @@ void ReadUserMessage(Handle msg, StringMap params) {
     }
 
     params.SetString("msg_name", szMsgName, true);
+    g_mMessage.SetValue("allchat", StrContains(szMsgName, "_All", false) != -1, true);
 
     char szParams[MAX_PARAMS][MESSAGE_LENGTH];
     int i;
 
     while(((!umType) ? BfGetNumBytesLeft(msg) > 1 : i < PbGetRepeatedFieldCount(msg, "params")) && i < MAX_PARAMS) {
-        if(!umType) BfReadString(msg, szParams[i++], sizeof(szParams[]));
-        else PbReadString(msg, "params", szParams[i], sizeof(szParams[]), i++);
+        if(!umType) BfReadString(msg, szParams[i], sizeof(szParams[]));
+        else PbReadString(msg, "params", szParams[i], sizeof(szParams[]), i);
 
         FormatEx(szMsgName, sizeof(szMsgName), "params[%i]", i);
-        params.SetString(szMsgName, szParams[i]);
+        params.SetString(szMsgName, szParams[i], true);
+
+        i++;
     }
 }

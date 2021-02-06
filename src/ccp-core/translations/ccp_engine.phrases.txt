@@ -2,7 +2,7 @@
 {
 
     // Templates CSGO,CSTRIKE: SayText2
-    "#Cstrike_Chat_CT_Loc"
+    "Cstrike_Chat_CT_Loc"
     {
         // {1} name
         // {2} message
@@ -11,7 +11,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_CT"
+    "Cstrike_Chat_CT"
     {
         // {1} name
         // {2} message
@@ -19,7 +19,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_T_Loc"
+    "Cstrike_Chat_T_Loc"
     {
         // {1} name
         // {2} message
@@ -28,7 +28,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_T"
+    "Cstrike_Chat_T"
     {
         // {1} name
         // {2} message
@@ -36,7 +36,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_CT_Dead"
+    "Cstrike_Chat_CT_Dead"
     {
         // {1} name
         // {2} message
@@ -44,7 +44,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_T_Dead"
+    "Cstrike_Chat_T_Dead"
     {
         // {1} name
         // {2} message
@@ -52,7 +52,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_Spec"
+    "Cstrike_Chat_Spec"
     {
         // {1} name
         // {2} message
@@ -60,7 +60,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_All"
+    "Cstrike_Chat_All"
     {
         // {1} name
         // {2} message
@@ -68,7 +68,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_AllDead"
+    "Cstrike_Chat_AllDead"
     {
         // {1} name
         // {2} message
@@ -76,7 +76,7 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
-    "#Cstrike_Chat_AllSpec"
+    "Cstrike_Chat_AllSpec"
     {
         // {1} name
         // {2} message

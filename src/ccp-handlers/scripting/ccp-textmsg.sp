@@ -131,10 +131,12 @@ void ReadUserMessage(Handle msg, StringMap params) {
     int i;
 
     while(((!umType) ? BfGetNumBytesLeft(msg) > 1 : i < PbGetRepeatedFieldCount(msg, "params")) && i < MAX_PARAMS) {
-        if(!umType) BfReadString(msg, szParams[i++], sizeof(szParams[]));
-        else PbReadString(msg, "params", szParams[i], sizeof(szParams[]), i++);
+        if(!umType) BfReadString(msg, szParams[i], sizeof(szParams[]));
+        else PbReadString(msg, "params", szParams[i], sizeof(szParams[]), i);
 
         FormatEx(szBuffer, sizeof(szBuffer), "params[%i]", i);
         params.SetString(szBuffer, szParams[i]);
+
+        i++;
     }
 }

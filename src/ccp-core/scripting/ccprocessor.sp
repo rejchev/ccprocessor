@@ -462,11 +462,11 @@ public int Native_RebuildMessage(Handle hPlugin, int params) {
     int     team
     char    value[MESSAGE_LENGTH];
 
-    FormatEx(SZ(szBuffer), "%c %T", 1, szMsgKey);
-
     isAlive =   view_as<bool>(sender & 0x01);
     team    =   (sender >> 1) & 0x03;
     sender  >>= 3;
+
+    FormatEx(SZ(szBuffer), "%c %T", 1, szMsgKey, sender);
 
     #if defined DEBUG
         DWRITE( \
@@ -481,7 +481,7 @@ public int Native_RebuildMessage(Handle hPlugin, int params) {
         );
     #endif
     
-    for(int i; i < BIND_MAX; i++) {
+    for(int i = 1; i < BIND_MAX; i++) {
         value = NULL_STRING;
 
         GetDefaultValue(szIndent, sender, team, isAlive, recipient, i, szName, szMessage, SZ(value));
