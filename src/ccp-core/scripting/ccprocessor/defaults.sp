@@ -7,7 +7,7 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
         );
         
         if(part == BIND_PROTOTYPE)
-            Format(szBuffer, size, "%c %T", 1, szBuffer, (props >> 3));
+            Format(szBuffer, size, "%c %T", 1, szBuffer, SENDER_INDEX(props));
 
         return;
     }
@@ -21,12 +21,12 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
     // DEF_{ALIVE/SENDER}
     Format(szBuffer, size, "%s_%s", szBuffer, 
         (part < BIND_TEAM_CO) 
-            ? (view_as<bool>(props & 0x01)) 
+            ? (SENDER_ALIVE(props)) 
                 ? "A" 
                 : "D" 
             : (part < BIND_PREFIX_CO) 
                 ? indent 
-                : ((props >> 3)) 
+                : (SENDER_INDEX(props)) 
                     ? "U" 
                     : "S"
     );
@@ -35,14 +35,14 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
     if(part < BIND_PREFIX_CO) {
         Format(szBuffer, size, "%s%s", szBuffer,
             (part < BIND_TEAM_CO) // Status & Status CO
-                ? (!(view_as<bool>(props & 0x01))) // Died
-                    ? (!(props >> 3)) // Server
+                ? (!(SENDER_ALIVE(props))) // Died
+                    ? (!SENDER_INDEX(props)) // Server
                         ? "_S"
                         : ""
                     : ""  
-                : (((props >> 1) & 0x03) == 2)  // Team & Team CO
+                : (SENDER_TEAM(props) == 2)  // Team & Team CO
                     ? "_R"
-                    : (((props >> 1) & 0x03) == 3)
+                    : (SENDER_TEAM(props) == 3)
                         ? "_B"
                         : "_S"
         );

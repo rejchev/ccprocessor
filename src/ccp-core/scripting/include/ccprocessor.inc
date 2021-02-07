@@ -10,6 +10,12 @@
 #define MESSAGE_LENGTH      256
 #define MAX_LENGTH          512
 
+// See description for: 
+// native Action ccp_RebuildMessage(const int[] props, int propsCount, ArrayList params);
+#define SENDER_INDEX(%0)    (%0 >> 3)
+#define SENDER_TEAM(%0)     ((%0 >> 1) & 0x03)
+#define SENDER_ALIVE(%0)    view_as<bool>((%0 & 0x01)) 
+
 /* 
 API key:
     The value changes if the API has been changed. 
