@@ -94,7 +94,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     /*
     Action(const char[] props, int propsCount, ArrayList params)
         prop[0] = int message id;
-        prop[1] = int sender;
+        prop[1] = int sender; (sender, team, isalive)
         prop[2] = int recipient;
 
         param[0] = const char[] indent;
@@ -126,8 +126,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     /*
     bool(const char[] props, int propsCount, ArrayList params)
-        prop[0] = int message id;
-        prop[1] = int sender;
+        prop[0] = int sender;
+        prop[1] = int recipient;
 
         param[0] = const char[] indent; 
     */
@@ -151,40 +151,40 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
         ET_Event, Param_String, Param_Cell
     );
 
-    // bool(const char[] indent, int sender, const char[] msg_key?)
+    // bool(const char[] props, int propsCount, ArrayList params)
     g_fwdOnEngineMsg = new GlobalForward(
         "cc_proc_HandleEngineMsg",
-        ET_Event, Param_String, Param_Cell, Param_String
+        ET_Event, Param_String, Param_Cell, Param_Cell
     );
 
-    // void(int id, const char[] indent, int sender)
+    // void(const char[] props, int propsCount, ArrayList params)
     g_fwdMessageEnd = new GlobalForward(
         "cc_proc_OnMessageEnd",
-        ET_Ignore, Param_Cell, Param_String, Param_Cell
+        ET_Ignore, Param_String, Param_Cell, Param_Cell
     );
 
-    // void(int id, const char[] indent, int sender, const char[] msg_key, int[] players, int count)
+    // Action(const char[] props, int propsCount, ArrayList params)
     g_fwdRebuildClients = new GlobalForward(
         "cc_proc_OnRebuildClients",
-        ET_Ignore, Param_Cell, Param_String, Param_Cell, Param_String, Param_Array, Param_CellByRef
+        ET_Hook, Param_String, Param_Cell, Param_Cell
     );
     
-    // bool(int sender, const char[] template, const char[] msg, char[] ident, int size, int[] players, int count) 
+    // bool(int sender, ArrayList params) 
     g_fwdNewMessage = new GlobalForward(
         "cc_proc_OnNewMessage",
-        ET_Event, Param_Cell, Param_String, Param_String, Param_String, Param_Cell, Param_Array, Param_Cell
+        ET_Event, Param_Cell, Param_Cell
     );
     
-    // bool(int id, const char[] indent, int sender, int recipient, int part, int level, const char[] value)
+    // bool(const char[] props, int part, ArrayList params, int level, const char[] value)
     g_fwdRebuildString_Post = new GlobalForward(
         "cc_proc_OnRebuildString_Post",
-        ET_Hook, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String
+        ET_Event, Param_String, Param_Cell, Param_Cell, Param_CellByRef, Param_String
     );
     
-    // Action(int id, const char[] indent, int sender, int recipient, int part, int &level, char[] value, int size)
+    // Action(const char[] props, int part, ArrayList params, int &level, char[] value, int size)
     g_fwdRebuildString = new GlobalForward(
         "cc_proc_OnRebuildString",
-        ET_Hook, Param_Cell, Param_String, Param_Cell, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
+        ET_Hook, Param_String, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
     );
 
     RegPluginLibrary("ccprocessor");
@@ -388,105 +388,77 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
         g_iMessageCount = 0;
 }
 
-// todo
 Action BuildMessage(const char[] props, int propsCount, ArrayList params) {
-    int     backup;
-    char    value[MESSAGE_LENGTH];
+    static const int compile = 4;
 
-    backup  =   sender;
-    sender  >>= 3;
+    int schema  = props[1],
+        lang    = props[2];
 
+    char value[MESSAGE_LENGTH];
+
+    Action whatNext;
+
+    char szBuffer[MAX_LENGTH];
     FormatEx(SZ(szBuffer), "%s", szBinds[BIND_PROTOTYPE]);
-
-    #if defined DEBUG
-        DWRITE( \
-            "%s: RebuildMessage(%s): => \
-                \n\t\tID: %d \
-                \n\t\tSender: %N \
-                \n\t\tRecepient: %N \
-                \n\t\tName: %s \
-                \n\t\tMessage: %s \
-                \n\t\tTemplate: %s", \
-            DEBUG, szIndent, id, sender, recipient, szName, szMessage, szBuffer\
-        );
-    #endif
     
     for(int i; i < BIND_MAX; i++) {
         value = NULL_STRING;
 
-        GetDefaultValue(
-            szIndent, backup, recipient, i, 
-            (i == BIND_NAME) 
-                ? szName 
-                : (i == BIND_MSG) 
-                    ? szMessage
-                    : szTemplate, 
-            SZ(value)
-        );
+        GetDefaultValue(schema, lang, i, params, SZ(value));
         
-        if(Call_RebuildString(id, szIndent, sender, recipient, i, SZ(value)) != Plugin_Continue) {
+        if((whatNext = Call_RebuildString(props, i, params, SZ(value))) != Plugin_Continue) {
             #if defined DEBUG
-                DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, recipient);
+                DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, lang);
             #endif
 
-            return false;
+            return whatNext;
         }
 
         ReplaceString(SZ(szBuffer), szBinds[i], value, true);
     }
 
-    #if defined DEBUG
-        DWRITE( \
-            "%s: RebuildMessage(%s) Output: => \
-                \n\t\tType: %d \
-                \n\t\tSender: %N \
-                \n\t\tRecepient: %N \
-                \n\t\tName: %s \
-                \n\t\tMessage: %s \
-                \n\t\tTemplate: %s", \
-            DEBUG, szIndent, id, sender, recipient, szName, szMessage, szBuffer\
-        );
-    #endif
-
-    SetNativeString(6, SZ(szName));
-    SetNativeString(7, SZ(szMessage));
-    SetNativeString(8, SZ(szBuffer));
+    params.SetString(compile, szBuffer);
+    return whatNext;
 }
 
-// todo
 Action HandleEngineMsg(const char[] props, int propsCount, ArrayList params) {
-    char szIndent[64];
-    GetNativeString(1, SZ(szIndent));
+    static const int compile;
 
-    int sender = GetNativeCell(2);
-    int recipient = GetNativeCell(3)
-    int max_params = GetNativeCell(4);
+    int lang        = props[1],
+        paramsCount = props[2];
+    
+    char szMessage[MESSAGE_LENGTH];
+    params.GetString(compile, SZ(szMessage));
 
-    char szBuffer[MAX_LENGTH];
-    GetNativeString(5, SZ(szBuffer));
-
-    char szNum[8];
-    if(szBuffer[0] == '#') {
-        if(!Call_HandleEngineMsg(szIndent, sender, szBuffer)) {
-            return false;
-        }
-        
-        Format(SZ(szBuffer), "%T", szBuffer, recipient);
+    Action whatNext;
+    if(!szMessage[0]) {
+        return whatNext;
     }
 
-    if(max_params) {
-        for(int i; i < max_params; i++) {
-            FormatEx(szNum, sizeof(szNum), "{%i}", i+1);
+    if(szMessage[0] == '#') {
+        if(!ccp_EngineMsgRequest(props, propsCount-1, params) || !ccp_Translate(szMessage, lang)) {
+            return (whatNext = Plugin_Handled);
+        }
+    }
+
+    params.SetString(compile, szMessage);
+    if(!paramsCount) {
+        return whatNext;
+    }
+
+    char szNum[8];
+    for(int i; i < paramsCount; i++) {
+        FormatEx(SZ(szNum), "{%i}", i+1);
             ReplaceString(
-                SZ(szBuffer), szNum, 
+                SZ(szMessage), szNum, 
                 (i == 0) ? "%s1" 
                 : (i == 1) ? "%s2" 
                 : (i == 2) ? "%s3" 
                 : (i == 3) ? "%s4" 
                 : "%s5"
-            );
-        }
+        );
     }
-    
-    SetNativeString(5, SZ(szBuffer));
+
+    params.SetString(compile, szMessage);
+    return whatNext;
 }

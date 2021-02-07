@@ -1,13 +1,19 @@
-void GetDefaultValue(
-    const char[] indent, int props, int lang, 
-    int part, const char[] input, char[] szBuffer, int size
-)
-{
+void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szBuffer, int size) {
     if(part == BIND_NAME || part == BIND_MSG || part == BIND_PROTOTYPE) {
-        if(part != BIND_PROTOTYPE) FormatEx(szBuffer, size, "%s", input);
-        else FormatEx(szBuffer, size, "%c %T", 1, input, (props >> 3));
+        params.GetString(
+            (part == BIND_PROTOTYPE) ? 1 :
+            (part == BIND_NAME) ? 2 : 3, 
+            szBuffer, size
+        );
+        
+        if(part == BIND_PROTOTYPE)
+            Format(szBuffer, size, "%c %T", 1, szBuffer, (props >> 3));
+
         return;
     }
+
+    char indent[NAME_LENGTH];
+    params.GetString(0, SZ(indent));
 
     // DEF_{BIND}
     FormatBind("DEF_", part, 'u', szBuffer, size);

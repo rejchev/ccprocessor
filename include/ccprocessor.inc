@@ -68,7 +68,7 @@ stock const char szBinds[BIND_MAX][] =
  *  @return             true - skipping
  *                      false - otherwise
 */
-forward bool cc_proc_SkipColors(const char[] indent, int sender);
+forward bool    cc_proc_SkipColors(const char[] indent, int sender);
 
 /*
  *  Call when new message arrives /\
@@ -83,10 +83,7 @@ forward bool cc_proc_SkipColors(const char[] indent, int sender);
  *  
  *  @return             true - allow msg / false - otherwise
 */
-forward bool cc_proc_OnNewMessage(
-    int sender, const char[] temp_key, const char[] msg, 
-    char[] indent, int size, const int[] players, int playersNum
-);
+forward bool    cc_proc_OnNewMessage(int sender, ArrayList params);
 
 /*
  *  Streaming output for editing the recipient list
@@ -100,10 +97,7 @@ forward bool cc_proc_OnNewMessage(
 
  *  @noreturn
 */
-forward void cc_proc_OnRebuildClients(
-    int mid, const char[] indent, int sender, 
-    const char[] msg_key, int[] players, int &playersNum 
-);
+forward Action  cc_proc_OnRebuildClients(const char[] props, int propsCount, ArrayList params);
 
 /*
  *	Calls when building parts of the template
@@ -121,11 +115,7 @@ forward void cc_proc_OnRebuildClients(
  *                      Plugin_Handled  - build rejected (after post call),
  *                      Plugin_Stop     - build rejected immediately (with out post call)
 */
-forward Action cc_proc_OnRebuildString(
-    int mid, const char[] indent, int sender,
-    int recipient, int part, int &level, 
-    char[] buffer, int size
-);
+forward Action  cc_proc_OnRebuildString(const char[] props, int part, ArrayList params, int &level, char[] value, int size);
 
 /*
  *  Call after build part of the template
@@ -140,11 +130,7 @@ forward Action cc_proc_OnRebuildString(
  *  
  *  @return             true - Block sending/false - send
 */
-forward bool cc_proc_OnRebuildString_Post(
-    int mid, const char[] indent, int sender,
-    int recipient, int part, int level,
-    const char[] value
-);
+forward bool    cc_proc_OnRebuildString_Post(const char[] props, int part, ArrayList params, int level, const char[] value);
 
 /*
  *  Calls after message delivery to all recipients 
@@ -155,9 +141,7 @@ forward bool cc_proc_OnRebuildString_Post(
  *  
  *  @noreturn
 */
-forward void cc_proc_OnMessageEnd(
-    int mid, const char[] indent, int sender
-);
+forward void    cc_proc_OnMessageEnd(const char[] props, int propsCount, ArrayList params);
 
 /*
  *  Calls when capturing an engine message from the server
@@ -169,9 +153,7 @@ forward void cc_proc_OnMessageEnd(
  *  
  *  @return             true - handle this / false - otherwise
 */
-forward bool cc_proc_HandleEngineMsg(
-    const char[] indent, int sender, const char[] msg
-);
+forward bool    cc_proc_HandleEngineMsg(const char[] props, int propsCount, ArrayList params);
 
 /*
  *  Calls when the config reading is completed
@@ -180,7 +162,7 @@ forward bool cc_proc_HandleEngineMsg(
  *  
  *  @noreturn
 */
-forward void cc_config_parsed();
+forward void    cc_config_parsed();
 
 /*
  *  API hand shake
@@ -189,7 +171,7 @@ forward void cc_config_parsed();
  *  
  *  @noreturn
 */
-forward void cc_proc_APIHandShake(const int api);
+forward void    cc_proc_APIHandShake(const int api);
 
 /*
  *  Get a pallete
@@ -209,7 +191,7 @@ native ArrayList cc_drop_palette();
  *  
  *  @noreturn
 */
-native void ccp_replaceColors(char[] szBuffer, bool toNull = true);
+native void     ccp_replaceColors(char[] szBuffer, bool toNull = true);
 
 /*
  *  Get the API key used by the core
@@ -218,7 +200,7 @@ native void ccp_replaceColors(char[] szBuffer, bool toNull = true);
  *  
  *  @return         API version key
 */
-native int cc_get_APIKey();
+native int      cc_get_APIKey();
 
 /*
  *  API key matching
@@ -228,37 +210,21 @@ native int cc_get_APIKey();
  *  @return             true - equal
                         false - otherwise
 */
-native bool cc_is_APIEqual(const int api);
+native bool     cc_is_APIEqual(const int api);
 
-native void ccp_UpdateRecipients(const int [] input, int[] output, int &playersNum);
-native bool ccp_SkipColors(const char[] indent, int sender);
-native void ccp_ChangeMode(const int[] players, int playersNum, const char[] value = NULL_STRING);
+native void     ccp_UpdateRecipients(const int [] input, int[] output, int &playersNum);
+native bool     ccp_SkipColors(const char[] indent, int sender);
+native void     ccp_ChangeMode(const int[] players, int playersNum, const char[] value = NULL_STRING);
 
-native int  ccp_StartNewMessage(
-    int sender, const char[] msg_key, 
-    const char[] msg, char[] indent, int size, 
-    const int[] players, int playersNum
-);
+native int      ccp_GetMessageID();
+native bool     ccp_Translate(char[] phrase, int recipient);
 
-native void ccp_RebuildClients(
-    int mid, const char[] indent, int sender,
-    const char[] msg_key, int[] players, int &playersNum 
-);
-
-native bool ccp_RebuildMessage(
-    int mid, const char[] indent, int props,
-    int recipient, const char[] msg_key, 
-    char[] name, char[] msg, char[] buffer, int size
-);
-
-native bool ccp_PrepareMessage(
-    const char[] indent, int sender,
-    int recipient, int max_params, char[] buffer
-);
-
-native void ccp_EndMessage(int mid, const char[] indent, int sedner);
-
-native bool ccp_EngineMsgRequest(const char[] indent, int sender, const char[] buffer);
+native int      ccp_StartNewMessage(int sender, ArrayList params);
+native Action   ccp_RebuildClients(const char[] props, int propsCount, ArrayList params);
+native Action   ccp_RebuildMessage(const char[] props, int propsCount, ArrayList params);
+native Action   ccp_HandleEngineMsg(const char[] props, int propsCount, ArrayList params);
+native void     ccp_EndMessage(const char[] props, int propsCount, ArrayList params);
+native bool     ccp_EngineMsgRequest(const char[] props, int propsCount, ArrayList params);
 
 stock int BreakPoint(int iBindType, char[] szValue)
 {
@@ -421,8 +387,10 @@ public void __pl_ccprocessor_SetNTVOptional()
     MarkNativeAsOptional("ccp_StartNewMessage");
     MarkNativeAsOptional("ccp_RebuildClients");
     MarkNativeAsOptional("ccp_RebuildMessage");
-    MarkNativeAsOptional("ccp_PrepareMessage");
+    MarkNativeAsOptional("ccp_HandleEngineMsg");
     MarkNativeAsOptional("ccp_EndMessage");
     MarkNativeAsOptional("ccp_EngineMsgRequest");
+    MarkNativeAsOptional("ccp_GetMessageID");
+    MarkNativeAsOptional("ccp_Translate");
 }
 #endif

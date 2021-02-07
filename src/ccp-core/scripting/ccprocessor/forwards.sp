@@ -4,25 +4,19 @@ void Call_OnCompReading()
     Call_Finish();
 }
 
-Action Call_RebuildString(
-    int id, const char[] indent,
-    int sender, int recipient,
-    int part, char[] szMessage, int iSize
-) {
+Action Call_RebuildString(const char[] props, int part, ArrayList params, char[] szMessage, int size) {
     Action output;
     bool block;
     int level;
 
     // Action Call
     Call_StartForward(g_fwdRebuildString);
-    Call_PushCell(id);
-    Call_PushString(indent);
-    Call_PushCell(sender);
-    Call_PushCell(recipient);
+    Call_PushString(props);
     Call_PushCell(part);
+    Call_PushCell(params);
     Call_PushCellRef(level);
-    Call_PushStringEx(szMessage, iSize, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-    Call_PushCell(iSize);
+    Call_PushStringEx(szMessage, size, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
+    Call_PushCell(size);
     Call_Finish(output);
 
     // exclude post call
@@ -33,11 +27,9 @@ Action Call_RebuildString(
 
     // post call
     Call_StartForward(g_fwdRebuildString_Post);
-    Call_PushCell(id);
-    Call_PushString(indent);
-    Call_PushCell(sender);
-    Call_PushCell(recipient);
+    Call_PushString(props);
     Call_PushCell(part);
+    Call_PushCell(params);
     Call_PushCell(level);
     Call_PushString(szMessage);
     Call_Finish(block);
@@ -49,28 +41,25 @@ Action Call_RebuildString(
     return output;
 }
 
-void Call_RebuildClients(
-    int id, const char[] indent, 
-    int sender, const char[] msg_key, 
-    int[] clients, int &numClients
-) {
+Action Call_RebuildClients(const char[] props, int propsCount, ArrayList params) {
+    Action whatNext;
+
     Call_StartForward(g_fwdRebuildClients);
-    Call_PushCell(id);
-    Call_PushString(indent);
-    Call_PushCell(sender);
-    Call_PushString(msg_key);
-    Call_PushArrayEx(clients, numClients, SM_PARAM_COPYBACK);
-    Call_PushCellRef(numClients);
-    Call_Finish();
+    Call_PushString(props);
+    Call_PushCell(propsCount);
+    Call_PushCell(params);
+    Call_Finish(whatNext);
+
+    return whatNext;
 }
 
-bool Call_HandleEngineMsg(const char[] indent, int sender, const char[] buffer) {
-    bool handle = TranslationPhraseExists(buffer);
+bool Call_HandleEngineMsg(const char[] props, int propsCount, ArrayList params) {
+    bool handle;
 
     Call_StartForward(g_fwdOnEngineMsg);
-    Call_PushString(indent);
-    Call_PushCell(sender);
-    Call_PushString(buffer);
+    Call_PushString(props);
+    Call_PushCell(propsCount);
+    Call_PushCell(params);
     Call_Finish(handle);
 
     return handle;
@@ -87,26 +76,21 @@ bool Call_IsSkipColors(const char[] indent, int sender) {
     return skip;
 }
 
-bool Call_NewMessage(int sender, const char[] msg_key, const char[] msg, char[] indent, int size, int[] players, int playersNum) {
+bool Call_NewMessage(int sender, ArrayList params) {
     bool start = true;
 
     Call_StartForward(g_fwdNewMessage);   
-    Call_PushCell(sender);
-    Call_PushString(msg_key);
-    Call_PushString(msg);
-    Call_PushStringEx(indent, size, SM_PARAM_STRING_UTF8|SM_PARAM_STRING_COPY, SM_PARAM_COPYBACK);
-    Call_PushCell(size);
-    Call_PushArray(players, playersNum);
-    Call_PushCell(playersNum);
+    Call_PushCell(sender);   
+    Call_PushCell(params);
     Call_Finish(start);
 
     return start
 }
 
-void Call_MessageEnd(int id, const char[] indent, int sender) {
+void Call_MessageEnd(const char[] props, int propsCount, ArrayList params) {
     Call_StartForward(g_fwdMessageEnd);
-    Call_PushCell(id);
-    Call_PushString(indent);
-    Call_PushCell(sender);
+    Call_PushString(props);
+    Call_PushCell(propsCount);
+    Call_PushCell(params);
     Call_Finish();
 }

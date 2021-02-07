@@ -93,21 +93,21 @@ public int Native_StartNewMessage(Handle hPlugin, int params) {
     return g_iMsgInProgress;
 }
 
-public int Native_RebuildClients(Handle hPlugin, int params) {
+public any Native_RebuildClients(Handle hPlugin, int params) {
     char props[16];
-    GetNativeString(1, SZ(szBuffer));
+    GetNativeString(1, SZ(props));
     
     return Call_RebuildClients(props, GetNativeCell(2), GetNativeCell(3));
 }
 
-public int Native_RebuildMessage(Handle hPlugin, int params) {
+public any Native_RebuildMessage(Handle hPlugin, int params) {
     char props[16];
     GetNativeString(1, SZ(props));
 
     return BuildMessage(props, GetNativeCell(2), GetNativeCell(3));
 }
 
-public int Native_HandleEngineMsg(Handle hPlugin, int params) {
+public any Native_HandleEngineMsg(Handle hPlugin, int params) {
     char props[16];
     GetNativeString(1, SZ(props));
     
