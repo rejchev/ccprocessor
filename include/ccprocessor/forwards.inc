@@ -36,7 +36,7 @@ forward bool    cc_proc_OnNewMessage(int sender, ArrayList params);
 
  *  @noreturn
 */
-forward Action  cc_proc_OnRebuildClients(const char[] props, int propsCount, ArrayList params);
+forward Action  cc_proc_OnRebuildClients(const int[] props, int propsCount, ArrayList params);
 
 /*
  *	Calls when building parts of the template
@@ -54,7 +54,7 @@ forward Action  cc_proc_OnRebuildClients(const char[] props, int propsCount, Arr
  *                      Plugin_Handled  - build rejected (after post call),
  *                      Plugin_Stop     - build rejected immediately (with out post call)
 */
-forward Action  cc_proc_OnRebuildString(const char[] props, int part, ArrayList params, int &level, char[] value, int size);
+forward Action  cc_proc_OnRebuildString(const int[] props, int part, ArrayList params, int &level, char[] value, int size);
 
 /*
  *  Call after build part of the template
@@ -69,7 +69,7 @@ forward Action  cc_proc_OnRebuildString(const char[] props, int part, ArrayList 
  *  
  *  @return             true - Block sending/false - send
 */
-forward bool    cc_proc_OnRebuildString_Post(const char[] props, int part, ArrayList params, int level, const char[] value);
+forward bool    cc_proc_OnRebuildString_Post(const int[] props, int part, ArrayList params, int level, const char[] value);
 
 /*
  *  Calls after message delivery to all recipients 
@@ -80,7 +80,7 @@ forward bool    cc_proc_OnRebuildString_Post(const char[] props, int part, Array
  *  
  *  @noreturn
 */
-forward void    cc_proc_OnMessageEnd(const char[] props, int propsCount, ArrayList params);
+forward void    cc_proc_OnMessageEnd(const int[] props, int propsCount, ArrayList params);
 
 /*
  *  Calls when capturing an engine message from the server
@@ -92,7 +92,7 @@ forward void    cc_proc_OnMessageEnd(const char[] props, int propsCount, ArrayLi
  *  
  *  @return             true - handle this / false - otherwise
 */
-forward bool    cc_proc_HandleEngineMsg(const char[] props, int propsCount, ArrayList params);
+forward bool    cc_proc_HandleEngineMsg(const int[] props, int propsCount, ArrayList params);
 
 /*
  *  Calls when the config reading is completed

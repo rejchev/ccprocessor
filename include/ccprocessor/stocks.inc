@@ -50,7 +50,8 @@ stock int stock_NewMessage(ArrayList a, int s, const char[] t, const char[] m, c
 }
 
 stock Action stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, const char[] m, int[] p, int &c) {
-    char props[4];
+    static const int propsCount = 2;
+    int[] props = new int[propsCount]
     props[0] = id;
     props[1] = s;
 
@@ -61,7 +62,7 @@ stock Action stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, 
     a.Push(c);
 
     Action next;
-    if((next = ccp_RebuildClients(props, strlen(props), a)) == Plugin_Continue) {
+    if((next = ccp_RebuildClients(props, propsCount, a)) == Plugin_Continue) {
         a.Get(3, c);
         a.GetArray(2, p, c);
     }
@@ -70,7 +71,8 @@ stock Action stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, 
 }
 
 stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind, const char[] t, char[] n, char[] m, char[] o) {
-    char props[4];
+    static const int propsCount = 3;
+    int[] props = new int[propsCount]
     props[0] = i;
     props[1] = s;
     props[2] = r;
@@ -83,7 +85,7 @@ stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind
     a.PushString(o);
 
     Action next;
-    if((next = ccp_RebuildMessage(props, strlen(props), a)) == Plugin_Continue) {
+    if((next = ccp_RebuildMessage(props, propsCount, a)) == Plugin_Continue) {
         a.GetString(2, n, NAME_LENGTH);
         a.GetString(3, m, MESSAGE_LENGTH);
         a.GetString(4, o, MAX_LENGTH);
@@ -93,16 +95,21 @@ stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind
 }
 
 stock Action stock_HandleEngineMsg(ArrayList a, int s, int r, int c, char[] m, int l) {
-    char props[4];
+    static const int propsCount = 3;
+    // int[] props = new int[propsCount];
+    int[] props = new int[propsCount]
     props[0] = s;
     props[1] = r;
     props[2] = c;
+
+    // LogMessage("Count: %d : %d : %s", props[2], c, props);
 
     a.Clear();
     a.PushString(m);
 
     Action next;
-    if((next = ccp_HandleEngineMsg(props, strlen(props), a)) < Plugin_Stop) {
+    if((next = ccp_HandleEngineMsg(props, propsCount, a)) != Plugin_Stop) {
+        LogMessage("Translate: %d", next);
         a.GetString(0, m, l);
     }
 
@@ -110,25 +117,27 @@ stock Action stock_HandleEngineMsg(ArrayList a, int s, int r, int c, char[] m, i
 } 
 
 stock void stock_EndMsg(ArrayList a, int id, int s, const char[] ind) {
-    char props[4];
+    static const int propsCount = 3;
+    int[] props = new int[propsCount]
     props[0] = id;
     props[1] = s;
 
     a.Clear();
     a.PushString(ind);
 
-    ccp_EndMessage(props, strlen(props), a);
+    ccp_EndMessage(props, propsCount, a);
 }
 
 stock bool stock_EngineMsgReq(ArrayList a, int s, int r, const char[] m) {
-    char props[4];
+    static const int propsCount = 3;
+    int[] props = new int[propsCount]
     props[0] = s;
     props[1] = r;
 
     a.Clear();
     a.PushString(m);
 
-    return ccp_EngineMsgRequest(props, strlen(props), a);
+    return ccp_EngineMsgRequest(props, propsCount, a);
 }
 
 #if !defined CORE

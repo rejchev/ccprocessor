@@ -45,11 +45,11 @@ native int      ccp_GetMessageID();
 native bool     ccp_Translate(char[] phrase, int recipient);
 
 native int      ccp_StartNewMessage(int sender, ArrayList params);
-native Action   ccp_RebuildClients(const char[] props, int propsCount, ArrayList params);
-native Action   ccp_RebuildMessage(const char[] props, int propsCount, ArrayList params);
-native Action   ccp_HandleEngineMsg(const char[] props, int propsCount, ArrayList params);
-native void     ccp_EndMessage(const char[] props, int propsCount, ArrayList params);
-native bool     ccp_EngineMsgRequest(const char[] props, int propsCount, ArrayList params);
+native Action   ccp_RebuildClients(const int[] props, int propsCount, ArrayList params);
+native Action   ccp_RebuildMessage(const int[] props, int propsCount, ArrayList params);
+native Action   ccp_HandleEngineMsg(const int[] props, int propsCount, ArrayList params);
+native void     ccp_EndMessage(const int[] props, int propsCount, ArrayList params);
+native bool     ccp_EngineMsgRequest(const int[] props, int propsCount, ArrayList params);
 
 #if !defined REQUIRE_PLUGIN
 public void __pl_ccprocessor_SetNTVOptional()
