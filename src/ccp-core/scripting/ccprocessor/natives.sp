@@ -9,6 +9,7 @@ public int Native_Translate(Handle hPlugin, int params) {
     GetNativeString(1, SZ(szPhrase));
 
     if(!TranslationPhraseExists(szPhrase)) {
+        // LogMessage("NotTransl: %s", szPhrase);
         return false;
     }
 
@@ -18,8 +19,8 @@ public int Native_Translate(Handle hPlugin, int params) {
 }
 
 public int Native_EngineMessageReq(Handle hPlugin, int params) {
-    char props[16];
-    GetNativeString(1, SZ(props));
+    int props[4];
+    GetNativeArray(1, props, GetNativeCell(2));
 
     return Call_HandleEngineMsg(props, GetNativeCell(2), GetNativeCell(3));
 }
@@ -94,29 +95,29 @@ public int Native_StartNewMessage(Handle hPlugin, int params) {
 }
 
 public any Native_RebuildClients(Handle hPlugin, int params) {
-    char props[16];
-    GetNativeString(1, SZ(props));
+    int props[4];
+    GetNativeArray(1, props, GetNativeCell(2));
     
     return Call_RebuildClients(props, GetNativeCell(2), GetNativeCell(3));
 }
 
 public any Native_RebuildMessage(Handle hPlugin, int params) {
-    char props[16];
-    GetNativeString(1, SZ(props));
+    int props[4];
+    GetNativeArray(1, props, GetNativeCell(2));
 
     return BuildMessage(props, GetNativeCell(2), GetNativeCell(3));
 }
 
 public any Native_HandleEngineMsg(Handle hPlugin, int params) {
-    char props[16];
-    GetNativeString(1, SZ(props));
+    int props[4];
+    GetNativeArray(1, props, GetNativeCell(2));
     
     return HandleEngineMsg(props, GetNativeCell(2), GetNativeCell(3));
 }
 
 public int Native_EndMessage(Handle hPlugin, int params) {
-    char props[16];
-    GetNativeString(1, SZ(props));
+    int props[4];
+    GetNativeArray(1, props, GetNativeCell(2));
 
     Call_MessageEnd(props, GetNativeCell(2), GetNativeCell(3));
 

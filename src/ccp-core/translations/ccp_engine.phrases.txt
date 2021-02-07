@@ -41,6 +41,12 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"   
     }
 
+    "#Game_Chat_Radio"
+    {
+        "ru"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
+        "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"   
+    }
+
     // Templates ALL: TextMsg && SayText
     "#Game_Chat_Server"
     {

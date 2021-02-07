@@ -85,7 +85,7 @@ public void AfterMessage(UserMsg msgid, bool send)
         return;
     }
     
-    ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
 
     char szIndent[NAME_LENGTH];
     strcopy(SZ(szIndent), indent_def);
@@ -100,9 +100,6 @@ public void AfterMessage(UserMsg msgid, bool send)
         FormatEx(SZ(szBuffer), "params[%i]", i);
         g_mMessage.GetString(szBuffer, params[i], sizeof(params[]));
     }
-
-    char szTemplate[MESSAGE_LENGTH];
-    g_mMessage.GetString("msg_name", SZ(szTemplate));
     
     int playersNum;
     g_mMessage.GetValue("playersNum", playersNum);
@@ -117,7 +114,7 @@ public void AfterMessage(UserMsg msgid, bool send)
     bool alive = IsPlayerAlive(sender);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, szTemplate, params[display], players, playersNum, SZ(szIndent))) == -1) {
+    if((id = stock_NewMessage(arr, sender, template, params[display], players, playersNum, SZ(szIndent))) == -1) {
         delete arr;
         return;
     }
@@ -149,10 +146,10 @@ public void AfterMessage(UserMsg msgid, bool send)
 
         // translation phrase is not exists
         if(next == Plugin_Handled) {
-            FormatEx(SZ(message), "{%i}", display);
+            FormatEx(SZ(message), "{%i}", display+1);
         }
 
-        if((next = stock_RebuildMsg(arr, id, j, players[i], szIndent, szTemplate, params[PARAM_NAME], message, szBuffer)) != Plugin_Continue) {
+        if((next = stock_RebuildMsg(arr, id, j, players[i], szIndent, template, params[PARAM_NAME], message, szBuffer)) != Plugin_Continue) {
             continue;
         }
 

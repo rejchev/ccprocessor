@@ -47,7 +47,7 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
     g_mMessage.GetString("params[0]", SZ(szMessage));
 
     ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
-    if(szMessage[0] == '#' && !stock_EngineMsgReq(arr, 0, 0, szMessage)) {
+    if(szMessage[0] == '#' && (!stock_EngineMsgReq(arr, 0, 0, szMessage) || !ccp_Translate(szMessage, 0))) {
         delete g_mMessage;
         delete arr;
         return Plugin_Continue;
@@ -113,6 +113,8 @@ public void TextMsg_Completed(StringMap g_mMessage)
         if(stock_RebuildMsg(arr, id, sender, players[i], szIndent, template, name, message, szBuffer) != Plugin_Continue) {
             continue;
         }
+
+        stock_HandleEngineMsg(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
 
         ccp_replaceColors(szBuffer, false);
 

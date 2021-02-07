@@ -4,14 +4,14 @@ void Call_OnCompReading()
     Call_Finish();
 }
 
-Action Call_RebuildString(const char[] props, int part, ArrayList params, char[] szMessage, int size) {
+Action Call_RebuildString(const int[] props, int propsCount, int part, ArrayList params, char[] szMessage, int size) {
     Action output;
     bool block;
     int level;
 
     // Action Call
     Call_StartForward(g_fwdRebuildString);
-    Call_PushString(props);
+    Call_PushArray(props, propsCount);
     Call_PushCell(part);
     Call_PushCell(params);
     Call_PushCellRef(level);
@@ -27,7 +27,7 @@ Action Call_RebuildString(const char[] props, int part, ArrayList params, char[]
 
     // post call
     Call_StartForward(g_fwdRebuildString_Post);
-    Call_PushString(props);
+    Call_PushArray(props, propsCount);
     Call_PushCell(part);
     Call_PushCell(params);
     Call_PushCell(level);
@@ -41,11 +41,11 @@ Action Call_RebuildString(const char[] props, int part, ArrayList params, char[]
     return output;
 }
 
-Action Call_RebuildClients(const char[] props, int propsCount, ArrayList params) {
+Action Call_RebuildClients(const int[] props, int propsCount, ArrayList params) {
     Action whatNext;
 
     Call_StartForward(g_fwdRebuildClients);
-    Call_PushString(props);
+    Call_PushArray(props, propsCount);
     Call_PushCell(propsCount);
     Call_PushCell(params);
     Call_Finish(whatNext);
@@ -53,11 +53,11 @@ Action Call_RebuildClients(const char[] props, int propsCount, ArrayList params)
     return whatNext;
 }
 
-bool Call_HandleEngineMsg(const char[] props, int propsCount, ArrayList params) {
-    bool handle;
+bool Call_HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
+    bool handle = true;
 
     Call_StartForward(g_fwdOnEngineMsg);
-    Call_PushString(props);
+    Call_PushArray(props, propsCount);
     Call_PushCell(propsCount);
     Call_PushCell(params);
     Call_Finish(handle);
@@ -87,9 +87,9 @@ bool Call_NewMessage(int sender, ArrayList params) {
     return start
 }
 
-void Call_MessageEnd(const char[] props, int propsCount, ArrayList params) {
+void Call_MessageEnd(const int[] props, int propsCount, ArrayList params) {
     Call_StartForward(g_fwdMessageEnd);
-    Call_PushString(props);
+    Call_PushArray(props, propsCount);
     Call_PushCell(propsCount);
     Call_PushCell(params);
     Call_Finish();

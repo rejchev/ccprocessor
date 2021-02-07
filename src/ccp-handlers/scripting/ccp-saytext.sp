@@ -53,7 +53,7 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
     g_mMessage.SetValue("playersNum", playersNum, true);
 
     ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
-    if(szMessage[0] == '#' && !stock_EngineMsgReq(arr, 0, 0, szMessage)) {
+    if(szMessage[0] == '#' && (!stock_EngineMsgReq(arr, 0, 0, szMessage) || !ccp_Translate(szMessage, 0))) {
         g_mMessage.Clear();
         delete arr;
         return Plugin_Continue;

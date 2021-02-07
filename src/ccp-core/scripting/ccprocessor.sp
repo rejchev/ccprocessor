@@ -92,7 +92,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("ccp_RebuildClients",                  Native_RebuildClients);
 
     /*
-    Action(const char[] props, int propsCount, ArrayList params)
+    Action(const int[] props, int propsCount, ArrayList params)
         prop[0] = int message id;
         prop[1] = int sender; (sender, team, isalive)
         prop[2] = int recipient;
@@ -106,7 +106,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("ccp_RebuildMessage",                  Native_RebuildMessage);
 
     /*
-    Action(const char[] props, int propsCount, ArrayList params)
+    Action(const int[] props, int propsCount, ArrayList params)
         prop[0] = int sender;
         prop[1] = int recipient;
         prop[2] = int paramsCount;
@@ -116,7 +116,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("ccp_HandleEngineMsg",                 Native_HandleEngineMsg);
 
     /*
-    void(const char[] props, int propsCount, ArrayList params)
+    void(const int[] props, int propsCount, ArrayList params)
         prop[0] = int message id;
         prop[1] = int sender;
 
@@ -125,7 +125,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("ccp_EndMessage",                      Native_EndMessage);
 
     /*
-    bool(const char[] props, int propsCount, ArrayList params)
+    bool(const int[] props, int propsCount, ArrayList params)
         prop[0] = int sender;
         prop[1] = int recipient;
 
@@ -151,22 +151,22 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
         ET_Event, Param_String, Param_Cell
     );
 
-    // bool(const char[] props, int propsCount, ArrayList params)
+    // bool(const int[] props, int propsCount, ArrayList params)
     g_fwdOnEngineMsg = new GlobalForward(
         "cc_proc_HandleEngineMsg",
-        ET_Event, Param_String, Param_Cell, Param_Cell
+        ET_Event, Param_Array, Param_Cell, Param_Cell
     );
 
-    // void(const char[] props, int propsCount, ArrayList params)
+    // void(const int[] props, int propsCount, ArrayList params)
     g_fwdMessageEnd = new GlobalForward(
         "cc_proc_OnMessageEnd",
-        ET_Ignore, Param_String, Param_Cell, Param_Cell
+        ET_Ignore, Param_Array, Param_Cell, Param_Cell
     );
 
-    // Action(const char[] props, int propsCount, ArrayList params)
+    // Action(const int[] props, int propsCount, ArrayList params)
     g_fwdRebuildClients = new GlobalForward(
         "cc_proc_OnRebuildClients",
-        ET_Hook, Param_String, Param_Cell, Param_Cell
+        ET_Hook, Param_Array, Param_Cell, Param_Cell
     );
     
     // bool(int sender, ArrayList params) 
@@ -175,16 +175,16 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
         ET_Event, Param_Cell, Param_Cell
     );
     
-    // bool(const char[] props, int part, ArrayList params, int level, const char[] value)
+    // bool(const int[] props, int part, ArrayList params, int level, const char[] value)
     g_fwdRebuildString_Post = new GlobalForward(
         "cc_proc_OnRebuildString_Post",
-        ET_Event, Param_String, Param_Cell, Param_Cell, Param_CellByRef, Param_String
+        ET_Event, Param_Array, Param_Cell, Param_Cell, Param_Cell, Param_String
     );
     
-    // Action(const char[] props, int part, ArrayList params, int &level, char[] value, int size)
+    // Action(const int[] props, int part, ArrayList params, int &level, char[] value, int size)
     g_fwdRebuildString = new GlobalForward(
         "cc_proc_OnRebuildString",
-        ET_Hook, Param_String, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
+        ET_Hook, Param_Array, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
     );
 
     RegPluginLibrary("ccprocessor");
@@ -388,11 +388,8 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
         g_iMessageCount = 0;
 }
 
-Action BuildMessage(const char[] props, int propsCount, ArrayList params) {
+Action BuildMessage(const int[] props, int propsCount, ArrayList params) {
     static const int compile = 4;
-
-    int schema  = props[1],
-        lang    = props[2];
 
     char value[MESSAGE_LENGTH];
 
@@ -404,11 +401,11 @@ Action BuildMessage(const char[] props, int propsCount, ArrayList params) {
     for(int i; i < BIND_MAX; i++) {
         value = NULL_STRING;
 
-        GetDefaultValue(schema, lang, i, params, SZ(value));
+        GetDefaultValue(props[1], props[2], i, params, SZ(value));
         
-        if((whatNext = Call_RebuildString(props, i, params, SZ(value))) != Plugin_Continue) {
+        if((whatNext = Call_RebuildString(props, propsCount, i, params, SZ(value))) != Plugin_Continue) {
             #if defined DEBUG
-                DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, lang);
+                DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, props[2]);
             #endif
 
             return whatNext;
@@ -421,11 +418,8 @@ Action BuildMessage(const char[] props, int propsCount, ArrayList params) {
     return whatNext;
 }
 
-Action HandleEngineMsg(const char[] props, int propsCount, ArrayList params) {
+Action HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
     static const int compile;
-
-    int lang        = props[1],
-        paramsCount = props[2];
     
     char szMessage[MESSAGE_LENGTH];
     params.GetString(compile, SZ(szMessage));
@@ -440,18 +434,18 @@ Action HandleEngineMsg(const char[] props, int propsCount, ArrayList params) {
             return (whatNext = Plugin_Stop);
         }
 
-        if(!ccp_Translate(szMessage, lang)) {
+        if(!ccp_Translate(szMessage, props[1])) {
             return (whatNext = Plugin_Handled);
         }
     }
 
     params.SetString(compile, szMessage);
-    if(!paramsCount) {
+    if(!props[2]) {
         return whatNext;
     }
 
     char szNum[8];
-    for(int i; i < paramsCount; i++) {
+    for(int i; i < props[2]; i++) {
         FormatEx(SZ(szNum), "{%i}", i+1);
             ReplaceString(
                 SZ(szMessage), szNum, 
