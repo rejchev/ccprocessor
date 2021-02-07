@@ -6,8 +6,13 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
             szBuffer, size
         );
         
-        if(part == BIND_PROTOTYPE)
+        if(part == BIND_PROTOTYPE && TranslationPhraseExists(szBuffer)) {
             Format(szBuffer, size, "%c %T", 1, szBuffer, SENDER_INDEX(props));
+        }
+
+        #if defined DEBUG
+        DWRITE("%s: GetDefaultValue(%i): \n\t\tPart: %i \n\t\tValue: %s", DEBUG, SENDER_INDEX(props), part, szBuffer);
+        #endif
 
         return;
     }
@@ -50,8 +55,14 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
 
     if(!TranslationPhraseExists(szBuffer)) {
         szBuffer[0] = 0;
-        return;
+    } else {
+        Format(szBuffer, size, "%T", szBuffer, lang);
     }
 
-    Format(szBuffer, size, "%T", szBuffer, lang);    
+    #if defined DEBUG
+    DWRITE(\
+        "%s: GetDefaultValue(%i): \n\t\tIndent: %s \n\t\tPart: %i \n\t\tValue: %s", \
+        DEBUG, SENDER_INDEX(props), indent, part, szBuffer\
+    );
+    #endif
 }

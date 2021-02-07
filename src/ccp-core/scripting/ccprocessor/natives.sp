@@ -11,7 +11,7 @@ public int Native_Translate(Handle hPlugin, int params) {
     bool exist = TranslationPhraseExists(szPhrase);
 
     #if defined DEBUG
-    DWRITE("%s: Native(ccp_Translate(%s)): %b", szPhrase, exist);
+    DWRITE("%s: ccp_Translate(%s): %b", DEBUG, szPhrase, exist);
     #endif
 
     if(exist) {
@@ -26,24 +26,34 @@ public int Native_EngineMessageReq(Handle hPlugin, int params) {
     int props[4];
     GetNativeArray(1, props, GetNativeCell(2));
 
-    return Call_HandleEngineMsg(props, GetNativeCell(2), GetNativeCell(3));
+    static bool handle;
+    handle = Call_HandleEngineMsg(props, GetNativeCell(2), GetNativeCell(3));
+
+    #if defined DEBUG
+    DWRITE("%s: ccp_EngineMsgRequest(): %b", DEBUG, handle);
+    #endif
+
+    return handle;
 }
 
 public int Native_UpdateRecipients(Handle hPlugin, int params) {
-    int players[MAXPLAYERS+1];
-    int output[MAXPLAYERS+1];
     int playersNum = GetNativeCellRef(3);
+    int[] players = new int[playersNum];
+
     GetNativeArray(1, players, playersNum);
 
     int a;
     for(int i; i < playersNum; i++) {
-        if(IsClientConnected(players[i]) 
-        && (IsClientSourceTV(players[i]) || !IsFakeClient(players[i]))) {
-            output[a++] = players[i];  
+        if(IsClientConnected(players[i]) && (IsClientSourceTV(players[i]) || !IsFakeClient(players[i]))) {
+            players[a++] = players[i];  
+
+            #if defined DEBUG
+            DWRITE("%s: ccp_UpdateRecipients(%i): valid", DEBUG, players[i]);
+            #endif
         }
     }
 
-    SetNativeArray(2, output, a);
+    SetNativeArray(2, players, a);
     SetNativeCellRef(3, a);   
 }
 
@@ -51,8 +61,14 @@ public int Native_SkipColors(Handle hPlugin, int params) {
     char szIndent[64];
     GetNativeString(1, szIndent, sizeof(szIndent));
 
-    return Call_IsSkipColors(szIndent, GetNativeCell(2));    
+    static bool skip;
+    skip = Call_IsSkipColors(szIndent, GetNativeCell(2));
 
+    #if defined DEBUG
+    DWRITE("%s: ccp_UpdateRecipients(%s): %b", DEBUG, szIndent, skip);
+    #endif
+
+    return skip;    
 }
 
 public int Native_ChangeMode(Handle hPlugin, int params) {
@@ -84,16 +100,20 @@ public int Native_ChangeMode(Handle hPlugin, int params) {
 }
 
 public int Native_StartNewMessage(Handle hPlugin, int params) {
-    if(g_iMsgInProgress != -1) {
-        return -1;
-    }
+    if(g_iMsgInProgress != -1 || !Call_NewMessage(GetNativeCell(1), GetNativeCell(2))) {
+        #if defined DEBUG
+        DWRITE("%s: ccp_StartNewMessage(%i): message aborted", DEBUG, g_iMsgInProgress);
+        #endif
 
-    if(!Call_NewMessage(GetNativeCell(1), GetNativeCell(2))) {
         return -1;
     }
 
     g_iMessageCount++;
     g_iMsgInProgress = g_iMessageCount;
+
+    #if defined DEBUG
+    DWRITE("%s: ccp_StartNewMessage(%i): start", DEBUG, g_iMsgInProgress);
+    #endif
 
     return g_iMsgInProgress;
 }
@@ -101,6 +121,10 @@ public int Native_StartNewMessage(Handle hPlugin, int params) {
 public any Native_RebuildClients(Handle hPlugin, int params) {
     int props[4];
     GetNativeArray(1, props, GetNativeCell(2));
+
+    #if defined DEBUG
+    DWRITE("%s: ccp_RebuildClients()", DEBUG);
+    #endif
     
     return Call_RebuildClients(props, GetNativeCell(2), GetNativeCell(3));
 }
@@ -109,12 +133,20 @@ public any Native_RebuildMessage(Handle hPlugin, int params) {
     int props[4];
     GetNativeArray(1, props, GetNativeCell(2));
 
+    #if defined DEBUG
+    DWRITE("%s: ccp_RebuildMessage()", DEBUG);
+    #endif
+
     return BuildMessage(props, GetNativeCell(2), GetNativeCell(3));
 }
 
 public any Native_HandleEngineMsg(Handle hPlugin, int params) {
     int props[4];
     GetNativeArray(1, props, GetNativeCell(2));
+
+    #if defined DEBUG
+    DWRITE("%s: ccp_HandleEngineMsg()", DEBUG);
+    #endif
     
     return HandleEngineMsg(props, GetNativeCell(2), GetNativeCell(3));
 }
@@ -122,6 +154,10 @@ public any Native_HandleEngineMsg(Handle hPlugin, int params) {
 public int Native_EndMessage(Handle hPlugin, int params) {
     int props[4];
     GetNativeArray(1, props, GetNativeCell(2));
+
+    #if defined DEBUG
+    DWRITE("%s: ccp_EndMessage()", DEBUG);
+    #endif
 
     Call_MessageEnd(props, GetNativeCell(2), GetNativeCell(3));
 

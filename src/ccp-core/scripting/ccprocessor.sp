@@ -62,126 +62,55 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("ccp_UpdateRecipients",                Native_UpdateRecipients);
     CreateNative("ccp_SkipColors",                      Native_SkipColors);
     CreateNative("ccp_ChangeMode",                      Native_ChangeMode);
-    
-    // int()
     CreateNative("ccp_GetMessageID",                    Native_GetMsgID);
-
-    // bool(char[] phrase, int lang);
-    CreateNative("ccp_Translate",                       Native_Translate);
-
-    /* 
-    int(int sender, ArryList params);
-        param[0] = char[] indent;
-        params[1] = const char[] template;
-        params[2] = const char[] message;
-        params[3] = const int[] players;
-        params[4] = int playersNum;
-    */  
+    CreateNative("ccp_Translate",                       Native_Translate);  
     CreateNative("ccp_StartNewMessage",                 Native_StartNewMessage);
-
-    /* 
-    Action(const char[id, sender, ...] props, int propsCount, ArrayList params)
-        prop[0] = int messageid;
-        prop[1] = int sender;
-
-        param[0] = const char[] indent;
-        param[1] = const char[] message; ?
-        param[2] = int[] players;
-        param[3] = int &playersNum;
-    */
     CreateNative("ccp_RebuildClients",                  Native_RebuildClients);
-
-    /*
-    Action(const int[] props, int propsCount, ArrayList params)
-        prop[0] = int message id;
-        prop[1] = int sender; (sender, team, isalive)
-        prop[2] = int recipient;
-
-        param[0] = const char[] indent;
-        param[1] = const char[] template;
-        param[2] = char[] name;
-        param[3] = char[] msg;
-        param[4] = char[] compile; 
-    */
     CreateNative("ccp_RebuildMessage",                  Native_RebuildMessage);
-
-    /*
-    Action(const int[] props, int propsCount, ArrayList params)
-        prop[0] = int sender;
-        prop[1] = int recipient;
-        prop[2] = int paramsCount;
-
-        param[0] = char[] message;
-    */
     CreateNative("ccp_HandleEngineMsg",                 Native_HandleEngineMsg);
-
-    /*
-    void(const int[] props, int propsCount, ArrayList params)
-        prop[0] = int message id;
-        prop[1] = int sender;
-
-        param[0] = const char[] indent; 
-    */
     CreateNative("ccp_EndMessage",                      Native_EndMessage);
-
-    /*
-    bool(const int[] props, int propsCount, ArrayList params)
-        prop[0] = int sender;
-        prop[1] = int recipient;
-
-        param[0] = const char[] indent; 
-    */
     CreateNative("ccp_EngineMsgRequest",                Native_EngineMessageReq);
     
-    // void()
     g_fwdConfigParsed = new GlobalForward(
         "cc_config_parsed", 
         ET_Ignore
     );
 
-    // void(const int key)
     g_fwdAPIHandShake = new GlobalForward(
         "cc_proc_APIHandShake", 
         ET_Ignore, Param_Cell
     );
 
-    // bool(const char[] indent, int sender)
     g_fwdSkipColors = new GlobalForward(
         "cc_proc_SkipColors", 
         ET_Event, Param_String, Param_Cell
     );
 
-    // bool(const int[] props, int propsCount, ArrayList params)
     g_fwdOnEngineMsg = new GlobalForward(
         "cc_proc_HandleEngineMsg",
         ET_Event, Param_Array, Param_Cell, Param_Cell
     );
 
-    // void(const int[] props, int propsCount, ArrayList params)
     g_fwdMessageEnd = new GlobalForward(
         "cc_proc_OnMessageEnd",
         ET_Ignore, Param_Array, Param_Cell, Param_Cell
     );
 
-    // Action(const int[] props, int propsCount, ArrayList params)
     g_fwdRebuildClients = new GlobalForward(
         "cc_proc_OnRebuildClients",
         ET_Hook, Param_Array, Param_Cell, Param_Cell
     );
     
-    // bool(int sender, ArrayList params) 
     g_fwdNewMessage = new GlobalForward(
         "cc_proc_OnNewMessage",
         ET_Event, Param_Cell, Param_Cell
     );
     
-    // bool(const int[] props, int part, ArrayList params, int level, const char[] value)
     g_fwdRebuildString_Post = new GlobalForward(
         "cc_proc_OnRebuildString_Post",
         ET_Event, Param_Array, Param_Cell, Param_Cell, Param_Cell, Param_String
     );
     
-    // Action(const int[] props, int part, ArrayList params, int &level, char[] value, int size)
     g_fwdRebuildString = new GlobalForward(
         "cc_proc_OnRebuildString",
         ET_Hook, Param_Array, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
@@ -414,6 +343,10 @@ Action BuildMessage(const int[] props, int propsCount, ArrayList params) {
         ReplaceString(SZ(szBuffer), szBinds[i], value, true);
     }
 
+    #if defined DEBUG
+    DWRITE("%s: RebuildMessage(%N) out: %s", DEBUG, SENDER_INDEX(props[1]), szBuffer);
+    #endif
+
     params.SetString(compile, szBuffer);
     return whatNext;
 }
@@ -424,6 +357,10 @@ Action HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
     char szMessage[MESSAGE_LENGTH];
     params.GetString(compile, SZ(szMessage));
 
+    #if defined DEBUG
+    DWRITE("%s: HandleEngineMsg(%i) in: %s", DEBUG, props[0], szMessage);
+    #endif
+
     Action whatNext;
     if(!szMessage[0]) {
         return whatNext;
@@ -431,13 +368,25 @@ Action HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
 
     if(szMessage[0] == '#') {
         if(!ccp_EngineMsgRequest(props, propsCount-1, params)) {
+            #if defined DEBUG
+            DWRITE("%s: HandleEngineMsg(%i): block sending", DEBUG, props[0]);
+            #endif
+
             return (whatNext = Plugin_Stop);
         }
 
         if(!ccp_Translate(szMessage, props[1])) {
+            #if defined DEBUG
+            DWRITE("%s: HandleEngineMsg(%i): translation is not available ", DEBUG, props[0]);
+            #endif
+
             return (whatNext = Plugin_Handled);
         }
     }
+
+    #if defined DEBUG
+    DWRITE("%s: HandleEngineMsg(%i) post: %s", DEBUG, props[0], szMessage);
+    #endif
 
     params.SetString(compile, szMessage);
     if(!props[2]) {
@@ -456,6 +405,10 @@ Action HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
                 : "%s5"
         );
     }
+
+    #if defined DEBUG
+    DWRITE("%s: HandleEngineMsg(%i) out: %s", DEBUG, props[0], szMessage);
+    #endif
 
     params.SetString(compile, szMessage);
     return whatNext;
