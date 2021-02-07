@@ -436,7 +436,11 @@ Action HandleEngineMsg(const char[] props, int propsCount, ArrayList params) {
     }
 
     if(szMessage[0] == '#') {
-        if(!ccp_EngineMsgRequest(props, propsCount-1, params) || !ccp_Translate(szMessage, lang)) {
+        if(!ccp_EngineMsgRequest(props, propsCount-1, params)) {
+            return (whatNext = Plugin_Stop);
+        }
+
+        if(!ccp_Translate(szMessage, lang)) {
             return (whatNext = Plugin_Handled);
         }
     }

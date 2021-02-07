@@ -52,10 +52,14 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
     g_mMessage.SetArray("players", clients, playersNum, true);
     g_mMessage.SetValue("playersNum", playersNum, true);
 
-    if(szMessage[0] == '#' && !ccp_EngineMsgRequest(indent_def, 0, szMessage)) {
+    ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
+    if(szMessage[0] == '#' && !stock_EngineMsgReq(arr, 0, 0, szMessage)) {
         g_mMessage.Clear();
+        delete arr;
         return Plugin_Continue;
     }
+
+    delete arr;
    
     return Plugin_Handled;
 }
@@ -67,8 +71,10 @@ public void AfterMessage(UserMsg msg_id, bool bSend)
     }
 
     static const int sender;
+
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
     
-    char szMessage[MESSAGE_LENGTH], szBuffer[MAX_LENGTH], name[4];
+    char szMessage[MESSAGE_LENGTH], szBuffer[MAX_LENGTH], name[NAME_LENGTH];
     g_mMessage.GetString("text", SZ(szMessage));
 
     int playersNum;
@@ -76,31 +82,44 @@ public void AfterMessage(UserMsg msg_id, bool bSend)
 
     int players[MAXPLAYERS+1];
     g_mMessage.GetArray("players", players, playersNum);
-    ccp_UpdateRecipients(players, players, playersNum);
+    ccp_UpdateRecipients(players, players, playersNum); 
 
     g_mMessage.Clear();
 
-    char indent[NAME_LENGTH];
-    strcopy(SZ(indent), indent_def);
+    char szIndent[NAME_LENGTH];
+    strcopy(SZ(szIndent), indent_def);
 
     int id;
-    if((id = ccp_StartNewMessage(sender, template, szMessage, SZ(indent), players, playersNum)) == -1) {
+    if((id = stock_NewMessage(arr, sender, template, szMessage, players, playersNum, SZ(szIndent))) == -1) {
+        delete arr;
         return;
     }
 
-    ccp_RebuildClients(id, indent, sender, template, players, playersNum);
+    if(!szIndent[0]) {
+        delete arr;
+        return;
+    }
+
+    if(stock_RebuildClients(arr, id, sender, szIndent, szMessage, players, playersNum) != Plugin_Continue) {
+        delete arr;
+        return;
+    }
+
+
     ccp_UpdateRecipients(players, players, playersNum);
     ccp_ChangeMode(players, playersNum, "0");
 
     Handle uMessage;
-    char prepare[MESSAGE_LENGTH];
+    char message[MESSAGE_LENGTH];
     for(int i; i < playersNum; i++) {
-        prepare = szMessage;
-        if(prepare[0] == '#') {
-            ccp_PrepareMessage(indent, sender, players[i], MAX_PARAMS, prepare);
+        szBuffer = NULL_STRING;
+        message = szMessage;
+
+        if(message[0] == '#') {
+            stock_HandleEngineMsg(arr, sender, players[i], MAX_PARAMS, SZ(message));
         }
 
-        if(!ccp_RebuildMessage(id, indent, sender, players[i], template, name, prepare, SZ(szBuffer))) {
+        if(stock_RebuildMsg(arr, id, sender, players[i], szIndent, template, name, message, szBuffer) != Plugin_Continue) {
             continue;
         }
 
@@ -126,5 +145,7 @@ public void AfterMessage(UserMsg msg_id, bool bSend)
     }
 
     ccp_ChangeMode(players, playersNum); 
-    ccp_EndMessage(id, indent, sender);
+
+    stock_EndMsg(arr, id, sender, szIndent);
+    delete arr;
 }

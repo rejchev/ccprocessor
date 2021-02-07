@@ -46,10 +46,14 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
     char szMessage[MESSAGE_LENGTH];
     g_mMessage.GetString("params[0]", SZ(szMessage));
 
-    if(szMessage[0] == '#' && !ccp_EngineMsgRequest(indent_def, 0, szMessage)) {
+    ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
+    if(szMessage[0] == '#' && !stock_EngineMsgReq(arr, 0, 0, szMessage)) {
         delete g_mMessage;
+        delete arr;
         return Plugin_Continue;
     }
+
+    delete arr;
 
     RequestFrame(TextMsg_Completed, g_mMessage);    
     return Plugin_Handled;
@@ -58,6 +62,8 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
 public void TextMsg_Completed(StringMap g_mMessage)
 {
     static const int sender;
+
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
     
     char params[MAX_PARAMS][MESSAGE_LENGTH], szBuffer[MAX_LENGTH], name[4];
     for(int i; i < MAX_PARAMS; i++) {
@@ -74,15 +80,25 @@ public void TextMsg_Completed(StringMap g_mMessage)
 
     delete g_mMessage;
 
-    char indent[NAME_LENGTH];
-    strcopy(SZ(indent), indent_def);
+    char szIndent[NAME_LENGTH];
+    strcopy(SZ(szIndent), indent_def);
 
     int id;
-    if((id = ccp_StartNewMessage(sender, template, params[PARAM_MESSAGE], SZ(indent), players, playersNum)) == -1) {
+    if((id = stock_NewMessage(arr, sender, template, params[PARAM_MESSAGE], players, playersNum, SZ(szIndent))) == -1) {
+        delete arr;
         return;
     }
 
-    ccp_RebuildClients(id, indent, sender, template, players, playersNum);
+    if(!szIndent[0]) {
+        delete arr;
+        return;
+    }
+
+    if(stock_RebuildClients(arr, id, sender, szIndent, params[PARAM_MESSAGE], players, playersNum) != Plugin_Continue) {
+        delete arr;
+        return;
+    }
+
     ccp_UpdateRecipients(players, players, playersNum);
     ccp_ChangeMode(players, playersNum, "0");
 
@@ -91,10 +107,10 @@ public void TextMsg_Completed(StringMap g_mMessage)
     for(int i, j; i < playersNum; i++) {
         message = params[PARAM_MESSAGE];
         if(message[0] == '#') {
-            ccp_PrepareMessage(indent, sender, players[i], MAX_PARAMS, message);
+            stock_HandleEngineMsg(arr, sender, players[i], MAX_PARAMS, SZ(message));
         }
 
-        if(!ccp_RebuildMessage(id, indent, sender, players[i], template, name, message, szBuffer, sizeof(szBuffer))) {
+        if(stock_RebuildMsg(arr, id, sender, players[i], szIndent, template, name, message, szBuffer) != Plugin_Continue) {
             continue;
         }
 
@@ -123,8 +139,10 @@ public void TextMsg_Completed(StringMap g_mMessage)
         EndMessage();
     }
 
-    ccp_ChangeMode(players, playersNum); 
-    ccp_EndMessage(id, indent, sender);
+    ccp_ChangeMode(players, playersNum);
+    
+    stock_EndMsg(arr, id, sender, szIndent);
+    delete arr;
 }
 
 void ReadUserMessage(Handle msg, StringMap params) {

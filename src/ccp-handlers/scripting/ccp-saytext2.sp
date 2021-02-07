@@ -72,6 +72,8 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     if(!send || !g_mMessage.GetValue("ent_idx", sender)) {
         return;
     }
+
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
     
     char szMsgName[MESSAGE_LENGTH], params[MAX_PARAMS][MESSAGE_LENGTH], szBuffer[MAX_LENGTH];
     for(int i; i < MAX_PARAMS; i++) {
@@ -99,27 +101,43 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
     g_mMessage.Clear();
 
-    char indent[NAME_LENGTH];
-    strcopy(SZ(indent), indent_def[allChat]);
+    char szIndent[NAME_LENGTH];
+    strcopy(SZ(szIndent), indent_def[allChat]);
 
     int id;
-    if((id = ccp_StartNewMessage(sender, templates[allChat], params[1], SZ(indent), players, playersNum)) == -1) {
+    if((id = stock_NewMessage(arr, sender, templates[allChat], params[1], players, playersNum, SZ(szIndent))) == -1) {
+        delete arr;
         return;
     }
 
-    ccp_RebuildClients(id, indent, sender, templates[allChat], players, playersNum);
+    if(!szIndent[0]) {
+        delete arr;
+        return;
+    }
+
+    if(stock_RebuildClients(arr, id, sender, szIndent, params[1], players, playersNum) != Plugin_Continue) {
+        delete arr;
+        return;
+    }
+
     ccp_UpdateRecipients(players, players, playersNum);
     ccp_ChangeMode(players, playersNum, "0");
 
     Handle uMessage;
+    char message[MESSAGE_LENGTH], name[MESSAGE_LENGTH];
     for(int i, j; i < playersNum; i++) {
+        szBuffer = NULL_STRING;
+        name = params[0];
+        message = params[1];
+
         j = (sender << 3|team << 1|view_as<int>(alive));
 
-        if(!ccp_RebuildMessage(id, indent, j, players[i], templates[allChat], params[0], params[1], SZ(szBuffer))) {
+        if(stock_RebuildMsg(arr, id, j, players[i], szIndent, templates[allChat], name, message, szBuffer) != Plugin_Continue) {
             continue;
         }
 
-        ccp_PrepareMessage(indent, sender, players[i], MAX_PARAMS, szBuffer);
+        stock_HandleEngineMsg(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
+
         ccp_replaceColors(szBuffer, false);
 
         uMessage = StartMessageOne("SayText2", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);
@@ -148,7 +166,9 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     }
 
     ccp_ChangeMode(players, playersNum); 
-    ccp_EndMessage(id, indent, sender);
+    stock_EndMsg(arr, id, sender, szIndent);
+
+    delete arr;
 }
 
 void ReadUserMessage(Handle msg, StringMap params) {
