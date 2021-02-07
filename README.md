@@ -8,6 +8,18 @@
     <img src="https://img.shields.io/github/downloads/nyood/ccprocessor/total" />
 </p>
 
+## Navigation
+- [About CCProcessor](#About)
+    - [Description](#Description)
+    - [Real-Time Color Processing](#Real-Time-Color-Processing)
+    - [Flexible Localization](#Flexible-Localization)
+    - [Extended Radio](#extended-radio)
+- [Game support](#game-support)
+- [Requirements](#Requirements)
+- [Chat Handlers](#handlers)
+- [Supported Modules](#supported-modules)
+- [License](#license)
+
 ## About
 
 ### Description
@@ -50,6 +62,14 @@ You can edit already boring radio commands. <br>
 - Sourcemod 1.10 
     - [Windows](http://sourcemod.net/latest.php?os=windows&version=1.10)
     - [Linux](http://sourcemod.net/latest.php?os=linux&version=1.10)
+
+## Handlers
+Handler Name | Message identifier | Package | Virtualization |
+:------------: | :------------------: | :-------: | :--------------: |
+|  `SayText2`  | `STA` = Public chat, `STP` = Team chat  | `ccp-saytext2.smx` | `Yes` |
+|  `TextMsg`   | `TM` = Server chat | `ccp-textmsg.smx`  | `Yes` |
+|  `SayText`   | `ST` = Server chat | `ccp-saytext.smx`  | `Yes` |
+|  `RadioText` | `RT` = Radio chat  | `ccp-radiomsg.smx` |  `Yes` |
     
 ## [Supported Modules](https://github.com/nyood/ccp-modules)
 
