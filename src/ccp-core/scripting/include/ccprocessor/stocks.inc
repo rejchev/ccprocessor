@@ -32,6 +32,20 @@ stock int BreakPoint(int iBindType, char[] szValue)
     return iMaxLength[iBindType];
 }
 
+/*
+ *  Request to start processing a new message 
+ *  
+ *  @param a            Buffer array 
+ *  @param s            Sender index
+ *  @param t            Message template
+ *  @param m            Message text
+ *  @param p            Message recipient list
+ *  @param c            Message recipient count
+ *  @param ind          Message indent
+ *  @param l            Message indent size       
+ *  
+ *  @return         ID or -1 if unsuccessful  
+*/
 stock int stock_NewMessage(ArrayList a, int s, const char[] t, const char[] m, const int[] p, int c, char[] ind, int l) {
     static const int rw;
 
@@ -49,6 +63,20 @@ stock int stock_NewMessage(ArrayList a, int s, const char[] t, const char[] m, c
     return s;
 }
 
+/*
+ *  Request to start rebuilding recipient list
+ *  
+ *  @param a            Buffer array 
+ *  @param id           Message ID
+ *  @param s            Message sender
+ *  @param ind          Message indent
+ *  @param m            Message text
+ *  @param p            Message recipient list
+ *  @param c            Message recipient count       
+ *  
+ *  @return             Plugin_Continue - On success
+ *                      Plugin_Handled - Otherwise  
+*/
 stock Action stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, const char[] m, int[] p, int &c) {
     static const int propsCount = 2;
     int[] props = new int[propsCount]
@@ -70,6 +98,23 @@ stock Action stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, 
     return next;
 }
 
+/*
+ *  Request to start rebuilding message
+ *  
+ *  @param a            Buffer array 
+ *  @param i            Message ID
+ *  @param s            Message buffer (pkg: senderID << 3|senderTeam << 1|senderAlive)
+ *  @param r            Message recipient
+ *  @param ind          Message indent
+ *  @param t            Message template
+ *  @param n            Message sender name
+ *  @param m            Message text
+ *  @param o            Message compile 
+ *  
+ *  @return             Plugin_Continue -  build continue,
+ *                      Plugin_Handled  -  build rejected (after post call),
+ *                      Plguin_Stop     -  build rejected immediately (with out post call)
+*/
 stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind, const char[] t, char[] n, char[] m, char[] o) {
     static const int propsCount = 3;
     int[] props = new int[propsCount]
@@ -94,6 +139,20 @@ stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind
     return next;
 }
 
+/*
+ *  Request to start rebuilding engine message
+ *  
+ *  @param a            Buffer array 
+ *  @param s            Message sender
+ *  @param r            Message recipient
+ *  @param c            Text params count
+ *  @param m            Message text
+ *  @param l            Message size     
+ *  
+ *  @return             Plugin_Continue -  Message handled,
+ *                      Plugin_Handled  -  Translation phrase not available,
+ *                      Plguin_Stop     -  Message rejected
+*/
 stock Action stock_HandleEngineMsg(ArrayList a, int s, int r, int c, char[] m, int l) {
     static const int propsCount = 3;
     // int[] props = new int[propsCount];
@@ -116,6 +175,16 @@ stock Action stock_HandleEngineMsg(ArrayList a, int s, int r, int c, char[] m, i
     return next;
 } 
 
+/*
+ *  End message request
+ *  
+ *  @param a            Buffer array 
+ *  @param id           Message ID
+ *  @param s            Message sender
+ *  @param ind          Message indent
+ *  
+ *  @noreturn
+*/
 stock void stock_EndMsg(ArrayList a, int id, int s, const char[] ind) {
     static const int propsCount = 3;
     int[] props = new int[propsCount]
@@ -128,6 +197,17 @@ stock void stock_EndMsg(ArrayList a, int id, int s, const char[] ind) {
     ccp_EndMessage(props, propsCount, a);
 }
 
+/*
+ *  Obtaining permission for processing engine msg
+ * 
+ *  @param a            Buffer array 
+ *  @param s            Message sender
+ *  @param r            Message recipient 
+ *  @param m            Message text 
+ *  
+ *  @return             true    - On Allowed
+ *                      false   - Otherwise 
+*/
 stock bool stock_EngineMsgReq(ArrayList a, int s, int r, const char[] m) {
     static const int propsCount = 3;
     int[] props = new int[propsCount]

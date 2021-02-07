@@ -8,14 +8,18 @@ public int Native_Translate(Handle hPlugin, int params) {
     char szPhrase[MESSAGE_LENGTH];
     GetNativeString(1, SZ(szPhrase));
 
-    if(!TranslationPhraseExists(szPhrase)) {
-        // LogMessage("NotTransl: %s", szPhrase);
-        return false;
+    bool exist = TranslationPhraseExists(szPhrase);
+
+    #if defined DEBUG
+    DWRITE("%s: Native(ccp_Translate(%s)): %b", szPhrase, exist);
+    #endif
+
+    if(exist) {
+        Format(SZ(szPhrase), "%T", szPhrase, GetNativeCell(2));
+        SetNativeString(1, SZ(szPhrase));
     }
 
-    Format(SZ(szPhrase), "%T", szPhrase, GetNativeCell(2));
-    SetNativeString(1, SZ(szPhrase));
-    return true;
+    return exist;
 }
 
 public int Native_EngineMessageReq(Handle hPlugin, int params) {

@@ -1,4 +1,23 @@
 /*
+ *  Get the API key used by the core
+ *  
+ *  @noparam 
+ *  
+ *  @return         API version key
+*/
+native int      cc_get_APIKey();
+
+/*
+ *  API key matching
+ *  
+ *  @param api          API version key
+ *  
+ *  @return             true - equal
+                        false - otherwise
+*/
+native bool     cc_is_APIEqual(const int api);
+
+/*
  *  Get a pallete
  *  
  *  @noparam
@@ -19,36 +38,168 @@ native ArrayList cc_drop_palette();
 native void     ccp_replaceColors(char[] szBuffer, bool toNull = true);
 
 /*
- *  Get the API key used by the core
+ *  Updates the list of recipients 
+ *  
+ *  @param input        Recipient list
+ *  @param output       buffer        
+ *  @param playersNum   Recipient count
+ *  
+ *  @noreturn
+*/
+native void     ccp_UpdateRecipients(const int[] input, int[] output, int &playersNum);
+
+/*
+ *  Request to skip color tags for author msg 
+ *  
+ *  @param input        Recipient list
+ *  @param output       buffer        
+ *  @param playersNum   Recipient count
+ *  
+ *  @return             true - Allowed to skip/false - otherwise 
+*/
+native bool     ccp_SkipColors(const char[] indent, int sender);
+
+/*
+ *  Changes the current game mode 
+ *  
+ *  @param players      Recipient list
+ *  @param playersNum   Recipient count        
+ *  @param value        Game mode value (NULL_STRING to default)   
+ *  
+ *  @noreturn
+*/
+native void     ccp_ChangeMode(const int[] players, int playersNum, const char[] value = NULL_STRING);
+
+/*
+ *  Get the ID of the current message
  *  
  *  @noparam 
  *  
- *  @return         API version key
+ *  @return         ID (-1 if none are in progress) 
 */
-native int      cc_get_APIKey();
+native int      ccp_GetMessageID();
 
 /*
- *  API key matching
+ *  Translation of a phrase 
  *  
- *  @param api          API version key
+ *  @param phrase       Buffer with phrase 
+ *  @param recipient    Recipient index          
  *  
- *  @return             true - equal
-                        false - otherwise
+ *  @return         true - Translation done/false - Phrases missing 
 */
-native bool     cc_is_APIEqual(const int api);
-
-native void     ccp_UpdateRecipients(const int [] input, int[] output, int &playersNum);
-native bool     ccp_SkipColors(const char[] indent, int sender);
-native void     ccp_ChangeMode(const int[] players, int playersNum, const char[] value = NULL_STRING);
-
-native int      ccp_GetMessageID();
 native bool     ccp_Translate(char[] phrase, int recipient);
 
+/*
+ *  Request to start processing a new message 
+ *  
+ *  @param sender       Message sender 
+ *  @param params       Message params
+ *      @params[0]      Message indent                      [String/RW]
+ *      @params[1]      Message template                    [String/Read]   
+ *      @params[2]      Message text                        [String/Read]
+ *      @params[3]      Message recipient list              [Array/Read]
+ *      @params[4]      Message recipient count             [Int/Read]             
+ *  
+ *  @return         ID or -1 if unsuccessful  
+*/
 native int      ccp_StartNewMessage(int sender, ArrayList params);
+
+/*
+ *  Request to start rebuilding recipient list
+ *  
+ *  @param props        Message props
+ *      @props[0]       Message ID
+ *      @props[1]       Message sender
+ *
+ *  @param propsCount   Props count
+ *
+ *  @param params       Message params
+ *      @params[0]      Message indent                      [String/Read]  
+ *      @params[1]      Message text                        [String/Read]
+ *      @params[2]      Message recipient list              [Array/RW]
+ *      @params[3]      Message recipient count             [Int/RW]             
+ *  
+ *  @return             Plugin_Continue - On success
+ *                      Plugin_Handled - Otherwise  
+*/
 native Action   ccp_RebuildClients(const int[] props, int propsCount, ArrayList params);
+
+/*
+ *  Request to start rebuilding message
+ *  
+ *  @param props        Message props
+ *      @props[0]       Message ID
+ *      @props[1]       Message buffer (pkg: senderID << 3|senderTeam << 1|senderAlive)
+ *      @props[2]       Message recipient
+ *
+ *  @param propsCount   Props count
+ *
+ *  @param params       Message params
+ *      @params[0]      Message indent                      [String/Read]  
+ *      @params[1]      Message template                    [String/Read]
+ *      @params[2]      Message sender name                 [String/RW]
+ *      @params[3]      Message text                        [String/RW] 
+ *      @params[4]      Message compile                     [String/RW]            
+ *  
+ *  @return             Plugin_Continue -  build continue,
+ *                      Plugin_Handled  -  build rejected (after post call),
+ *                      Plguin_Stop     -  build rejected immediately (with out post call)
+*/
 native Action   ccp_RebuildMessage(const int[] props, int propsCount, ArrayList params);
+
+/*
+ *  Request to start rebuilding engine message
+ *  
+ *  @param props        Message props
+ *      @props[0]       Sender index
+ *      @props[1]       Recipient index
+ *      @props[2]       Text params count
+ *
+ *  @param propsCount   Props count
+ *
+ *  @param params       Message params
+ *      @params[0]      Message text                      [String/RW]  
+ *           
+ *  
+ *  @return             Plugin_Continue -  Message handled,
+ *                      Plugin_Handled  -  Translation phrase not available,
+ *                      Plguin_Stop     -  Message rejected
+*/
 native Action   ccp_HandleEngineMsg(const int[] props, int propsCount, ArrayList params);
+
+/*
+ *  End message request
+ *  
+ *  @param props        Message props
+ *      @props[0]       Message ID
+ *      @props[1]       Sender index
+ *
+ *  @param propsCount   Props count
+ *
+ *  @param params       Message params
+ *      @params[0]      Message indent                      [String/Read]  
+ *           
+ *  
+ *  @noreturn
+*/
 native void     ccp_EndMessage(const int[] props, int propsCount, ArrayList params);
+
+/*
+ *  Obtaining permission for processing engine msg
+ *  
+ *  @param props        Message props
+ *      @props[0]       Sender index
+ *      @props[1]       Recipient index
+ *
+ *  @param propsCount   Props count
+ *
+ *  @param params       Message params
+ *      @params[0]      Message text                      [String/Read]  
+ *           
+ *  
+ *  @return             true    - On Allowed
+ *                      false   - Otherwise 
+*/
 native bool     ccp_EngineMsgRequest(const int[] props, int propsCount, ArrayList params);
 
 #if !defined REQUIRE_PLUGIN
