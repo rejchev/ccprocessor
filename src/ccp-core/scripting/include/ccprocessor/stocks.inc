@@ -168,7 +168,6 @@ stock Action stock_HandleEngineMsg(ArrayList a, int s, int r, int c, char[] m, i
 
     Action next;
     if((next = ccp_HandleEngineMsg(props, propsCount, a)) != Plugin_Stop) {
-        LogMessage("Translate: %d", next);
         a.GetString(0, m, l);
     }
 
