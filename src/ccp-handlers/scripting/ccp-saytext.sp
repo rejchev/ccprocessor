@@ -52,14 +52,24 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
     g_mMessage.SetArray("players", clients, playersNum, true);
     g_mMessage.SetValue("playersNum", playersNum, true);
 
-    ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
-    if(szMessage[0] == '#' && (!stock_EngineMsgReq(arr, 0, 0, szMessage) || !ccp_Translate(szMessage, 0))) {
-        g_mMessage.Clear();
-        delete arr;
-        return Plugin_Continue;
-    }
+    if(szMessage[0] == '#') {
+        ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
+        any a = -1;
+        if(!stock_EngineMsgReq(arr, 0, 0, szMessage)) {
+            a = Plugin_Handled;
+        } 
 
-    delete arr;
+        delete arr;
+        
+        if(a == -1 && !ccp_Translate(szMessage, 0)) {
+            a = Plugin_Continue
+        }
+
+        if(a != -1) {
+            g_mMessage.Clear();
+            return view_as<Action>(a);
+        }
+    }
    
     return Plugin_Handled;
 }

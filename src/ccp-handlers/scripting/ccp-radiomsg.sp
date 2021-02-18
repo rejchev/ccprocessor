@@ -35,15 +35,13 @@ public void OnPluginStart() {
     g_mMessage = new StringMap();
 }
 
-public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
-{
+public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
     if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3)
         return Plugin_Continue;
 
     if(!ReadUserMessage(msg, g_mMessage)) {
         return Plugin_Handled;
     }
-
 
     int a;
     g_mMessage.GetValue("display", a);
@@ -56,13 +54,21 @@ public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players,
     g_mMessage.GetString(szComp, SZ(szBuffer));
 
     ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
+    any b = -1;
     if(!stock_EngineMsgReq(arr, sender, sender, szBuffer)) {
-        g_mMessage.Clear();
-        delete arr;
-        return Plugin_Continue;
-    }
+        b = Plugin_Handled;
+    } 
 
     delete arr;
+    
+    if(b == -1 && !ccp_Translate(szBuffer, 0)) {
+        b = Plugin_Continue
+    }
+
+    if(b != -1) {
+        g_mMessage.Clear();
+        return view_as<Action>(b);
+    }
 
     int clients[MAXPLAYERS+1];
     ccp_UpdateRecipients(players, clients, playersNum);
