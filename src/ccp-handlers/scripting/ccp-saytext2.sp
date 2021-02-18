@@ -11,7 +11,7 @@ public Plugin myinfo =
     name        = "[CCP] SayText2 handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.0",
+    version     = "1.0.1",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -105,17 +105,10 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     strcopy(SZ(szIndent), indent_def[allChat]);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, templates[allChat], params[1], players, playersNum, SZ(szIndent))) == -1) {
-        delete arr;
-        return;
-    }
-
-    if(!szIndent[0]) {
-        delete arr;
-        return;
-    }
-
-    if(stock_RebuildClients(arr, id, sender, szIndent, params[1], players, playersNum) != Plugin_Continue) {
+    if((id = stock_NewMessage(arr, sender, templates[allChat], params[1], players, playersNum, SZ(szIndent))) == -1
+    || !szIndent[0]
+    || stock_RebuildClients(arr, id, sender, szIndent, params[1], players, playersNum) != Plugin_Continue) {
+        stock_EndMsg(arr, id, sender, indent_def[allChat]);
         delete arr;
         return;
     }

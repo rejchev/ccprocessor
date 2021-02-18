@@ -12,7 +12,7 @@ public Plugin myinfo =
     name        = "[CCP] RadioText handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.0",
+    version     = "1.0.1",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -114,17 +114,10 @@ public void AfterMessage(UserMsg msgid, bool send)
     bool alive = IsPlayerAlive(sender);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, template, params[display], players, playersNum, SZ(szIndent))) == -1) {
-        delete arr;
-        return;
-    }
-
-    if(!szIndent[0]) {
-        delete arr;
-        return;
-    }
-
-    if(stock_RebuildClients(arr, id, sender, szIndent, params[display], players, playersNum) != Plugin_Continue) {
+    if((id = stock_NewMessage(arr, sender, template, params[display], players, playersNum, SZ(szIndent))) == -1
+    || !szIndent[0]
+    || stock_RebuildClients(arr, id, sender, szIndent, params[display], players, playersNum) != Plugin_Continue) {
+        stock_EndMsg(arr, id, sender, indent_def);
         delete arr;
         return;
     }
