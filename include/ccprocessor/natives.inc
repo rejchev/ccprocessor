@@ -119,10 +119,11 @@ native int      ccp_StartNewMessage(int sender, ArrayList params);
  *      @params[2]      Message recipient list              [Array/RW]
  *      @params[3]      Message recipient count             [Int/RW]             
  *  
- *  @return             Plugin_Continue - On success
- *                      Plugin_Handled - Otherwise  
+ *  @return             Proc_Continue - with out changes,
+ *                      Proc_Change - recipients have been changed,
+ *                      Proc_Reject - rejected
 */
-native Action   ccp_RebuildClients(const int[] props, int propsCount, ArrayList params);
+native Processing   ccp_RebuildClients(const int[] props, int propsCount, ArrayList params);
 
 /*
  *  Request to start rebuilding message
@@ -141,14 +142,15 @@ native Action   ccp_RebuildClients(const int[] props, int propsCount, ArrayList 
  *      @params[3]      Message text                        [String/RW] 
  *      @params[4]      Message compile                     [String/RW]            
  *  
- *  @return             Plugin_Continue -  build continue,
- *                      Plugin_Handled  -  build rejected (after post call),
- *                      Plguin_Stop     -  build rejected immediately (with out post call)
+ *  @return             Proc_Continue - continue with out changes,
+ *                      Proc_Change - value has been changed & continue,
+ *                      Proc_Reject - build rejected (after post call)
+ *                      Proc_Stop - build rejected immediately (before post call)
 */
-native Action   ccp_RebuildMessage(const int[] props, int propsCount, ArrayList params);
+native Processing   ccp_RebuildMessage(const int[] props, int propsCount, ArrayList params);
 
 /*
- *  Request to start rebuilding engine message
+ *  Renders engine messages 
  *  
  *  @param props        Message props
  *      @props[0]       Sender index
@@ -161,11 +163,9 @@ native Action   ccp_RebuildMessage(const int[] props, int propsCount, ArrayList 
  *      @params[0]      Message text                      [String/RW]  
  *           
  *  
- *  @return             Plugin_Continue -  Message handled,
- *                      Plugin_Handled  -  Translation phrase not available,
- *                      Plguin_Stop     -  Message rejected
+ *  @noreturn             
 */
-native Action   ccp_HandleEngineMsg(const int[] props, int propsCount, ArrayList params);
+native void   ccp_RenderEngineCtx(const int[] props, int propsCount, ArrayList params);
 
 /*
  *  End message request
@@ -197,10 +197,10 @@ native void     ccp_EndMessage(const int[] props, int propsCount, ArrayList para
  *      @params[0]      Message text                      [String/Read]  
  *           
  *  
- *  @return             true    - On Allowed
- *                      false   - Otherwise 
+ *  @return             Proc_Continue - processing continue,
+ *                      Proc_Stop - processing rejected
 */
-native bool     ccp_EngineMsgRequest(const int[] props, int propsCount, ArrayList params);
+native Processing     ccp_EngineMsgRequest(const int[] props, int propsCount, ArrayList params);
 
 #if !defined REQUIRE_PLUGIN
 public void __pl_ccprocessor_SetNTVOptional()

@@ -22,11 +22,11 @@ public int Native_Translate(Handle hPlugin, int params) {
     return exist;
 }
 
-public int Native_EngineMessageReq(Handle hPlugin, int params) {
+public any Native_EngineMessageReq(Handle hPlugin, int params) {
     int props[4];
     GetNativeArray(1, props, GetNativeCell(2));
 
-    static bool handle;
+    Processing handle;
     handle = Call_HandleEngineMsg(props, GetNativeCell(2), GetNativeCell(3));
 
     #if defined DEBUG
@@ -100,9 +100,17 @@ public int Native_ChangeMode(Handle hPlugin, int params) {
 }
 
 public int Native_StartNewMessage(Handle hPlugin, int params) {
-    if(g_iMsgInProgress != -1 || !Call_NewMessage(GetNativeCell(1), GetNativeCell(2))) {
+    if(g_iMsgInProgress != -1) {
         #if defined DEBUG
-        DWRITE("%s: ccp_StartNewMessage(%i): message aborted", DEBUG, g_iMsgInProgress);
+        DWRITE("%s: ccp_StartNewMessage(%i): already one in progress", DEBUG, g_iMsgInProgress);
+        #endif
+
+        return -1;
+    }
+
+    if(Call_NewMessage(GetNativeCell(1), GetNativeCell(2)) > Proc_Change) {
+        #if defined DEBUG
+        DWRITE("%s: ccp_StartNewMessage(): message rejected", DEBUG);
         #endif
 
         return -1;
@@ -140,7 +148,7 @@ public any Native_RebuildMessage(Handle hPlugin, int params) {
     return BuildMessage(props, GetNativeCell(2), GetNativeCell(3));
 }
 
-public any Native_HandleEngineMsg(Handle hPlugin, int params) {
+public int Native_RenderEngineCtx(Handle hPlugin, int params) {
     int props[4];
     GetNativeArray(1, props, GetNativeCell(2));
 
@@ -148,7 +156,7 @@ public any Native_HandleEngineMsg(Handle hPlugin, int params) {
     DWRITE("%s: ccp_HandleEngineMsg()", DEBUG);
     #endif
     
-    return HandleEngineMsg(props, GetNativeCell(2), GetNativeCell(3));
+    RenderEngineCtx(props, GetNativeCell(2), GetNativeCell(3));
 }
 
 public int Native_EndMessage(Handle hPlugin, int params) {

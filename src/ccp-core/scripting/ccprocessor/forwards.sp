@@ -4,10 +4,13 @@ void Call_OnCompReading()
     Call_Finish();
 }
 
-Action Call_RebuildString(const int[] props, int propsCount, int part, ArrayList params, char[] szMessage, int size) {
-    Action output;
-    bool block;
+Processing Call_RebuildString(const int[] props, int propsCount, int part, ArrayList params, char[] szMessage, int size) {
+    Processing output;
+    Processing block;
     int level;
+
+    static char szBuffer[MESSAGE_LENGTH];
+    FormatEx(SZ(szBuffer), "%s", szMessage);
 
     // Action Call
     Call_StartForward(g_fwdRebuildString);
@@ -19,8 +22,12 @@ Action Call_RebuildString(const int[] props, int propsCount, int part, ArrayList
     Call_PushCell(size);
     Call_Finish(output);
 
+    if(output == Proc_Continue) {
+        FormatEx(szMessage, size, "%s", szBuffer);
+    }
+
     // exclude post call
-    if(output == Plugin_Stop)
+    if(output == Proc_Stop)
         return output;
 
     BreakPoint(part, szMessage);
@@ -34,15 +41,20 @@ Action Call_RebuildString(const int[] props, int propsCount, int part, ArrayList
     Call_PushString(szMessage);
     Call_Finish(block);
 
-    if(output == Plugin_Continue && block) {
-        output++;
+    if(output < block) {
+        output = block;
     } 
 
     return output;
 }
 
-Action Call_RebuildClients(const int[] props, int propsCount, ArrayList params) {
-    Action whatNext;
+Processing Call_RebuildClients(const int[] props, int propsCount, ArrayList params) {
+    Processing whatNext;
+
+    int count = params.Get(3);
+    int[] players = new int[count];
+
+    params.GetArray(2, players, count);
 
     Call_StartForward(g_fwdRebuildClients);
     Call_PushArray(props, propsCount);
@@ -50,11 +62,16 @@ Action Call_RebuildClients(const int[] props, int propsCount, ArrayList params) 
     Call_PushCell(params);
     Call_Finish(whatNext);
 
+    if(whatNext == Proc_Continue) {
+        params.SetArray(2, players, count);
+        params.Set(3, count);
+    }
+
     return whatNext;
 }
 
-bool Call_HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
-    bool handle = true;
+Processing Call_HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
+    Processing handle;
 
     Call_StartForward(g_fwdOnEngineMsg);
     Call_PushArray(props, propsCount);
@@ -76,15 +93,22 @@ bool Call_IsSkipColors(const char[] indent, int sender) {
     return skip;
 }
 
-bool Call_NewMessage(int sender, ArrayList params) {
-    bool start = true;
+Processing Call_NewMessage(int sender, ArrayList params) {
+    Processing start;
+
+    char szIndent[64];
+    params.GetString(0, szIndent, sizeof(szIndent));
 
     Call_StartForward(g_fwdNewMessage);   
     Call_PushCell(sender);   
     Call_PushCell(params);
     Call_Finish(start);
 
-    return start
+    if(start == Proc_Continue) {
+        params.SetString(0, szIndent);
+    }
+
+    return start;
 }
 
 void Call_MessageEnd(const int[] props, int propsCount, ArrayList params) {

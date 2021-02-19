@@ -20,9 +20,11 @@ forward bool    cc_proc_SkipColors(const char[] indent, int sender);
  *      @params[3]      Message recipient list              [Array/Read]
  *      @params[4]      Message recipient count             [Int/Read]      
  *  
- *  @return             true - allow msg / false - otherwise
+ *  @return             Proc_Continue - continue,
+ *                      Proc_Change - Indent changed & continue,
+ *                      Proc_Reject - Reject message generation 
 */
-forward bool    cc_proc_OnNewMessage(int sender, ArrayList params);
+forward Processing    cc_proc_OnNewMessage(int sender, ArrayList params);
 
 /*
  *  Streaming output for editing the recipient list
@@ -39,9 +41,11 @@ forward bool    cc_proc_OnNewMessage(int sender, ArrayList params);
  *      @params[2]      Message recipient list              [Array/RW]
  *      @params[3]      Message recipient count             [Int/RW]  
  *
- *  @noreturn
+ *  @return             Proc_Continue - continue with out changes,
+ *                      Proc_Change - recipients changed & continue,
+ *                      Proc_Reject - Reject message
 */
-forward Action  cc_proc_OnRebuildClients(const int[] props, int propsCount, ArrayList params);
+forward Processing  cc_proc_OnRebuildClients(const int[] props, int propsCount, ArrayList params);
 
 /*
  *	Calls when building parts of the template
@@ -64,11 +68,12 @@ forward Action  cc_proc_OnRebuildClients(const int[] props, int propsCount, Arra
  *  @param value        Value buffer    
  *  @param size         Value Size     
  *
- *  @return             Plugin_Continue - build continue,
- *                      Plugin_Handled  - build rejected (after post call),
- *                      Plugin_Stop     - build rejected immediately (with out post call)
+ *  @return             Proc_Continue - continue with out changes,
+ *                      Proc_Change - value changed & continue,
+ *                      Proc_Reject - build rejected (after post call)
+ *                      Proc_Stop - build rejected immediately (before post call)
 */
-forward Action  cc_proc_OnRebuildString(const int[] props, int part, ArrayList params, int &level, char[] value, int size);
+forward Processing  cc_proc_OnRebuildString(const int[] props, int part, ArrayList params, int &level, char[] value, int size);
 
 /*
  *  Call after build part of the template
@@ -90,9 +95,10 @@ forward Action  cc_proc_OnRebuildString(const int[] props, int part, ArrayList p
  *  @param level        Replacement priority   
  *  @param value        Value buffer  
  *  
- *  @return             true - Block sending/false - send
+ *  @return             Proc_Continue/Proc_Change - continue processing,
+ *                      Proc_Reject/Proc_Stop - reject current message
 */
-forward bool    cc_proc_OnRebuildString_Post(const int[] props, int part, ArrayList params, int level, const char[] value);
+forward Processing    cc_proc_OnRebuildString_Post(const int[] props, int part, ArrayList params, int level, const char[] value);
 
 /*
  *  Calls after message delivery to all recipients 
@@ -122,9 +128,10 @@ forward void    cc_proc_OnMessageEnd(const int[] props, int propsCount, ArrayLis
  *  @param params       Message params
  *      @params[0]      Message text                      [String/Read]  
  *  
- *  @return             true - handle this / false - otherwise
+ *  @return             Proc_Continue - continue processing,
+ *                      Proc_Stop - reject processing
 */
-forward bool    cc_proc_HandleEngineMsg(const int[] props, int propsCount, ArrayList params);
+forward Processing    cc_proc_HandleEngineMsg(const int[] props, int propsCount, ArrayList params);
 
 /*
  *  Calls when the config reading is completed

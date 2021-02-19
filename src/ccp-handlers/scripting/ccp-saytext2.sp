@@ -11,7 +11,7 @@ public Plugin myinfo =
     name        = "[CCP] SayText2 handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.1",
+    version     = "1.0.2",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -107,7 +107,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     int id;
     if((id = stock_NewMessage(arr, sender, templates[allChat], params[1], players, playersNum, SZ(szIndent))) == -1
     || !szIndent[0]
-    || stock_RebuildClients(arr, id, sender, szIndent, params[1], players, playersNum) != Plugin_Continue) {
+    || stock_RebuildClients(arr, id, sender, szIndent, params[1], players, playersNum) == Proc_Reject) {
         stock_EndMsg(arr, id, sender, indent_def[allChat]);
         delete arr;
         return;
@@ -125,12 +125,12 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
         j = (sender << 3|team << 1|view_as<int>(alive));
 
-        if(stock_RebuildMsg(arr, id, j, players[i], szIndent, templates[allChat], name, message, szBuffer) != Plugin_Continue) {
+        if(stock_RebuildMsg(arr, id, j, players[i], szIndent, templates[allChat], name, message, szBuffer) > Proc_Change) {
             continue;
         }
 
-        stock_HandleEngineMsg(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
-
+        // Rendering the final result 
+        stock_RenderEngineCtx(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
         ccp_replaceColors(szBuffer, false);
 
         uMessage = StartMessageOne("SayText2", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);

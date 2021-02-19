@@ -74,10 +74,11 @@ stock int stock_NewMessage(ArrayList a, int s, const char[] t, const char[] m, c
  *  @param p            Message recipient list
  *  @param c            Message recipient count       
  *  
- *  @return             Plugin_Continue - On success
- *                      Plugin_Handled - Otherwise  
+ *  @return             Proc_Continue - with out changes,
+ *                      Proc_Change - recipients have been changed,
+ *                      Proc_Reject - message rejected
 */
-stock Action stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, const char[] m, int[] p, int &c) {
+stock Processing stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, const char[] m, int[] p, int &c) {
     static const int propsCount = 2;
     int[] props = new int[propsCount]
     props[0] = id;
@@ -89,8 +90,8 @@ stock Action stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, 
     a.PushArray(p, c);
     a.Push(c);
 
-    Action next;
-    if((next = ccp_RebuildClients(props, propsCount, a)) == Plugin_Continue) {
+    Processing next;
+    if((next = ccp_RebuildClients(props, propsCount, a)) == Proc_Change) {
         a.Get(3, c);
         a.GetArray(2, p, c);
     }
@@ -111,11 +112,12 @@ stock Action stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, 
  *  @param m            Message text
  *  @param o            Message compile 
  *  
- *  @return             Plugin_Continue -  build continue,
- *                      Plugin_Handled  -  build rejected (after post call),
- *                      Plguin_Stop     -  build rejected immediately (with out post call)
+ *  @return             Proc_Continue - continue with out changes,
+ *                      Proc_Change - value has been changed & continue,
+ *                      Proc_Reject - build rejected (after post call)
+ *                      Proc_Stop - build rejected immediately (before post call)
 */
-stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind, const char[] t, char[] n, char[] m, char[] o) {
+stock Processing stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind, const char[] t, char[] n, char[] m, char[] o) {
     static const int propsCount = 3;
     int[] props = new int[propsCount]
     props[0] = i;
@@ -129,8 +131,8 @@ stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind
     a.PushString(m);
     a.PushString(o);
 
-    Action next;
-    if((next = ccp_RebuildMessage(props, propsCount, a)) == Plugin_Continue) {
+    Processing next;
+    if((next = ccp_RebuildMessage(props, propsCount, a)) <= Proc_Change) {
         a.GetString(2, n, NAME_LENGTH);
         a.GetString(3, m, MESSAGE_LENGTH);
         a.GetString(4, o, MAX_LENGTH);
@@ -140,7 +142,7 @@ stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind
 }
 
 /*
- *  Request to start rebuilding engine message
+ *  Renders engine messages 
  *  
  *  @param a            Buffer array 
  *  @param s            Message sender
@@ -149,11 +151,9 @@ stock Action stock_RebuildMsg(ArrayList a, int i, int s, int r, const char[] ind
  *  @param m            Message text
  *  @param l            Message size     
  *  
- *  @return             Plugin_Continue -  Message handled,
- *                      Plugin_Handled  -  Translation phrase not available,
- *                      Plguin_Stop     -  Message rejected
+ *  @noreturn
 */
-stock Action stock_HandleEngineMsg(ArrayList a, int s, int r, int c, char[] m, int l) {
+stock void stock_RenderEngineCtx(ArrayList a, int s, int r, int c, char[] m, int l) {
     static const int propsCount = 3;
     // int[] props = new int[propsCount];
     int[] props = new int[propsCount]
@@ -166,12 +166,9 @@ stock Action stock_HandleEngineMsg(ArrayList a, int s, int r, int c, char[] m, i
     a.Clear();
     a.PushString(m);
 
-    Action next;
-    if((next = ccp_HandleEngineMsg(props, propsCount, a)) != Plugin_Stop) {
-        a.GetString(0, m, l);
-    }
+    ccp_RenderEngineCtx(props, propsCount, a);
 
-    return next;
+    a.GetString(0, m, l);
 } 
 
 /*
@@ -204,10 +201,10 @@ stock void stock_EndMsg(ArrayList a, int id, int s, const char[] ind) {
  *  @param r            Message recipient 
  *  @param m            Message text 
  *  
- *  @return             true    - On Allowed
- *                      false   - Otherwise 
+ *  @return             Proc_Continue - processing continue,
+ *                      Proc_Stop - processing rejected
 */
-stock bool stock_EngineMsgReq(ArrayList a, int s, int r, const char[] m) {
+stock Processing stock_EngineMsgReq(ArrayList a, int s, int r, const char[] m) {
     static const int propsCount = 3;
     int[] props = new int[propsCount]
     props[0] = s;

@@ -40,7 +40,7 @@ public Plugin myinfo =
     name        = "[CCP] Core",
     author      = "nyood",
     description = "Color chat processor",
-    version     = "3.4.0",
+    version     = "3.4.1",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -67,7 +67,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("ccp_StartNewMessage",                 Native_StartNewMessage);
     CreateNative("ccp_RebuildClients",                  Native_RebuildClients);
     CreateNative("ccp_RebuildMessage",                  Native_RebuildMessage);
-    CreateNative("ccp_HandleEngineMsg",                 Native_HandleEngineMsg);
+    CreateNative("ccp_RenderEngineCtx",                 Native_RenderEngineCtx);
     CreateNative("ccp_EndMessage",                      Native_EndMessage);
     CreateNative("ccp_EngineMsgRequest",                Native_EngineMessageReq);
     
@@ -88,7 +88,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     g_fwdOnEngineMsg = new GlobalForward(
         "cc_proc_HandleEngineMsg",
-        ET_Event, Param_Array, Param_Cell, Param_Cell
+        ET_Hook, Param_Array, Param_Cell, Param_Cell
     );
 
     g_fwdMessageEnd = new GlobalForward(
@@ -103,12 +103,12 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     
     g_fwdNewMessage = new GlobalForward(
         "cc_proc_OnNewMessage",
-        ET_Event, Param_Cell, Param_Cell
+        ET_Hook, Param_Cell, Param_Cell
     );
     
     g_fwdRebuildString_Post = new GlobalForward(
         "cc_proc_OnRebuildString_Post",
-        ET_Event, Param_Array, Param_Cell, Param_Cell, Param_Cell, Param_String
+        ET_Hook, Param_Array, Param_Cell, Param_Cell, Param_Cell, Param_String
     );
     
     g_fwdRebuildString = new GlobalForward(
@@ -317,12 +317,12 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
         g_iMessageCount = 0;
 }
 
-Action BuildMessage(const int[] props, int propsCount, ArrayList params) {
+Processing BuildMessage(const int[] props, int propsCount, ArrayList params) {
     static const int compile = 4;
 
     char value[MESSAGE_LENGTH];
 
-    Action whatNext;
+    Processing whatNext;
 
     char szBuffer[MAX_LENGTH];
     FormatEx(SZ(szBuffer), "%s", szBinds[BIND_PROTOTYPE]);
@@ -332,7 +332,7 @@ Action BuildMessage(const int[] props, int propsCount, ArrayList params) {
 
         GetDefaultValue(props[1], props[2], i, params, SZ(value));
         
-        if((whatNext = Call_RebuildString(props, propsCount, i, params, SZ(value))) != Plugin_Continue) {
+        if((whatNext = Call_RebuildString(props, propsCount, i, params, SZ(value))) > Proc_Change) {
             #if defined DEBUG
                 DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, props[2]);
             #endif
@@ -351,7 +351,7 @@ Action BuildMessage(const int[] props, int propsCount, ArrayList params) {
     return whatNext;
 }
 
-Action HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
+void RenderEngineCtx(const int[] props, int propsCount, ArrayList params) {
     static const int compile;
     
     char szMessage[MESSAGE_LENGTH];
@@ -360,38 +360,6 @@ Action HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
     #if defined DEBUG
     DWRITE("%s: HandleEngineMsg(%i) in: %s", DEBUG, props[0], szMessage);
     #endif
-
-    Action whatNext;
-    if(!szMessage[0]) {
-        return whatNext;
-    }
-
-    if(szMessage[0] == '#') {
-        if(!ccp_EngineMsgRequest(props, propsCount-1, params)) {
-            #if defined DEBUG
-            DWRITE("%s: HandleEngineMsg(%i): block sending", DEBUG, props[0]);
-            #endif
-
-            return (whatNext = Plugin_Stop);
-        }
-
-        if(!ccp_Translate(szMessage, props[1])) {
-            #if defined DEBUG
-            DWRITE("%s: HandleEngineMsg(%i): translation is not available ", DEBUG, props[0]);
-            #endif
-
-            return (whatNext = Plugin_Handled);
-        }
-    }
-
-    #if defined DEBUG
-    DWRITE("%s: HandleEngineMsg(%i) post: %s", DEBUG, props[0], szMessage);
-    #endif
-
-    params.SetString(compile, szMessage);
-    if(!props[2]) {
-        return whatNext;
-    }
 
     char szNum[8];
     for(int i; i < props[2]; i++) {
@@ -411,5 +379,4 @@ Action HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
     #endif
 
     params.SetString(compile, szMessage);
-    return whatNext;
 }

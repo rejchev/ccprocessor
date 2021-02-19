@@ -12,7 +12,7 @@ public Plugin myinfo =
     name        = "[CCP] TextMsg handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.1",
+    version     = "1.0.2",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -49,7 +49,7 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
     if(szMessage[0] == '#') {
         ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
         any a = -1;
-        if(!stock_EngineMsgReq(arr, 0, 0, szMessage)) {
+        if(stock_EngineMsgReq(arr, 0, 0, szMessage) == Proc_Stop) {
             a = Plugin_Handled;
         } 
 
@@ -96,7 +96,7 @@ public void TextMsg_Completed(StringMap g_mMessage)
     int id;
     if((id = stock_NewMessage(arr, sender, template, params[PARAM_MESSAGE], players, playersNum, SZ(szIndent))) == -1
     || !szIndent[0]
-    || stock_RebuildClients(arr, id, sender, szIndent, params[PARAM_MESSAGE], players, playersNum) != Plugin_Continue) {
+    || stock_RebuildClients(arr, id, sender, szIndent, params[PARAM_MESSAGE], players, playersNum) == Proc_Reject) {
         stock_EndMsg(arr, id, sender, indent_def);
         delete arr;
         return;
@@ -110,15 +110,15 @@ public void TextMsg_Completed(StringMap g_mMessage)
     for(int i, j; i < playersNum; i++) {
         message = params[PARAM_MESSAGE];
         if(message[0] == '#') {
-            stock_HandleEngineMsg(arr, sender, players[i], MAX_PARAMS, SZ(message));
+            ccp_Translate(message, players[i]);
+            stock_RenderEngineCtx(arr, sender, players[i], MAX_PARAMS, SZ(message));
         }
 
-        if(stock_RebuildMsg(arr, id, sender, players[i], szIndent, template, name, message, szBuffer) != Plugin_Continue) {
+        if(stock_RebuildMsg(arr, id, sender, players[i], szIndent, template, name, message, szBuffer) > Proc_Change) {
             continue;
         }
 
-        stock_HandleEngineMsg(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
-
+        stock_RenderEngineCtx(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
         ccp_replaceColors(szBuffer, false);
 
         uMessage = StartMessageOne("TextMsg", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS);

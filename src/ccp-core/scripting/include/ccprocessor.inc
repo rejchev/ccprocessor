@@ -24,7 +24,7 @@ API key:
     ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY             75091137
+#define API_KEY             98091137
 
 #if !defined CORE
     #define API_OOD         "The plugin module uses an outdated API. You must update it."
@@ -51,6 +51,14 @@ enum
     BIND_MSG,
 
     BIND_MAX
+};
+
+enum Processing
+{
+    Proc_Continue = 0,
+    Proc_Change,
+    Proc_Reject,
+    Proc_Stop
 };
 
 #include "ccprocessor/natives.inc"

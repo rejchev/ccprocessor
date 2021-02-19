@@ -12,7 +12,7 @@ public Plugin myinfo =
     name        = "[CCP] RadioText handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.1",
+    version     = "1.0.2",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -55,7 +55,7 @@ public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players,
 
     ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
     any b = -1;
-    if(!stock_EngineMsgReq(arr, sender, sender, szBuffer)) {
+    if(stock_EngineMsgReq(arr, sender, sender, szBuffer) == Proc_Stop) {
         b = Plugin_Handled;
     } 
 
@@ -122,8 +122,8 @@ public void AfterMessage(UserMsg msgid, bool send)
     int id;
     if((id = stock_NewMessage(arr, sender, template, params[display], players, playersNum, SZ(szIndent))) == -1
     || !szIndent[0]
-    || stock_RebuildClients(arr, id, sender, szIndent, params[display], players, playersNum) != Plugin_Continue) {
-        stock_EndMsg(arr, id, sender, indent_def);
+    || stock_RebuildClients(arr, id, sender, szIndent, params[display], players, playersNum) == Proc_Reject) {
+        stock_EndMsg(arr, id, sender, szIndent);
         delete arr;
         return;
     }
@@ -131,29 +131,37 @@ public void AfterMessage(UserMsg msgid, bool send)
     ccp_UpdateRecipients(players, players, playersNum);
     ccp_ChangeMode(players, playersNum, "0");
 
-    Action next;
+    Processing next;
     Handle uMessage;
     char message[MESSAGE_LENGTH];
     for(int i, j; i < playersNum; i++) {
+        
         szBuffer = NULL_STRING;
         message = params[display];
         j = (sender << 3|team << 1|view_as<int>(alive));
 
-        if((next = stock_HandleEngineMsg(arr, sender, players[i], PARAM_NAME, SZ(message))) == Plugin_Stop) {
-            continue;
+        if(message[0] == '#') {
+            if((next = stock_EngineMsgReq(arr, sender, players[i], message)) == Proc_Stop) {
+                continue;
+            }
+
+            next = (ccp_Translate(message, players[i])) ? Proc_Change : Proc_Continue;
         }
+        
+        // Attempting to render message text (Its a useless thing ... )
+        stock_RenderEngineCtx(arr, sender, players[i], PARAM_NAME, SZ(message));
 
         // translation phrase is not exists
-        if(next == Plugin_Handled) {
+        if(next == Proc_Continue) {
             FormatEx(SZ(message), "{%i}", display+1);
         }
 
-        if((next = stock_RebuildMsg(arr, id, j, players[i], szIndent, template, params[PARAM_NAME], message, szBuffer)) != Plugin_Continue) {
+        if((next = stock_RebuildMsg(arr, id, j, players[i], szIndent, template, params[PARAM_NAME], message, szBuffer)) > Proc_Change) {
             continue;
         }
 
-        stock_HandleEngineMsg(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
-
+        // Rendering the final result 
+        stock_RenderEngineCtx(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
         ccp_replaceColors(szBuffer, false);
 
         if(!(uMessage = StartMessageOne("RadioText", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS))) {
