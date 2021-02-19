@@ -1,8 +1,8 @@
 <h1 align="center">Color Chat Processor</h1>
 <p align="center">
-    <img src="https://travis-ci.org/nyood/CCProcessor.svg?branch=ccp-3.1" />
+    <img src="https://travis-ci.com/nyood/ccprocessor.svg?branch=main" />
     <a href="#license"><img src="https://img.shields.io/github/license/nyood/ccprocessor" /></a>
-    <a href="https://github.com/nyood/ccprocessor/releases"><img src="https://img.shields.io/github/v/release/nyood/CCProcessor" /></a>
+    <a href="https://github.com/nyood/ccprocessor/releases"><img src="https://img.shields.io/github/v/release/nyood/ccprocessor" /></a>
     <a href="#requirements"><img src="https://img.shields.io/badge/sourcemod-v.1.10-blue" /></a>
     <a href="https://discord.gg/cFZ97Mzrjy" target="_blank"><img src="https://img.shields.io/discord/494942123548868609" /></a>
     <img src="https://img.shields.io/github/downloads/nyood/ccprocessor/total" />
