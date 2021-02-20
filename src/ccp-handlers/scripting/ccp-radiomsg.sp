@@ -61,9 +61,9 @@ public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players,
 
     delete arr;
     
-    if(b == -1 && !ccp_Translate(szBuffer, 0)) {
-        b = Plugin_Continue
-    }
+    // if(b == -1 && !ccp_Translate(szBuffer, 0)) {
+    //     b = Plugin_Continue
+    // }
 
     if(b != -1) {
         g_mMessage.Clear();
@@ -225,7 +225,7 @@ bool ReadUserMessage(Handle msg, StringMap params) {
     }
 
     params.GetString("msg_name", SZ(szMsgName));
-    if((i = FindDisplayMessage(szParams, MAX_PARAMS, sizeof(szParams[]))) == -1
+    if((i = FindDisplayMessage(szParams, MAX_PARAMS)) == -1
     || StrContains(szParams[i], "Game_radio", false) != -1) {
         // Stop sending... 
         if(StrContains(szMsgName, "Game_radio", false) != -1) {
@@ -245,7 +245,7 @@ bool ReadUserMessage(Handle msg, StringMap params) {
     return true;
 }
 
-int FindDisplayMessage(char[][] params, int count, int size = 0) {
+int FindDisplayMessage(char[][] params, int count) {
     for(int i = PARAM_NAME+1; i < count; i++) {
         if(params[i][0] == '#') {
             return i;
