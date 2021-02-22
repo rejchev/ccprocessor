@@ -25,7 +25,7 @@ before_script:
     - chmod +x $TRAVIS_BUILD_DIR/travis/compile.sh
     - chmod +x $TRAVIS_BUILD_DIR/travis/package.sh
 script:
-    - bash ./travis/compile.sh $SOURCES $SOURCES_SM || exit 1
+    - bash ./travis/compile.sh $SOURCES $SOURCES_SM ${TRAVIS_BUILD_NUMBER} || exit 1
 
 before_deploy:
     - bash ./travis/package.sh $SOURCES ${TRAVIS_BUILD_NUMBER} || exit 1
