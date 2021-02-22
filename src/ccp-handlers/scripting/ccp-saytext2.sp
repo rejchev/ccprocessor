@@ -19,8 +19,8 @@ UserMessageType umType;
 
 StringMap g_mMessage;
 
-static const char indent_def[][] = {"STP", "STA"};
-static const char templates[][] = {"#Game_Chat_Team", "#Game_Chat_Public"};
+static const char indent_def[][] = {"STP", "STA", "CN"};
+static const char templates[][] = {"#Game_Chat_Team", "#Game_Chat_Public", "#Game_Chat_CUsername"};
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 {    
@@ -46,8 +46,8 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
     int sender;
     g_mMessage.GetValue("ent_idx", sender);
 
-    int allChat;
-    g_mMessage.GetValue("allchat", allChat);
+    int chatType;
+    g_mMessage.GetValue("chatType", chatType);
 
     char szName[NAME_LENGTH];
     g_mMessage.GetString("params[0]", szName, sizeof(szName));
@@ -58,7 +58,7 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
     ccp_replaceColors(szName, true);
     g_mMessage.SetString("params[0]", szName, true);
 
-    if(!ccp_SkipColors(indent_def[allChat], sender)) {
+    if(!ccp_SkipColors(indent_def[chatType], sender)) {
         ccp_replaceColors(szMessage, true);
         g_mMessage.SetString("params[1]", szMessage, true);
     }
@@ -96,19 +96,19 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     bool alive;
     alive = (sender) ? IsPlayerAlive(sender) : false;
 
-    int allChat;
-    g_mMessage.GetValue("allchat", allChat);
+    int chatType;
+    g_mMessage.GetValue("chatType", chatType);
 
     g_mMessage.Clear();
 
     char szIndent[NAME_LENGTH];
-    strcopy(SZ(szIndent), indent_def[allChat]);
+    strcopy(SZ(szIndent), indent_def[chatType]);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, templates[allChat], params[1], players, playersNum, SZ(szIndent))) == -1
+    if((id = stock_NewMessage(arr, sender, templates[chatType], params[1], players, playersNum, SZ(szIndent))) == -1
     || !szIndent[0]
     || stock_RebuildClients(arr, id, sender, szIndent, params[1], players, playersNum) == Proc_Reject) {
-        stock_EndMsg(arr, id, sender, indent_def[allChat]);
+        stock_EndMsg(arr, id, sender, indent_def[chatType]);
         delete arr;
         return;
     }
@@ -125,7 +125,7 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
         j = (sender << 3|team << 1|view_as<int>(alive));
 
-        if(stock_RebuildMsg(arr, id, j, players[i], szIndent, templates[allChat], name, message, szBuffer) > Proc_Change) {
+        if(stock_RebuildMsg(arr, id, j, players[i], szIndent, templates[chatType], name, message, szBuffer) > Proc_Change) {
             continue;
         }
 
@@ -180,7 +180,14 @@ void ReadUserMessage(Handle msg, StringMap params) {
     }
 
     params.SetString("msg_name", szMsgName, true);
-    g_mMessage.SetValue("allchat", StrContains(szMsgName, "_All", false) != -1, true);
+    g_mMessage.SetValue("chatType", 
+        (StrContains(szMsgName, "_Name_Change", false) != -1) 
+            ? 2
+            : (StrContains(szMsgName, "_All", false) != -1) 
+                ? 1 
+                : 0, 
+        true
+    );
 
     char szParams[MAX_PARAMS][MESSAGE_LENGTH];
     int i;
