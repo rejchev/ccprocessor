@@ -66,7 +66,7 @@ You can edit already boring radio commands. <br>
 ## Handlers
 Handler Name | Message identifier | Package | Virtualization |
 :------------: | :------------------: | :-------: | :--------------: |
-|  `SayText2`  | `STA` = Public chat, `STP` = Team chat  | `ccp-saytext2.smx` | `Yes` |
+|  `SayText2`  | `STA` = Public chat <br> `STP` = Team chat <br> `CN` = Name Change  | `ccp-saytext2.smx` | `Yes` |
 |  `TextMsg`   | `TM` = Server chat | `ccp-textmsg.smx`  | `Yes` |
 |  `SayText`   | `ST` = Server chat | `ccp-saytext.smx`  | `Yes` |
 |  `RadioText` | `RT` = Radio chat  | `ccp-radiomsg.smx` |  `Yes` |

@@ -22,6 +22,17 @@
         "en"                "{STATUSCO}{STATUS} {TEAMCO}{TEAM} {PREFIXCO}{PREFIX} {NAMECO}{NAME}{W}: {MSGCO}{MSG}"
     }
 
+    // Username was changed
+    "#Game_Chat_CUsername"
+    {
+        // {1} name
+        // {2} message
+        // {3} location
+
+        "ru"                "{NAMECO}{NAME}{W}: {MSGCO}{MSG}"
+        "en"                "{NAMECO}{NAME}{W}: {MSGCO}{MSG}"
+    }
+
     // Templates: RadioText
     "#Cstrike_TitlesTXT_Game_radio"
     {
