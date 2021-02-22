@@ -12,7 +12,7 @@ public Plugin myinfo =
     name        = "[CCP] TextMsg handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.2"...BUILD_END(_BUILD),
+    version     = "1.0.2",
     url         = "discord.gg/ChTyPUG"
 };
 

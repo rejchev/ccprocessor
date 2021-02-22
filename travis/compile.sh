@@ -2,14 +2,8 @@
 
 SOURCES=$1
 SOURCES_SM=$2
-BUILD_NUM="#define _BUILD \"${3}\""$'\n'
-echo "Build param: ${BUILD_NUM}"
-
 INCLUDES_SM=$SOURCES_SM'/include'
 ERROR=1
-
-# bruh...
-echo -e "${BUILD_NUM} $(cat ${INCLUDES_SM}/ccprocessor.inc)"> $INCLUDES_SM'/ccprocessor.inc'
 
 cd $SOURCES
 
