@@ -40,7 +40,7 @@ public Plugin myinfo =
     name        = "[CCP] Core",
     author      = "nyood",
     description = "Color chat processor",
-    version     = "3.4.1",
+    version     = "3.4.1"...BUILD_END(_BUILD),
     url         = "discord.gg/ChTyPUG"
 };
 

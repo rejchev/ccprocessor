@@ -30,6 +30,12 @@ API key:
     #define API_OOD         "The plugin module uses an outdated API. You must update it."
 #endif
 
+#if !defined _BUILD
+    #define _BUILD           "0"
+#endif
+
+#define BUILD_END(%0)      "." ...%0
+
 // Message template parts
 enum
 {
