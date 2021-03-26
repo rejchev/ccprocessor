@@ -8,18 +8,6 @@
     <img src="https://img.shields.io/github/downloads/nyood/ccprocessor/total" />
 </p>
 
-## Navigation
-- [About CCProcessor](#About)
-    - [Description](#Description)
-    - [Real-Time Color Processing](#Real-Time-Color-Processing)
-    - [Flexible Localization](#Flexible-Localization)
-    - [Extended Radio](#extended-radio)
-- [Game support](#game-support)
-- [Requirements](#Requirements)
-- [Chat Handlers](#handlers)
-- [Supported Modules](#supported-modules)
-- [License](#license)
-
 ## About
 
 ### Description
