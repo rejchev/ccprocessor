@@ -46,6 +46,7 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
 
     int clients[MAXPLAYERS+1];
     ccp_UpdateRecipients(players, clients, playersNum);
+
     g_mMessage.SetArray("players", clients, playersNum, true);
     g_mMessage.SetValue("playersNum", playersNum, true);
 
@@ -75,8 +76,6 @@ public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] player
 public void OnNextFrame(StringMap g_mMessage) {
     static const int sender;
 
-    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
-    
     char szMessage[MESSAGE_LENGTH], szBuffer[MAX_LENGTH], name[NAME_LENGTH];
     g_mMessage.GetString("text", SZ(szMessage));
 
@@ -86,15 +85,25 @@ public void OnNextFrame(StringMap g_mMessage) {
     int players[MAXPLAYERS+1];
     g_mMessage.GetArray("players", players, playersNum);
     ccp_UpdateRecipients(players, players, playersNum); 
-
     delete g_mMessage;
+
+    if(playersNum < 1) {
+        return;
+    }
+
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
 
     char szIndent[NAME_LENGTH];
     strcopy(SZ(szIndent), indent_def);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, template, szMessage, players, playersNum, SZ(szIndent))) == -1
-    || !szIndent[0]
+    if((id = stock_NewMessage(arr, sender, template, szMessage, players, playersNum, SZ(szIndent))) == -1)
+    {
+        delete arr;
+        return;
+    }
+
+    if(!szIndent[0]
     || stock_RebuildClients(arr, id, sender, szIndent, szMessage, players, playersNum) == Proc_Reject) {
         stock_EndMsg(arr, id, sender, indent_def);
         delete arr;

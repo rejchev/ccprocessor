@@ -40,6 +40,7 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
 
     int clients[MAXPLAYERS+1];
     ccp_UpdateRecipients(players, clients, playersNum);
+
     g_mMessage.SetArray("players", clients, playersNum);
     g_mMessage.SetValue("playersNum", playersNum);
 
@@ -72,8 +73,6 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     if(!send || !g_mMessage.GetValue("ent_idx", sender)) {
         return;
     }
-
-    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
     
     char szMsgName[MESSAGE_LENGTH], params[MAX_PARAMS][MESSAGE_LENGTH], szBuffer[MAX_LENGTH];
     for(int i; i < MAX_PARAMS; i++) {
@@ -101,12 +100,23 @@ public void SayText2_Completed(UserMsg msgid, bool send)
 
     g_mMessage.Clear();
 
+    if(playersNum < 1) {
+        return;
+    }
+
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
+
     char szIndent[NAME_LENGTH];
     strcopy(SZ(szIndent), indent_def[chatType]);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, templates[chatType], params[1], players, playersNum, SZ(szIndent))) == -1
-    || !szIndent[0]
+    if((id = stock_NewMessage(arr, sender, templates[chatType], params[1], players, playersNum, SZ(szIndent))) == -1)
+    {
+        delete arr;
+        return;
+    }
+
+    if(!szIndent[0]
     || stock_RebuildClients(arr, id, sender, szIndent, params[1], players, playersNum) == Proc_Reject) {
         stock_EndMsg(arr, id, sender, indent_def[chatType]);
         delete arr;

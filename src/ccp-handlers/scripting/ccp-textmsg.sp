@@ -40,6 +40,7 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
 
     int clients[MAXPLAYERS+1];
     ccp_UpdateRecipients(players, clients, playersNum);
+
     g_mMessage.SetArray("players", clients, playersNum);
     g_mMessage.SetValue("playersNum", playersNum);
 
@@ -72,8 +73,6 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
 public void TextMsg_Completed(StringMap g_mMessage)
 {
     static const int sender;
-
-    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
     
     char params[MAX_PARAMS][MESSAGE_LENGTH], szBuffer[MAX_LENGTH], name[4];
     for(int i; i < MAX_PARAMS; i++) {
@@ -90,12 +89,23 @@ public void TextMsg_Completed(StringMap g_mMessage)
 
     delete g_mMessage;
 
+    if(playersNum < 1) {
+        return;
+    }
+
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
+
     char szIndent[NAME_LENGTH];
     strcopy(SZ(szIndent), indent_def);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, template, params[PARAM_MESSAGE], players, playersNum, SZ(szIndent))) == -1
-    || !szIndent[0]
+    if((id = stock_NewMessage(arr, sender, template, params[PARAM_MESSAGE], players, playersNum, SZ(szIndent))) == -1)
+    {
+        delete arr;
+        return;
+    }
+
+    if(!szIndent[0]
     || stock_RebuildClients(arr, id, sender, szIndent, params[PARAM_MESSAGE], players, playersNum) == Proc_Reject) {
         stock_EndMsg(arr, id, sender, indent_def);
         delete arr;

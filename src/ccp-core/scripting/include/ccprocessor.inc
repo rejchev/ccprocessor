@@ -28,6 +28,12 @@ API key:
 
 #if !defined CORE
     #define API_OOD         "The plugin module uses an outdated API. You must update it."
+
+    #if defined INCLUDE_RIPJSON
+        #undef REQUIRE_EXTENSIONS
+        #include <ripext_m>
+        #define REQUIRE_EXTENSIONS
+    #endif
 #endif
 
 // Message template parts

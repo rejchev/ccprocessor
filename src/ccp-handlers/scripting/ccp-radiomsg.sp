@@ -72,6 +72,7 @@ public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players,
 
     int clients[MAXPLAYERS+1];
     ccp_UpdateRecipients(players, clients, playersNum);
+    
     g_mMessage.SetArray("players", clients, playersNum, true);
     g_mMessage.SetValue("playersNum", playersNum, true);
 
@@ -91,8 +92,6 @@ public void AfterMessage(UserMsg msgid, bool send)
         return;
     }
     
-    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
-
     char szIndent[NAME_LENGTH];
     strcopy(SZ(szIndent), indent_def);
 
@@ -116,12 +115,23 @@ public void AfterMessage(UserMsg msgid, bool send)
     
     g_mMessage.Clear();
 
+    if(playersNum < 1) {
+        return;
+    }
+
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
+
     int team = GetClientTeam(sender);
     bool alive = IsPlayerAlive(sender);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, template, params[display], players, playersNum, SZ(szIndent))) == -1
-    || !szIndent[0]
+    if((id = stock_NewMessage(arr, sender, template, params[display], players, playersNum, SZ(szIndent))) == -1)
+    {
+        delete arr;
+        return;
+    }
+    
+    if(!szIndent[0]
     || stock_RebuildClients(arr, id, sender, szIndent, params[display], players, playersNum) == Proc_Reject) {
         stock_EndMsg(arr, id, sender, szIndent);
         delete arr;

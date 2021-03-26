@@ -37,23 +37,30 @@ public any Native_EngineMessageReq(Handle hPlugin, int params) {
 }
 
 public int Native_UpdateRecipients(Handle hPlugin, int params) {
-    int playersNum = GetNativeCellRef(3);
-    int[] players = new int[playersNum];
+    static int 
+        input[MAXPLAYERS+1],
+        output[MAXPLAYERS+1];
 
-    GetNativeArray(1, players, playersNum);
+    int playersNum;
+    if((playersNum = GetNativeCellRef(3)) < 1)
+    {
+        return;
+    }
+
+    GetNativeArray(1, input, playersNum);
 
     int a;
     for(int i; i < playersNum; i++) {
-        if(IsClientConnected(players[i]) && (IsClientSourceTV(players[i]) || !IsFakeClient(players[i]))) {
-            players[a++] = players[i];  
+        if(IsClientConnected(input[i]) && (IsClientSourceTV(input[i]) || !IsFakeClient(input[i]))) {
+            output[a++] = input[i];  
 
             #if defined DEBUG
-            DWRITE("%s: ccp_UpdateRecipients(%i): valid", DEBUG, players[i]);
+            DWRITE("%s: ccp_UpdateRecipients(): %N : (id: %d) re-saved", DEBUG, input[i], input[i]);
             #endif
         }
     }
 
-    SetNativeArray(2, players, a);
+    SetNativeArray(2, output, a);
     SetNativeCellRef(3, a);   
 }
 
@@ -65,7 +72,7 @@ public int Native_SkipColors(Handle hPlugin, int params) {
     skip = Call_IsSkipColors(szIndent, GetNativeCell(2));
 
     #if defined DEBUG
-    DWRITE("%s: ccp_UpdateRecipients(%s): %b", DEBUG, szIndent, skip);
+    DWRITE("%s: ccp_SkipColors(%s): %b", DEBUG, szIndent, skip);
     #endif
 
     return skip;    
