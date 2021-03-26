@@ -92,7 +92,7 @@ stock Processing stock_RebuildClients(ArrayList a, int id, int s, const char[] i
 
     Processing next;
     if((next = ccp_RebuildClients(props, propsCount, a)) == Proc_Change) {
-        a.Get(3, c);
+        c = a.Get(3);
         a.GetArray(2, p, c);
     }
 
