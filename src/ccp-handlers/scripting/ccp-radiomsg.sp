@@ -12,13 +12,13 @@ public Plugin myinfo =
     name        = "[CCP] RadioText handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.2",
+    version     = "1.0.3",
     url         = "discord.gg/ChTyPUG"
 };
 
 UserMessageType umType;
 
-StringMap g_mMessage;
+ArrayList g_aThread;
 
 static const char indent_def[] = "RT";
 stock const char template[] = "#Game_Chat_Radio"
@@ -32,26 +32,29 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 
 public void OnPluginStart() {
-    g_mMessage = new StringMap();
+    g_aThread = new ArrayList(36, 0);
 }
 
 public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
     if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3)
         return Plugin_Continue;
 
-    if(!ReadUserMessage(msg, g_mMessage)) {
+    StringMap mMessage;
+    if(!(mMessage = ReadUserMessage(msg))) {
         return Plugin_Handled;
     }
 
     int a;
-    g_mMessage.GetValue("display", a);
+    mMessage.GetValue("display", a);
     
     int sender;
-    g_mMessage.GetValue("client", sender);
+    mMessage.GetValue("client", sender);
+
+    mMessage.SetValue("recipient", players[0]);
 
     char szBuffer[MESSAGE_LENGTH], szComp[MESSAGE_LENGTH];
     FormatEx(SZ(szComp), "params[%i]", a);
-    g_mMessage.GetString(szComp, SZ(szBuffer));
+    mMessage.GetString(szComp, SZ(szBuffer));
 
     ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
     any b = -1;
@@ -60,64 +63,58 @@ public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players,
     } 
 
     delete arr;
-    
-    // if(b == -1 && !ccp_Translate(szBuffer, 0)) {
-    //     b = Plugin_Continue
-    // }
 
     if(b != -1) {
-        g_mMessage.Clear();
+        delete mMessage;
         return view_as<Action>(b);
     }
-
-    int clients[MAXPLAYERS+1];
-    ccp_UpdateRecipients(players, clients, playersNum);
     
-    g_mMessage.SetArray("players", clients, playersNum, true);
-    g_mMessage.SetValue("playersNum", playersNum, true);
-
     // #ENTNAME[#]Name
-    g_mMessage.GetString("params[0]", SZ(szBuffer));
+    mMessage.GetString("params[0]", SZ(szBuffer));
     strcopy(SZ(szBuffer), szBuffer[(FindCharInString(szBuffer, ']') + 1)]);
     ccp_replaceColors(szBuffer, true);
-    g_mMessage.SetString("params[0]", szBuffer, true);
+    mMessage.SetString("params[0]", szBuffer, true);
     
+
+    g_aThread.Push(mMessage);
     return Plugin_Handled;
 }
 
 public void AfterMessage(UserMsg msgid, bool send)
 {
-    int sender;
-    if(!send || !g_mMessage.GetValue("client", sender)) {
+    if(!send || !g_aThread.Length) {
         return;
     }
+
+    StringMap mMessage;
+    mMessage = view_as<StringMap>(g_aThread.Get(0));
+    g_aThread.Erase(0);
+
+    if(!mMessage) {
+        return;
+    }
+
+    int sender;
+    mMessage.GetValue("client", sender);
     
     char szIndent[NAME_LENGTH];
     strcopy(SZ(szIndent), indent_def);
 
     int display;
-    g_mMessage.GetValue("display", display);
+    mMessage.GetValue("display", display);
     
     char    params[MAX_PARAMS][MESSAGE_LENGTH],
             szBuffer[MAX_LENGTH];
 
     for(int i; i < MAX_PARAMS; i++) {
         FormatEx(SZ(szBuffer), "params[%i]", i);
-        g_mMessage.GetString(szBuffer, params[i], sizeof(params[]));
+        mMessage.GetString(szBuffer, params[i], sizeof(params[]));
     }
     
-    int playersNum;
-    g_mMessage.GetValue("playersNum", playersNum);
-
-    int players[MAXPLAYERS+1];
-    g_mMessage.GetArray("players", players, playersNum);
-    ccp_UpdateRecipients(players, players, playersNum);
+    int recipient;
+    mMessage.GetValue("recipient", recipient);
     
-    g_mMessage.Clear();
-
-    if(playersNum < 1) {
-        return;
-    }
+    delete mMessage;
 
     ArrayList arr = new ArrayList(MAX_LENGTH, 0);
 
@@ -125,87 +122,85 @@ public void AfterMessage(UserMsg msgid, bool send)
     bool alive = IsPlayerAlive(sender);
 
     int id;
-    if((id = stock_NewMessage(arr, sender, template, params[display], players, playersNum, SZ(szIndent))) == -1)
+    if((id = stock_NewMessage(arr, sender, recipient, template, params[display], SZ(szIndent))) == -1)
     {
         delete arr;
         return;
     }
     
-    if(!szIndent[0]
-    || stock_RebuildClients(arr, id, sender, szIndent, params[display], players, playersNum) == Proc_Reject) {
+    if(!szIndent[0]) {
         stock_EndMsg(arr, id, sender, szIndent);
         delete arr;
         return;
     }
 
-    ccp_UpdateRecipients(players, players, playersNum);
-    ccp_ChangeMode(players, playersNum, "0");
+    ccp_ChangeMode(recipient, "0");
 
     Processing next;
     Handle uMessage;
     char message[MESSAGE_LENGTH];
-    for(int i, j; i < playersNum; i++) {
-        
-        szBuffer = NULL_STRING;
-        message = params[display];
-        j = (sender << 3|team << 1|view_as<int>(alive));
+    
+    szBuffer = NULL_STRING;
+    message = params[display];
+    int j = (sender << 3|team << 1|view_as<int>(alive));
 
-        if(message[0] == '#') {
-            if((next = stock_EngineMsgReq(arr, sender, players[i], message)) == Proc_Stop) {
-                continue;
-            }
-
-            next = (ccp_Translate(message, players[i])) ? Proc_Change : Proc_Continue;
-        }
-        
-        // Attempting to render message text (Its a useless thing ... )
-        stock_RenderEngineCtx(arr, sender, players[i], PARAM_NAME, SZ(message));
-
-        // translation phrase is not exists
-        if(next == Proc_Continue) {
-            FormatEx(SZ(message), "{%i}", display+1);
+    if(message[0] == '#') {
+        if((next = stock_EngineMsgReq(arr, sender, recipient, message)) == Proc_Stop) {
+            ccp_ChangeMode(recipient);
+            stock_EndMsg(arr, id, sender, szIndent);
+            delete arr;
+            return;
         }
 
-        if((next = stock_RebuildMsg(arr, id, j, players[i], szIndent, template, params[PARAM_NAME], message, szBuffer)) > Proc_Change) {
-            continue;
-        }
+        next = (ccp_Translate(message, recipient)) ? Proc_Change : Proc_Continue;
+    }
+    
+    // Attempting to render message text (Its a useless thing ... )
+    stock_RenderEngineCtx(arr, sender, recipient, PARAM_NAME, SZ(message));
 
-        // Rendering the final result 
-        stock_RenderEngineCtx(arr, sender, players[i], MAX_PARAMS, SZ(szBuffer));
-        ccp_replaceColors(szBuffer, false);
-
-        if(!(uMessage = StartMessageOne("RadioText", players[i], USERMSG_RELIABLE|USERMSG_BLOCKHOOKS))) {
-            continue;
-        }
-
-        j = 0;
-        if(!umType) {
-            BfWriteByte(uMessage, 3);
-            BfWriteByte(uMessage, sender);
-            BfWriteString(uMessage, szBuffer);
-            while(j < MAX_PARAMS) {
-                BfWriteString(uMessage, params[j++]);
-            }
-            
-        } else {
-            PbSetInt(uMessage, "msg_dst", 3);
-            PbSetInt(uMessage, "client", sender);
-            PbSetString(uMessage, "msg_name", szBuffer);
-            while(j < MAX_PARAMS)
-                PbAddString(uMessage, "params", params[j++]);
-        }
-        
-        EndMessage();
+    // translation phrase is not exists
+    if(next == Proc_Continue) {
+        FormatEx(SZ(message), "{%i}", display+1);
     }
 
-    ccp_ChangeMode(players, playersNum);
+    if((next = stock_RebuildMsg(arr, id, j, recipient, szIndent, template, params[PARAM_NAME], message, szBuffer)) <= Proc_Change) {
+        
+        // Rendering the final result 
+        stock_RenderEngineCtx(arr, sender, recipient, MAX_PARAMS, SZ(szBuffer));
+        ccp_replaceColors(szBuffer, false);
+
+        if((uMessage = StartMessageOne("RadioText", recipient, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS)) != null) {
+            j = 0;
+            if(!umType) {
+                BfWriteByte(uMessage, 3);
+                BfWriteByte(uMessage, sender);
+                BfWriteString(uMessage, szBuffer);
+                while(j < MAX_PARAMS) {
+                    BfWriteString(uMessage, params[j++]);
+                }
+                
+            } else {
+                PbSetInt(uMessage, "msg_dst", 3);
+                PbSetInt(uMessage, "client", sender);
+                PbSetString(uMessage, "msg_name", szBuffer);
+                while(j < MAX_PARAMS)
+                    PbAddString(uMessage, "params", params[j++]);
+            }
+            
+            EndMessage();
+        }
+
+    }
+
+
+    ccp_ChangeMode(recipient);
     stock_EndMsg(arr, id, sender, szIndent);
 
     delete arr;
 }
 
-bool ReadUserMessage(Handle msg, StringMap params) {
-    params.Clear();
+StringMap ReadUserMessage(Handle msg) {
+    StringMap params = new StringMap();
 
     int sender = (!umType) 
                     ? BfReadByte(msg) 
@@ -239,8 +234,8 @@ bool ReadUserMessage(Handle msg, StringMap params) {
     || StrContains(szParams[i], "Game_radio", false) != -1) {
         // Stop sending... 
         if(StrContains(szMsgName, "Game_radio", false) != -1) {
-            params.Clear();
-            return false;
+            delete params
+            return params;
         }
         
         // {1} - name
@@ -252,7 +247,7 @@ bool ReadUserMessage(Handle msg, StringMap params) {
     }
 
     params.SetValue("display", i, true);
-    return true;
+    return params;
 }
 
 int FindDisplayMessage(char[][] params, int count) {

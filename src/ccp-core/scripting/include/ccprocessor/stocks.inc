@@ -37,26 +37,28 @@ stock int BreakPoint(int iBindType, char[] szValue)
  *  
  *  @param a            Buffer array 
  *  @param s            Sender index
+ *  @param s            Recipient index
  *  @param t            Message template
  *  @param m            Message text
- *  @param p            Message recipient list
- *  @param c            Message recipient count
  *  @param ind          Message indent
  *  @param l            Message indent size       
  *  
  *  @return         ID or -1 if unsuccessful  
 */
-stock int stock_NewMessage(ArrayList a, int s, const char[] t, const char[] m, const int[] p, int c, char[] ind, int l) {
+stock int stock_NewMessage(ArrayList a, int s, int r, const char[] t, const char[] m, char[] ind, int l) {
+    static const int propsCount = 2;
     static const int rw;
+
+    int[] props = new int[propsCount]
+    props[0] = s;
+    props[1] = r;
 
     a.Clear();
     a.PushString(ind);
     a.PushString(t);
     a.PushString(m);
-    a.PushArray(p, c);
-    a.Push(c);
 
-    if((s = ccp_StartNewMessage(s, a)) != -1) {
+    if((s = ccp_StartNewMessage(props, propsCount, a)) != -1) {
         a.GetString(rw, ind, l);
     } 
 
@@ -78,26 +80,26 @@ stock int stock_NewMessage(ArrayList a, int s, const char[] t, const char[] m, c
  *                      Proc_Change - recipients have been changed,
  *                      Proc_Reject - message rejected
 */
-stock Processing stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, const char[] m, int[] p, int &c) {
-    static const int propsCount = 2;
-    int[] props = new int[propsCount]
-    props[0] = id;
-    props[1] = s;
+// stock Processing stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, const char[] m, int[] p, int &c) {
+//     static const int propsCount = 2;
+//     int[] props = new int[propsCount]
+//     props[0] = id;
+//     props[1] = s;
 
-    a.Clear();
-    a.PushString(ind);
-    a.PushString(m);
-    a.PushArray(p, c);
-    a.Push(c);
+//     a.Clear();
+//     a.PushString(ind);
+//     a.PushString(m);
+//     a.PushArray(p, c);
+//     a.Push(c);
 
-    Processing next;
-    if((next = ccp_RebuildClients(props, propsCount, a)) == Proc_Change) {
-        c = a.Get(3);
-        a.GetArray(2, p, c);
-    }
+//     Processing next;
+//     if((next = ccp_RebuildClients(props, propsCount, a)) == Proc_Change) {
+//         c = a.Get(3);
+//         a.GetArray(2, p, c);
+//     }
 
-    return next;
-}
+//     return next;
+// }
 
 /*
  *  Request to start rebuilding message

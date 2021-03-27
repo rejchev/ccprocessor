@@ -24,7 +24,7 @@ GlobalForward
     g_fwdConfigParsed,
     g_fwdNewMessage,
     g_fwdAPIHandShake,
-    g_fwdRebuildClients,
+    // g_fwdRebuildClients,
     g_fwdRebuildString_Post,
     g_fwdMessageEnd;
 
@@ -40,7 +40,7 @@ public Plugin myinfo =
     name        = "[CCP] Core",
     author      = "nyood",
     description = "Color chat processor",
-    version     = "3.4.1",
+    version     = "3.5.0",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -59,13 +59,13 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     CreateNative("cc_is_APIEqual",                      Native_IsAPIEqual);
     CreateNative("cc_drop_palette",                     Native_DropPalette);
     CreateNative("ccp_replaceColors",                   Native_ReplaceColors);
-    CreateNative("ccp_UpdateRecipients",                Native_UpdateRecipients);
+    // CreateNative("ccp_UpdateRecipients",                Native_UpdateRecipients);
     CreateNative("ccp_SkipColors",                      Native_SkipColors);
     CreateNative("ccp_ChangeMode",                      Native_ChangeMode);
     CreateNative("ccp_GetMessageID",                    Native_GetMsgID);
     CreateNative("ccp_Translate",                       Native_Translate);  
     CreateNative("ccp_StartNewMessage",                 Native_StartNewMessage);
-    CreateNative("ccp_RebuildClients",                  Native_RebuildClients);
+    // CreateNative("ccp_RebuildClients",                  Native_RebuildClients);
     CreateNative("ccp_RebuildMessage",                  Native_RebuildMessage);
     CreateNative("ccp_RenderEngineCtx",                 Native_RenderEngineCtx);
     CreateNative("ccp_EndMessage",                      Native_EndMessage);
@@ -96,14 +96,14 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
         ET_Ignore, Param_Array, Param_Cell, Param_Cell
     );
 
-    g_fwdRebuildClients = new GlobalForward(
-        "cc_proc_OnRebuildClients",
-        ET_Hook, Param_Array, Param_Cell, Param_Cell
-    );
+    // g_fwdRebuildClients = new GlobalForward(
+    //     "cc_proc_OnRebuildClients",
+    //     ET_Hook, Param_Array, Param_Cell, Param_Cell
+    // );
     
     g_fwdNewMessage = new GlobalForward(
         "cc_proc_OnNewMessage",
-        ET_Hook, Param_Cell, Param_Cell
+        ET_Hook, Param_Array, Param_Cell, Param_Cell
     );
     
     g_fwdRebuildString_Post = new GlobalForward(
@@ -313,8 +313,10 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
     if(halted || failed)
         SetFailState("There was a problem reading the configuration file");
 
-    if(g_bResetByMap)
+    if(g_bResetByMap) {
+        g_iMsgInProgress = -1;
         g_iMessageCount = 0;
+    }
 }
 
 Processing BuildMessage(const int[] props, int propsCount, ArrayList params) {

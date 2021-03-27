@@ -36,34 +36,6 @@ public any Native_EngineMessageReq(Handle hPlugin, int params) {
     return handle;
 }
 
-public int Native_UpdateRecipients(Handle hPlugin, int params) {
-    static int 
-        input[MAXPLAYERS+1],
-        output[MAXPLAYERS+1];
-
-    int playersNum;
-    if((playersNum = GetNativeCellRef(3)) < 1)
-    {
-        return;
-    }
-
-    GetNativeArray(1, input, playersNum);
-
-    int a;
-    for(int i; i < playersNum; i++) {
-        if(IsClientConnected(input[i]) && (IsClientSourceTV(input[i]) || !IsFakeClient(input[i]))) {
-            output[a++] = input[i];  
-
-            #if defined DEBUG
-            DWRITE("%s: ccp_UpdateRecipients(): %N : (id: %d) re-saved", DEBUG, input[i], input[i]);
-            #endif
-        }
-    }
-
-    SetNativeArray(2, output, a);
-    SetNativeCellRef(3, a);   
-}
-
 public int Native_SkipColors(Handle hPlugin, int params) {
     char szIndent[64];
     GetNativeString(1, szIndent, sizeof(szIndent));
@@ -83,27 +55,19 @@ public int Native_ChangeMode(Handle hPlugin, int params) {
         return;
     }
 
-    int players[MAXPLAYERS+1];
-    int playersNum = GetNativeCell(2);
-    GetNativeArray(1, players, playersNum);
+    int iClient = GetNativeCell(1);
 
-    char szValue[4];
-    GetNativeString(3, szValue, sizeof(szValue));
+    char szValue[NAME_LENGTH];
+    GetNativeString(2, szValue, sizeof(szValue));
 
     if(!szValue[0]) {
         strcopy(szValue, sizeof(szValue), mode_default_value);
     }
 
-    for(int i; i < playersNum; i++) {
-        #if defined DEBUG
-            DWRITE("%s: ChangeModeValue(%N): %s", DEBUG, players[i], szValue);
-        #endif
-
-        if(IsFakeClient(players[i]))
-            SetFakeClientConVar(players[i], "game_mode", szValue);
-        
-        else game_mode.ReplicateToClient(players[i], szValue);
-    }
+    if(IsFakeClient(iClient))
+        SetFakeClientConVar(iClient, "game_mode", szValue);
+    
+    else game_mode.ReplicateToClient(iClient, szValue);
 }
 
 public int Native_StartNewMessage(Handle hPlugin, int params) {
@@ -115,7 +79,10 @@ public int Native_StartNewMessage(Handle hPlugin, int params) {
         return -1;
     }
 
-    if(Call_NewMessage(GetNativeCell(1), GetNativeCell(2)) > Proc_Change) {
+    int props[4];
+    GetNativeArray(1, props, GetNativeCell(2));
+
+    if(Call_NewMessage(props, GetNativeCell(2), GetNativeCell(3)) > Proc_Change) {
         #if defined DEBUG
         DWRITE("%s: ccp_StartNewMessage(): message rejected", DEBUG);
         #endif
@@ -131,17 +98,6 @@ public int Native_StartNewMessage(Handle hPlugin, int params) {
     #endif
 
     return g_iMsgInProgress;
-}
-
-public any Native_RebuildClients(Handle hPlugin, int params) {
-    int props[4];
-    GetNativeArray(1, props, GetNativeCell(2));
-
-    #if defined DEBUG
-    DWRITE("%s: ccp_RebuildClients()", DEBUG);
-    #endif
-    
-    return Call_RebuildClients(props, GetNativeCell(2), GetNativeCell(3));
 }
 
 public any Native_RebuildMessage(Handle hPlugin, int params) {

@@ -46,7 +46,7 @@ native void     ccp_replaceColors(char[] szBuffer, bool toNull = true);
  *  
  *  @noreturn
 */
-native void     ccp_UpdateRecipients(const int[] input, int[] output, int &playersNum);
+// native void     ccp_UpdateRecipients(const int[] input, int[] output, int &playersNum);
 
 /*
  *  Request to skip color tags for author msg 
@@ -62,13 +62,12 @@ native bool     ccp_SkipColors(const char[] indent, int sender);
 /*
  *  Changes the current game mode 
  *  
- *  @param players      Recipient list
- *  @param playersNum   Recipient count        
+ *  @param iClient      Client Index     
  *  @param value        Game mode value (NULL_STRING to default)   
  *  
  *  @noreturn
 */
-native void     ccp_ChangeMode(const int[] players, int playersNum, const char[] value = NULL_STRING);
+native void     ccp_ChangeMode(int iClient, const char[] value = NULL_STRING);
 
 /*
  *  Get the ID of the current message
@@ -92,17 +91,20 @@ native bool     ccp_Translate(char[] phrase, int recipient);
 /*
  *  Request to start processing a new message 
  *  
- *  @param sender       Message sender 
+ *  @param props        Message props
+ *      @props[0]       Message Sender
+ *      @props[1]       Message Recipient
+ *
+ *  @param propsCount   Props count
+ *
  *  @param params       Message params
  *      @params[0]      Message indent                      [String/RW]
  *      @params[1]      Message template                    [String/Read]   
- *      @params[2]      Message text                        [String/Read]
- *      @params[3]      Message recipient list              [Array/Read]
- *      @params[4]      Message recipient count             [Int/Read]             
+ *      @params[2]      Message text                        [String/Read]           
  *  
  *  @return         ID or -1 if unsuccessful  
 */
-native int      ccp_StartNewMessage(int sender, ArrayList params);
+native int      ccp_StartNewMessage(const int[] props, int propsCount, ArrayList params);
 
 /*
  *  Request to start rebuilding recipient list
@@ -123,7 +125,7 @@ native int      ccp_StartNewMessage(int sender, ArrayList params);
  *                      Proc_Change - recipients have been changed,
  *                      Proc_Reject - rejected
 */
-native Processing   ccp_RebuildClients(const int[] props, int propsCount, ArrayList params);
+// native Processing   ccp_RebuildClients(const int[] props, int propsCount, ArrayList params);
 
 /*
  *  Request to start rebuilding message
@@ -209,11 +211,11 @@ public void __pl_ccprocessor_SetNTVOptional()
     MarkNativeAsOptional("ccp_replaceColors");
     MarkNativeAsOptional("cc_get_APIKey");
     MarkNativeAsOptional("cc_is_APIEqual");
-    MarkNativeAsOptional("ccp_UpdateRecipients");
+    // MarkNativeAsOptional("ccp_UpdateRecipients");
     MarkNativeAsOptional("ccp_SkipColors");
     MarkNativeAsOptional("ccp_ChangeMode");
     MarkNativeAsOptional("ccp_StartNewMessage");
-    MarkNativeAsOptional("ccp_RebuildClients");
+    // MarkNativeAsOptional("ccp_RebuildClients");
     MarkNativeAsOptional("ccp_RebuildMessage");
     MarkNativeAsOptional("ccp_HandleEngineMsg");
     MarkNativeAsOptional("ccp_EndMessage");
