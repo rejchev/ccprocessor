@@ -80,6 +80,10 @@ public void OnNextFrame(StringMap g_mMessage) {
 
     delete g_mMessage;
 
+    if(!IsClientConnected(recipient)) {
+        return;
+    }
+
     ArrayList arr = new ArrayList(MAX_LENGTH, 0);
 
     char szIndent[NAME_LENGTH];

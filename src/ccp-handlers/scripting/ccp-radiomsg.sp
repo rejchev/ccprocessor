@@ -32,7 +32,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 
 public void OnPluginStart() {
-    g_aThread = new ArrayList(36, 0);
+    g_aThread = new ArrayList(64, 0);
 }
 
 public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
@@ -56,9 +56,9 @@ public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players,
     FormatEx(SZ(szComp), "params[%i]", a);
     mMessage.GetString(szComp, SZ(szBuffer));
 
-    ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
     any b = -1;
-    if(stock_EngineMsgReq(arr, sender, sender, szBuffer) == Proc_Stop) {
+    ArrayList arr = new ArrayList(MESSAGE_LENGTH, 0);
+    if(stock_EngineMsgReq(arr, sender, players[0], szBuffer) == Proc_Stop) {
         b = Plugin_Handled;
     } 
 
@@ -71,11 +71,14 @@ public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players,
     
     // #ENTNAME[#]Name
     mMessage.GetString("params[0]", SZ(szBuffer));
-    strcopy(SZ(szBuffer), szBuffer[(FindCharInString(szBuffer, ']') + 1)]);
+
+    if((a = FindCharInString(szBuffer, ']')) != -1) {
+        strcopy(SZ(szBuffer), szBuffer[a + 1]);
+    }
+    
     ccp_replaceColors(szBuffer, true);
     mMessage.SetString("params[0]", szBuffer, true);
     
-
     g_aThread.Push(mMessage);
     return Plugin_Handled;
 }
@@ -116,85 +119,71 @@ public void AfterMessage(UserMsg msgid, bool send)
     
     delete mMessage;
 
-    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
-
-    int team = GetClientTeam(sender);
-    bool alive = IsPlayerAlive(sender);
+    if(!IsClientConnected(recipient)) {
+        return;
+    }
 
     int id;
-    if((id = stock_NewMessage(arr, sender, recipient, template, params[display], SZ(szIndent))) == -1)
-    {
-        delete arr;
-        return;
-    }
-    
-    if(!szIndent[0]) {
-        stock_EndMsg(arr, id, sender, szIndent);
-        delete arr;
-        return;
-    }
+    ArrayList arr = new ArrayList(MAX_LENGTH, 0);
+    if((id = stock_NewMessage(arr, sender, recipient, template, params[display], SZ(szIndent))) != -1) {
+        if(szIndent[0]) {
+            int j;
+            Processing next;
+            char message[MESSAGE_LENGTH];
 
-    ccp_ChangeMode(recipient, "0");
+            szBuffer = NULL_STRING;
+            message = params[display];
+            j = (sender << 3|(GetClientTeam(sender)) << 1|(view_as<int>(IsPlayerAlive(sender))));
 
-    Processing next;
-    Handle uMessage;
-    char message[MESSAGE_LENGTH];
-    
-    szBuffer = NULL_STRING;
-    message = params[display];
-    int j = (sender << 3|team << 1|view_as<int>(alive));
-
-    if(message[0] == '#') {
-        if((next = stock_EngineMsgReq(arr, sender, recipient, message)) == Proc_Stop) {
-            ccp_ChangeMode(recipient);
-            stock_EndMsg(arr, id, sender, szIndent);
-            delete arr;
-            return;
-        }
-
-        next = (ccp_Translate(message, recipient)) ? Proc_Change : Proc_Continue;
-    }
-    
-    // Attempting to render message text (Its a useless thing ... )
-    stock_RenderEngineCtx(arr, sender, recipient, PARAM_NAME, SZ(message));
-
-    // translation phrase is not exists
-    if(next == Proc_Continue) {
-        FormatEx(SZ(message), "{%i}", display+1);
-    }
-
-    if((next = stock_RebuildMsg(arr, id, j, recipient, szIndent, template, params[PARAM_NAME], message, szBuffer)) <= Proc_Change) {
-        
-        // Rendering the final result 
-        stock_RenderEngineCtx(arr, sender, recipient, MAX_PARAMS, SZ(szBuffer));
-        ccp_replaceColors(szBuffer, false);
-
-        if((uMessage = StartMessageOne("RadioText", recipient, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS)) != null) {
-            j = 0;
-            if(!umType) {
-                BfWriteByte(uMessage, 3);
-                BfWriteByte(uMessage, sender);
-                BfWriteString(uMessage, szBuffer);
-                while(j < MAX_PARAMS) {
-                    BfWriteString(uMessage, params[j++]);
-                }
-                
-            } else {
-                PbSetInt(uMessage, "msg_dst", 3);
-                PbSetInt(uMessage, "client", sender);
-                PbSetString(uMessage, "msg_name", szBuffer);
-                while(j < MAX_PARAMS)
-                    PbAddString(uMessage, "params", params[j++]);
+            if(message[0] == '#' && (next = stock_EngineMsgReq(arr, sender, recipient, message)) != Proc_Stop) {
+                next = (ccp_Translate(message, recipient)) ? Proc_Change : Proc_Continue;
             }
-            
-            EndMessage();
+
+            if(next != Proc_Stop && IsClientConnected(recipient)) {
+                // Attempting to render message text (Its a useless thing ... )
+                stock_RenderEngineCtx(arr, sender, recipient, PARAM_NAME, SZ(message));
+
+                // translation phrase is not exists
+                if(next == Proc_Continue) {
+                    FormatEx(SZ(message), "{%i}", display+1);
+                }
+
+                if((next = stock_RebuildMsg(arr, id, j, recipient, szIndent, template, params[PARAM_NAME], message, szBuffer)) <= Proc_Change) {
+                    
+                    // Rendering the final result 
+                    stock_RenderEngineCtx(arr, sender, recipient, MAX_PARAMS, SZ(szBuffer));
+                    ccp_replaceColors(szBuffer, false);
+                    ccp_ChangeMode(recipient, "0");
+
+                    Handle uMessage;
+                    if((uMessage = StartMessageOne("RadioText", recipient, USERMSG_RELIABLE|USERMSG_BLOCKHOOKS)) != null) {
+                        j = 0;
+                        if(!umType) {
+                            BfWriteByte(uMessage, 3);
+                            BfWriteByte(uMessage, sender);
+                            BfWriteString(uMessage, szBuffer);
+                            while(j < MAX_PARAMS) {
+                                BfWriteString(uMessage, params[j++]);
+                            }
+                            
+                        } else {
+                            PbSetInt(uMessage, "msg_dst", 3);
+                            PbSetInt(uMessage, "client", sender);
+                            PbSetString(uMessage, "msg_name", szBuffer);
+                            while(j < MAX_PARAMS)
+                                PbAddString(uMessage, "params", params[j++]);
+                        }
+                        
+                        EndMessage();
+                    }
+
+                    ccp_ChangeMode(recipient);
+                }
+            }
         }
 
+        stock_EndMsg(arr, id, sender, szIndent);
     }
-
-
-    ccp_ChangeMode(recipient);
-    stock_EndMsg(arr, id, sender, szIndent);
 
     delete arr;
 }
@@ -234,7 +223,7 @@ StringMap ReadUserMessage(Handle msg) {
     || StrContains(szParams[i], "Game_radio", false) != -1) {
         // Stop sending... 
         if(StrContains(szMsgName, "Game_radio", false) != -1) {
-            delete params
+            delete params;
             return params;
         }
         

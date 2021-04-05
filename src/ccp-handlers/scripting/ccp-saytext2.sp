@@ -37,8 +37,11 @@ public void OnPluginStart() {
 public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
 {
     StringMap mMap = ReadUserMessage(msg);
+    if(!mMap) {
+        return Plugin_Handled;
+    }
 
-    PrintToConsoleAll("Recipient: %d | %N", playersNum, players[0]);
+    // PrintToConsoleAll("Recipient: %d | %N", playersNum, players[0]);
 
     int sender;
     mMap.GetValue("ent_idx", sender);
@@ -62,7 +65,7 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
         mMap.SetString("params[1]", szMessage, true);
     }
     
-    PrintToConsoleAll("Map: %x", mMap);
+    // PrintToConsoleAll("Map: %x", mMap);
     g_aThread.Push(mMap);
     return Plugin_Handled;
 }
@@ -100,6 +103,10 @@ public void SayText2_Completed(UserMsg msgid, bool send)
     mMessage.GetValue("chatType", chatType);
 
     delete mMessage;
+
+    if(!IsClientConnected(recipient)) {
+        return;
+    }
 
     int team;
     team = (sender) ? GetClientTeam(sender) : 1;

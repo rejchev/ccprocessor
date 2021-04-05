@@ -38,6 +38,10 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
 
     ReadUserMessage(msg, g_mMessage);
 
+    if(!g_mMessage) {
+        return Plugin_Handled;
+    }
+
     g_mMessage.SetValue("recipient", players[0]);
 
     char szMessage[MESSAGE_LENGTH];
@@ -80,6 +84,10 @@ public void TextMsg_Completed(StringMap g_mMessage)
     g_mMessage.GetValue("recipient", recipient);
 
     delete g_mMessage;
+
+    if(!IsClientConnected(recipient)) {
+        return;
+    }
 
     ArrayList arr = new ArrayList(MAX_LENGTH, 0);
 
