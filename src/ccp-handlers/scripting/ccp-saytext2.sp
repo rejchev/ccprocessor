@@ -36,6 +36,12 @@ public void OnPluginStart() {
 
 public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
 {
+    // playersNum will be zero if this is an initial message :/
+    // maybe ...
+    if(playersNum == 0) {
+        return Plugin_Continue;
+    }
+
     StringMap mMap = ReadUserMessage(msg);
     if(!mMap) {
         return Plugin_Handled;

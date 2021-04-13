@@ -30,7 +30,8 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
 public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
 {
-    if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "ent_idx")) != 0)
+    // playersNum will be zero if this is an initial message :/
+    if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "ent_idx")) != 0 || playersNum == 0)
         return Plugin_Continue;
 
     StringMap g_mMessage = new StringMap();

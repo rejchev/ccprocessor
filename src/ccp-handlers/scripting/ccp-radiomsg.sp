@@ -36,7 +36,8 @@ public void OnPluginStart() {
 }
 
 public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
-    if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3)
+    // playersNum will be zero if this is an initial message :/
+    if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3 || playersNum == 0)
         return Plugin_Continue;
 
     StringMap mMessage;
