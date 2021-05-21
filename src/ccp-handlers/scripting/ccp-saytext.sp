@@ -11,7 +11,7 @@ public Plugin myinfo =
     name        = "[CCP] SayText handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.3",
+    version     = "1.0.4",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -28,11 +28,13 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     return APLRes_Success;
 }
 
-public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
-{
-    // playersNum will be zero if this is an initial message :/
-    if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "ent_idx")) != 0 || playersNum == 0)
+public Action UserMessage_SayText(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
+    if(!msg
+    || ((!umType) ? BfReadByte(msg) : PbReadInt(msg, "ent_idx")) != 0 
+    || playersNum < 1
+    || IsClientSourceTV(players[0])) {
         return Plugin_Continue;
+    }
 
     StringMap g_mMessage = new StringMap();
 

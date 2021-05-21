@@ -11,7 +11,7 @@ public Plugin myinfo =
     name        = "[CCP] SayText2 handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.3",
+    version     = "1.0.4",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -31,23 +31,20 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 }
 
 public void OnPluginStart() {
-    g_aThread = new ArrayList(36, 0);
+    g_aThread = new ArrayList(64, 0);
 }
 
-public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
-{
-    // playersNum will be zero if this is an initial message :/
-    // maybe ...
-    if(playersNum == 0) {
+public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
+    // exclude SourceTV from processing
+    // players[] length already = 1
+    if(!msg || playersNum < 1 || IsClientSourceTV(players[0])) {
         return Plugin_Continue;
     }
 
-    StringMap mMap = ReadUserMessage(msg);
-    if(!mMap) {
+    StringMap mMap;
+    if(!(mMap = ReadUserMessage(msg))) {
         return Plugin_Handled;
     }
-
-    // PrintToConsoleAll("Recipient: %d | %N", playersNum, players[0]);
 
     int sender;
     mMap.GetValue("ent_idx", sender);
@@ -71,13 +68,11 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
         mMap.SetString("params[1]", szMessage, true);
     }
     
-    // PrintToConsoleAll("Map: %x", mMap);
     g_aThread.Push(mMap);
     return Plugin_Handled;
 }
 
-public void SayText2_Completed(UserMsg msgid, bool send)
-{
+public void SayText2_Completed(UserMsg msgid, bool send) {
     if(!send || !g_aThread.Length) {
         return;
     }

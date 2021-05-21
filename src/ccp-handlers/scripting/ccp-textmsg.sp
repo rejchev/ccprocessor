@@ -12,7 +12,7 @@ public Plugin myinfo =
     name        = "[CCP] TextMsg handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.3",
+    version     = "1.0.4",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -29,17 +29,17 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     return APLRes_Success;
 }
 
-public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init)
-{
-    // playersNum will be zero if this is an initial message :/
-    if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3 || playersNum == 0)
-        return Plugin_Continue;
+public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
     
-    StringMap g_mMessage = new StringMap();
-
-    ReadUserMessage(msg, g_mMessage);
-
-    if(!g_mMessage) {
+    if(!msg 
+    || ((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3 
+    || playersNum < 1
+    || IsClientSourceTV(players[0])) {
+        return Plugin_Continue;
+    }
+    
+    StringMap g_mMessage;
+    if(!(g_mMessage = ReadUserMessage(msg))) {
         return Plugin_Handled;
     }
 
@@ -153,11 +153,12 @@ public void TextMsg_Completed(StringMap g_mMessage)
     delete arr;
 }
 
-void ReadUserMessage(Handle msg, StringMap params) {
-    params.Clear();
+StringMap ReadUserMessage(Handle msg) {
 
-    char szParams[MAX_PARAMS][MESSAGE_LENGTH], szBuffer[64];
+    StringMap map = new StringMap();
+
     int i;
+    char szParams[MAX_PARAMS][MESSAGE_LENGTH], szBuffer[64];
 
     while(((!umType) ? BfGetNumBytesLeft(msg) > 1 : i < PbGetRepeatedFieldCount(msg, "params")) && i < MAX_PARAMS) {
         if(!umType) BfReadString(msg, szParams[i], sizeof(szParams[]));
@@ -168,4 +169,6 @@ void ReadUserMessage(Handle msg, StringMap params) {
 
         i++;
     }
+
+    return map;
 }

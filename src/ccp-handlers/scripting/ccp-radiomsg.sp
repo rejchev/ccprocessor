@@ -12,7 +12,7 @@ public Plugin myinfo =
     name        = "[CCP] RadioText handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.3",
+    version     = "1.0.4",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -36,9 +36,13 @@ public void OnPluginStart() {
 }
 
 public Action UserMessage_Radio(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
-    // playersNum will be zero if this is an initial message :/
-    if(((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3 || playersNum == 0)
+
+    if(!msg
+    || ((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3 
+    || playersNum < 1
+    || IsClientSourceTV(players[0])) {
         return Plugin_Continue;
+    }
 
     StringMap mMessage;
     if(!(mMessage = ReadUserMessage(msg))) {
