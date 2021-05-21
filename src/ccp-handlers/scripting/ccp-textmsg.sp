@@ -165,7 +165,7 @@ StringMap ReadUserMessage(Handle msg) {
         else PbReadString(msg, "params", szParams[i], sizeof(szParams[]), i);
 
         FormatEx(szBuffer, sizeof(szBuffer), "params[%i]", i);
-        params.SetString(szBuffer, szParams[i]);
+        map.SetString(szBuffer, szParams[i]);
 
         i++;
     }
