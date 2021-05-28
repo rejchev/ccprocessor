@@ -313,6 +313,32 @@ stock void StringToUppercase(char[] sText)
     }
 }
 
+stock int FindChannelInChannels(const char[][] array, const char[] channel, bool casesens = true) {
+    for(int i = 0; i < array.Length; i++) {
+        if(!strcmp(channel, array[i], casesens)) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+#if defined INCLUDE_RIPJSON
+stock int FindChannelInChannels_json(JSONArray jsonArray, const char[] channel, bool casesens = true) {
+    static char buffer[64];
+    
+    for(int i = 0; i < jsonArray.Length; i++) {
+        jsonArray.GetString(i, buffer, sizeof(buffer));
+
+        if(!strcmp(buffer, channel, casesens)) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+#endif
+
 #if defined DEBUG
 char g_szLog[MESSAGE_LENGTH];
 
