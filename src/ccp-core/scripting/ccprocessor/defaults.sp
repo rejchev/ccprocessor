@@ -1,4 +1,7 @@
-void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szBuffer, int size) {
+void GetDefaultValue(const int[] props, const int propsCount, int part, ArrayList params, char[] szBuffer, int size) {
+    if(propsCount < 2) 
+        SetFailState("Anchor");
+
     if(part == BIND_NAME || part == BIND_MSG || part == BIND_PROTOTYPE) {
         params.GetString(
             (part == BIND_PROTOTYPE) ? 1 :
@@ -7,17 +10,23 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
         );
         
         if(part == BIND_PROTOTYPE && TranslationPhraseExists(szBuffer)) {
-            Format(szBuffer, size, "%c %T", 1, szBuffer, SENDER_INDEX(props));
+            // Fixed:
+            // Now, template format depends on the recipient
+            Format(szBuffer, size, "%c %T", 1, szBuffer, props[2]);
         }
 
         #if defined DEBUG
-        DWRITE("%s: GetDefaultValue(%i): \n\t\tPart: %i \n\t\tValue: %s", DEBUG, SENDER_INDEX(props), part, szBuffer);
+        DWRITE("%s: Template:
+                \n\t\tSender: %N
+                \n\t\tRecipient: %N
+                \n\t\tPart: %s
+                \n\t\tOutput: %s", DEBUG, SENDER_INDEX(props[1]), props[2], szBinds[part], szBuffer);
         #endif
 
         return;
     }
 
-    char indent[NAME_LENGTH];
+    static char indent[NAME_LENGTH];
     params.GetString(0, SZ(indent));
 
     // DEF_{BIND}
@@ -26,12 +35,12 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
     // DEF_{ALIVE/SENDER}
     Format(szBuffer, size, "%s_%s", szBuffer, 
         (part < BIND_TEAM_CO) 
-            ? (SENDER_ALIVE(props)) 
+            ? (SENDER_ALIVE(props[1])) 
                 ? "A" 
                 : "D" 
             : (part < BIND_PREFIX_CO) 
                 ? indent 
-                : (SENDER_INDEX(props)) 
+                : (SENDER_INDEX(props[1])) 
                     ? "U" 
                     : "S"
     );
@@ -40,14 +49,14 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
     if(part < BIND_PREFIX_CO) {
         Format(szBuffer, size, "%s%s", szBuffer,
             (part < BIND_TEAM_CO) // Status & Status CO
-                ? (!(SENDER_ALIVE(props))) // Died
-                    ? (!SENDER_INDEX(props)) // Server
+                ? (!(SENDER_ALIVE(props[1]))) // Died
+                    ? (!SENDER_INDEX(props[1])) // Server
                         ? "_S"
                         : ""
                     : ""  
-                : (SENDER_TEAM(props) == 2)  // Team & Team CO
+                : (SENDER_TEAM(props[1]) == 2)  // Team & Team CO
                     ? "_R"
-                    : (SENDER_TEAM(props) == 3)
+                    : (SENDER_TEAM(props[1]) == 3)
                         ? "_B"
                         : "_S"
         );
@@ -56,13 +65,14 @@ void GetDefaultValue(int props, int lang, int part, ArrayList params, char[] szB
     if(!TranslationPhraseExists(szBuffer)) {
         szBuffer[0] = 0;
     } else {
-        Format(szBuffer, size, "%T", szBuffer, lang);
+        Format(szBuffer, size, "%T", szBuffer, props[2]);
     }
 
     #if defined DEBUG
-    DWRITE(\
-        "%s: GetDefaultValue(%i): \n\t\tIndent: %s \n\t\tPart: %i \n\t\tValue: %s", \
-        DEBUG, SENDER_INDEX(props), indent, part, szBuffer\
-    );
+    DWRITE("%s: Template:
+            \n\t\tSender: %N
+            \n\t\tRecipient: %N
+            \n\t\tPart: %s
+            \n\t\tOutput: %s", DEBUG, SENDER_INDEX(props[1]), props[2], szBinds[part], szBuffer);
     #endif
 }

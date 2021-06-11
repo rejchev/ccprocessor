@@ -40,7 +40,7 @@ public Plugin myinfo =
     name        = "[CCP] Core",
     author      = "nyood",
     description = "Color chat processor",
-    version     = "3.5.0",
+    version     = "3.5.1",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -332,11 +332,15 @@ Processing BuildMessage(const int[] props, int propsCount, ArrayList params) {
     for(int i; i < BIND_MAX; i++) {
         value = NULL_STRING;
 
-        GetDefaultValue(props[1], props[2], i, params, SZ(value));
+        GetDefaultValue(props, propsCount, i, params, SZ(value));
         
         if((whatNext = Call_RebuildString(props, propsCount, i, params, SZ(value))) > Proc_Change) {
             #if defined DEBUG
-                DWRITE("%s: RebuildMessage(%N) Output: Sending discarded", DEBUG, props[2]);
+                DWRITE("%s: MessageBuilder(Rejected):
+                        \n\t\t\tSender: %d
+                        \n\t\t\tRecipient: %N
+                        \n\t\t\tPart: %s,
+                        \n\t\t\tCode: %d", DEBUG, SENDER_INDEX(props[1]), props[2], szBinds[i], whatNext);
             #endif
 
             return whatNext;
