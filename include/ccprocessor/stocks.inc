@@ -3,6 +3,10 @@
 #endif
 #define _ccprocessor_stocks_included
 
+/*
+ *  Template parts(string values)
+ *       
+*/
 stock const char szBinds[BIND_MAX][] = 
 {
     "{PROTOTYPE}"   ,
@@ -14,6 +18,10 @@ stock const char szBinds[BIND_MAX][] =
     "{MSGCO}"       ,   "{MSG}"
 };
 
+/*
+ *  Break string points for all of the parts
+ *       
+*/
 stock int BreakPoint(int iBindType, char[] szValue)
 {
     static const int iMaxLength[BIND_MAX] = 
@@ -218,6 +226,11 @@ stock Processing stock_EngineMsgReq(ArrayList a, int s, int r, const char[] m) {
     return ccp_EngineMsgRequest(props, propsCount, a);
 }
 
+/*
+ *  Enable API handshake for modules not defined as CORE
+ * 
+ *  @define CORE
+*/
 #if !defined CORE
 public void cc_proc_APIHandShake(const int key)
 {
@@ -225,11 +238,20 @@ public void cc_proc_APIHandShake(const int key)
 }
 #endif
 
-stock void BreakString_stock(char[] szValue, int MaxSmb)
+
+/*
+ *  Limits a string by the number of characters (ignores byte ownership)
+ * 
+ *  @param szValue      Buffer
+ *  @param smbMax       maxLength
+ *  
+ *  @noreturn           
+*/
+stock void BreakString_stock(char[] szValue, int maxLength)
 {
     for(int i, a, b; i < strlen(szValue); i++)
     {
-        if(a >= MaxSmb)
+        if(a >= maxLength)
         {
             szValue[i] = 0;
             break;
@@ -242,6 +264,13 @@ stock void BreakString_stock(char[] szValue, int MaxSmb)
     }
 }
 
+/*
+ *  Counting the number of letters in buffer (ignores byte ownership)
+ * 
+ *  @param str          Buffer
+ *  
+ *  @return             Length           
+*/
 stock int numlts_stock(const char[] str)
 {
     int a;
@@ -257,6 +286,13 @@ stock int numlts_stock(const char[] str)
     return a;
 }
 
+/*
+ *  Gets part of the pattern from input string 
+ * 
+ *  @param inputString   Buffer
+ *  
+ *  @return             part value           
+*/
 stock int BindFromString(const char[] inputString)
 {
     char szBuffer[NAME_LENGTH];
@@ -272,6 +308,17 @@ stock int BindFromString(const char[] inputString)
     return BIND_MAX;
 }
 
+/*
+ *  Formats part of the template according to the specified rules 
+ * 
+ *  @param prefix       Any tag or NULL_STRING
+ *  @param iBind        part index (BIND_PROTOTYPE, BIND_NAME, ..., etc)
+ *  @param to           l/L - lowercase, U/u - uppercase
+ *  @param szBuffer     Buffer
+ *  @param size         Buffer size
+ *  
+ *  @noreturn         
+*/
 stock void FormatBind(const char[] prefix, const int iBind, const char to = 0, char[] szBuffer, int size)
 {
     if(iBind < 0 || iBind >= BIND_MAX)
@@ -313,6 +360,11 @@ stock void StringToUppercase(char[] sText)
     }
 }
 
+/*
+ *  Find string in array
+ *
+ *  @return             Index or -1         
+*/
 stock int FindChannelInChannels(const char[][] array, const char[] channel, bool casesens = true) {
     for(int i = 0; i < array.Length; i++) {
         if(!strcmp(channel, array[i], casesens)) {
@@ -323,6 +375,12 @@ stock int FindChannelInChannels(const char[][] array, const char[] channel, bool
     return -1;
 }
 
+
+/*
+ *  Find string in json array
+ *
+ *  @return             Index or -1         
+*/
 #if defined INCLUDE_RIPJSON
 stock int FindChannelInChannels_json(JSONArray jsonArray, const char[] channel, bool casesens = true) {
     static char buffer[64];
@@ -339,6 +397,11 @@ stock int FindChannelInChannels_json(JSONArray jsonArray, const char[] channel, 
 }
 #endif
 
+/*
+ *  DEBUG 
+ *
+ *  @define DEBUG      
+*/
 #if defined DEBUG
 char g_szLog[MESSAGE_LENGTH];
 
