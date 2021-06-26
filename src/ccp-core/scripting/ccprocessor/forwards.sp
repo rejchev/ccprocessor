@@ -48,28 +48,6 @@ Processing Call_RebuildString(const int[] props, int propsCount, int part, Array
     return output;
 }
 
-// Processing Call_RebuildClients(const int[] props, int propsCount, ArrayList params) {
-//     Processing whatNext;
-
-//     int count = params.Get(3);
-//     int[] players = new int[count];
-
-//     params.GetArray(2, players, count);
-
-//     Call_StartForward(g_fwdRebuildClients);
-//     Call_PushArray(props, propsCount);
-//     Call_PushCell(propsCount);
-//     Call_PushCell(params);
-//     Call_Finish(whatNext);
-
-//     if(whatNext == Proc_Continue) {
-//         params.SetArray(2, players, count);
-//         params.Set(3, count);
-//     }
-
-//     return whatNext;
-// }
-
 Processing Call_HandleEngineMsg(const int[] props, int propsCount, ArrayList params) {
     Processing handle;
 

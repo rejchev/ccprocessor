@@ -365,8 +365,8 @@ stock void StringToUppercase(char[] sText)
  *
  *  @return             Index or -1         
 */
-stock int FindChannelInChannels(const char[][] array, const char[] channel, bool casesens = true) {
-    for(int i = 0; i < array.Length; i++) {
+stock int FindChannelInChannels(const char[][] array, int count, const char[] channel, bool casesens = true) {
+    for(int i = 0; i < count; i++) {
         if(!strcmp(channel, array[i], casesens)) {
             return i;
         }

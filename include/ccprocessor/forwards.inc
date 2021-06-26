@@ -30,27 +30,6 @@ forward bool    cc_proc_SkipColors(const char[] indent, int sender);
 forward Processing    cc_proc_OnNewMessage(const int[] props, int propsCount, ArrayList params);
 
 /*
- *  Streaming output for editing the recipient list
- *  
- *  @param props        Message props
- *      @props[0]       Message ID
- *      @props[1]       Message sender
- *
- *  @param propsCount   Props count
- *
- *  @param params       Message params
- *      @params[0]      Message indent                      [String/Read]  
- *      @params[1]      Message text                        [String/Read]
- *      @params[2]      Message recipient list              [Array/RW]
- *      @params[3]      Message recipient count             [Int/RW]  
- *
- *  @return             Proc_Continue - continue with out changes,
- *                      Proc_Change - recipients changed & continue,
- *                      Proc_Reject - Reject message
-*/
-// forward Processing  cc_proc_OnRebuildClients(const int[] props, int propsCount, ArrayList params);
-
-/*
  *	Calls when building parts of the template
  *
  *  @param props        Message props

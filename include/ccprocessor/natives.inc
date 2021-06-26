@@ -38,17 +38,6 @@ native ArrayList cc_drop_palette();
 native void     ccp_replaceColors(char[] szBuffer, bool toNull = true);
 
 /*
- *  Updates the list of recipients 
- *  
- *  @param input        Recipient list
- *  @param output       buffer        
- *  @param playersNum   Recipient count
- *  
- *  @noreturn
-*/
-// native void     ccp_UpdateRecipients(const int[] input, int[] output, int &playersNum);
-
-/*
  *  Request to skip color tags for author msg 
  *  
  *  @param input        Recipient list
@@ -211,11 +200,9 @@ public void __pl_ccprocessor_SetNTVOptional()
     MarkNativeAsOptional("ccp_replaceColors");
     MarkNativeAsOptional("cc_get_APIKey");
     MarkNativeAsOptional("cc_is_APIEqual");
-    // MarkNativeAsOptional("ccp_UpdateRecipients");
     MarkNativeAsOptional("ccp_SkipColors");
     MarkNativeAsOptional("ccp_ChangeMode");
     MarkNativeAsOptional("ccp_StartNewMessage");
-    // MarkNativeAsOptional("ccp_RebuildClients");
     MarkNativeAsOptional("ccp_RebuildMessage");
     MarkNativeAsOptional("ccp_HandleEngineMsg");
     MarkNativeAsOptional("ccp_EndMessage");
