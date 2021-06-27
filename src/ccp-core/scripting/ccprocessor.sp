@@ -328,10 +328,10 @@ Processing BuildMessage(const int[] props, int propsCount, ArrayList params) {
         
         if((whatNext = Call_RebuildString(props, propsCount, i, params, SZ(value))) > Proc_Change) {
             #if defined DEBUG
-                DWRITE("%s: MessageBuilder(Rejected):
-                        \n\t\t\tSender: %d
-                        \n\t\t\tRecipient: %N
-                        \n\t\t\tPart: %s,
+                DWRITE("%s: MessageBuilder(Rejected): \
+                        \n\t\t\tSender: %d \
+                        \n\t\t\tRecipient: %N \
+                        \n\t\t\tPart: %s, \
                         \n\t\t\tCode: %d", DEBUG, SENDER_INDEX(props[1]), props[2], szBinds[i], whatNext);
             #endif
 

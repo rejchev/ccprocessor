@@ -16,10 +16,10 @@ void GetDefaultValue(const int[] props, const int propsCount, int part, ArrayLis
         }
 
         #if defined DEBUG
-        DWRITE("%s: Template:
-                \n\t\tSender: %N
-                \n\t\tRecipient: %N
-                \n\t\tPart: %s
+        DWRITE("%s: Template: \
+                \n\t\tSender: %N \
+                \n\t\tRecipient: %N \
+                \n\t\tPart: %s \
                 \n\t\tOutput: %s", DEBUG, SENDER_INDEX(props[1]), props[2], szBinds[part], szBuffer);
         #endif
 
@@ -69,10 +69,10 @@ void GetDefaultValue(const int[] props, const int propsCount, int part, ArrayLis
     }
 
     #if defined DEBUG
-    DWRITE("%s: Template:
-            \n\t\tSender: %N
-            \n\t\tRecipient: %N
-            \n\t\tPart: %s
+    DWRITE("%s: Template: \
+            \n\t\tSender: %N \
+            \n\t\tRecipient: %N \
+            \n\t\tPart: %s \
             \n\t\tOutput: %s", DEBUG, SENDER_INDEX(props[1]), props[2], szBinds[part], szBuffer);
     #endif
 }
