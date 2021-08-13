@@ -13,14 +13,20 @@ env:
     - SOURCES=$TRAVIS_BUILD_DIR/src
     - SOURCES_SM=$TRAVIS_BUILD_DIR/addons/sourcemod/scripting
     - INCLUDES=$TRAVIS_BUILD_DIR/include
+    - SOURCES_RIP=$TRAVIS_BUILD_DIR/ripext
+    - SOURCES_JANSSON=$TRAVIS_BUILD_DIR/jansson
   jobs:
     - SMVERSION=1.10
 
 install:
     - wget --input-file=http://sourcemod.net/smdrop/$SMVERSION/sourcemod-latest-linux
     - tar -xzf $(cat sourcemod-latest-linux)
+    - git clone -b main https://github.com/nyood/sm-jansson.git $SOURCES_JANSSON
+    - git clone -b main https://github.com/ErikMinekus/sm-ripext.git $SOURCES_RIP
 before_script:
     - cp -R -f $INCLUDES $SOURCES_SM
+    - cp -R -f $SOURCES_RIP/pawn/scripting/include $SOURCES_SM
+    - cp -R -f $SOURCES_JANSSON/pawn/scripting/include $SOURCES_SM
     - chmod +x $SOURCES_SM/spcomp
     - chmod +x $TRAVIS_BUILD_DIR/travis/compile.sh
     - chmod +x $TRAVIS_BUILD_DIR/travis/package.sh
