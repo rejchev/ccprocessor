@@ -24,14 +24,14 @@ API key:
     ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY             98091137
+#define API_KEY             98092248
 
 #if !defined CORE
     #define API_OOD         "The plugin module uses an outdated API. You must update it."
 
     #if defined INCLUDE_RIPJSON
         #undef REQUIRE_EXTENSIONS
-        #include <ripext_m>
+        #include <ccp-addition/ripext_m>
         #define REQUIRE_EXTENSIONS
     #endif
 #endif

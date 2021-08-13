@@ -382,6 +382,8 @@ stock int FindChannelInChannels(const char[][] array, int count, const char[] ch
  *  @return             Index or -1         
 */
 #if defined INCLUDE_RIPJSON
+#include <ccp-addition/ccprocessor_pkg>
+
 stock int FindChannelInChannels_json(JSONArray jsonArray, const char[] channel, bool casesens = true) {
     static char buffer[64];
     
@@ -400,10 +402,10 @@ stock int FindChannelInChannels_json(JSONArray jsonArray, const char[] channel, 
 public const char CHANNEL_MGR_PKGKEY[] = "channel_mgr";
 
 stock JSON ccp_GetChannelList() {
-    return ccp_GetArtifact(0, CHANNEL_MGR_PKGKEY);
+    return asJSON(ccp_GetArtifact(0, CHANNEL_MGR_PKGKEY));
 }
 
-stock int FindChannel(const char[] szTag, bool casesens = true) {
+stock int ccp_FindChannel(const char[] szTag, bool casesens = true) {
     JSONArray channels;
     if((channels = asJSONA(ccp_GetChannelList())) != null) {
         char szBuffer[PREFIX_LENGTH];
