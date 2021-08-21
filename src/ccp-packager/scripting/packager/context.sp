@@ -8,7 +8,6 @@ Processing context(Handle plugin, int iClient, const char[] artifact, JSON value
 
         if(value)
             ctx.Set((artifact[0]) ? artifact : "model", value);
-        else ctx.SetNull((artifact[0]) ? artifact : "model");
         
         ctx.SetInt("caller", view_as<int>(plugin));
     }
@@ -27,11 +26,11 @@ Processing context(Handle plugin, int iClient, const char[] artifact, JSON value
         FormatEx(szBuffer, sizeof(szBuffer), "%d", iClient);
 
         if(ok == Proc_Change)
-            temp =  !ctx.IsNull((artifact[0]) ? artifact : "model") 
+            temp =  ctx.HasKey((artifact[0]) ? artifact : "model") 
                  ?  ctx.Get((artifact[0]) ? artifact : "model")
                  :  null;
         
-        else temp = (value) ? view_as<JSON>(CloneHandle(value)) : null;
+        else temp = (value) ? asJSON(CloneHandle(value)) : null;
 
 #if defined DEBUG
         if(temp)
@@ -43,7 +42,7 @@ Processing context(Handle plugin, int iClient, const char[] artifact, JSON value
 #endif
 
         if(temp || artifact[0])
-            obj = (artifact[0]) ? view_as<JSON>(ccp_GetPackage(iClient)) : temp;
+            obj = (artifact[0]) ? asJSON(ccp_GetPackage(iClient)) : temp;
 
         if(artifact[0]) {
             if(!temp)
@@ -63,8 +62,7 @@ Processing context(Handle plugin, int iClient, const char[] artifact, JSON value
         }
 
         if(!obj)
-            packager.SetNull(szBuffer);
-
+            packager.Remove(szBuffer);
         else packager.Set(szBuffer, obj);
     }
 
@@ -72,7 +70,7 @@ Processing context(Handle plugin, int iClient, const char[] artifact, JSON value
     delete obj;
 
 #if defined DEBUG
-    view_as<JSON>(packager).ToString(valve, sizeof(valve), 0);
+    asJSON(packager).ToString(valve, sizeof(valve), 0);
 
     DWRITE("%s: context(): \
             \n\t\t\t\tClient: %N \

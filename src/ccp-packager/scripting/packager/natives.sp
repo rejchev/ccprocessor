@@ -10,7 +10,7 @@ public any Native_GetPackage(Handle h, int a) {
 
 // bool(iClient, Handle value, int level)
 public any Native_SetPackage(Handle h, int a) {
-    return context(h, GetNativeCell(1), NULL_STRING, view_as<JSON>(GetNativeCell(2)), GetNativeCell(3)) < Proc_Reject;
+    return context(h, GetNativeCell(1), NULL_STRING, asJSON(GetNativeCell(2)), GetNativeCell(3)) < Proc_Reject;
 }
 
 // bool(iClient)
@@ -49,7 +49,7 @@ public any Native_SetArtifact(Handle h, int a) {
     static char artifact[PREFIX_LENGTH];
     GetNativeString(2, artifact, sizeof(artifact));
 
-    return context(h, GetNativeCell(1), artifact, view_as<JSON>(GetNativeCell(3)), GetNativeCell(4)) < Proc_Reject;
+    return context(h, GetNativeCell(1), artifact, asJSON(GetNativeCell(3)), GetNativeCell(4)) < Proc_Reject;
 }
 
 // bool(int iClient, const char[] artifact, int repLevel)

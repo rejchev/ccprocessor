@@ -13,7 +13,7 @@ public Plugin myinfo =
 	name = "[CCP] JSON Packager",
 	author = "rej.chev",
 	description = "...",
-	version = "1.1.0",
+	version = "1.1.1",
 	url = "discord.gg/ChTyPUG"
 };
 
@@ -89,7 +89,7 @@ public void OnPluginStart() {
     if(g_bLate) {
         g_bLate = false;
         for(int i = 1; i <= MaxClients; i++) {
-            if(IsClientConnected(i) && IsClientAuthorized(i)) {
+            if(IsClientInGame(i) && IsClientAuthorized(i)) {
                 OnClientAuthorized(i, GetClientAuthIdEx(i));
             }
         }
@@ -108,7 +108,7 @@ public void OnClientAuthorized(int iClient, const char[] auth) {
     if(iClient && (IsFakeClient(iClient) || IsClientSourceTV(iClient)))
         return;
 
-    if(!ccp_SetPackage(iClient, null, -1) || !Initialization(iClient, auth))
+    if(!Initialization(iClient, auth))
         SetFailState("What the fuck are u doing?");
 
     Call_StartForward(fwdPackageAvailable);
