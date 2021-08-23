@@ -31,8 +31,11 @@ API key:
 
     #if defined INCLUDE_RIPJSON
         #undef REQUIRE_EXTENSIONS
-        #include <ccp-addition/ripext_m>
+        #include <ccprocessor/packager/ripext_m>
         #define REQUIRE_EXTENSIONS
+
+        #include <ccprocessor/packager/ccprocessor_pkg>
+        #include <ccprocessor/packager/modules/ccp-channels/ccp-channels>
     #endif
 #endif
 
