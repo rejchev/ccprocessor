@@ -11,7 +11,7 @@ public Plugin myinfo =
     name        = "[CCP] SayText2 handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.4",
+    version     = "1.0.5",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -197,6 +197,13 @@ StringMap ReadUserMessage(Handle msg) {
                 : 0, 
         true
     );
+
+    // wahahha, i skip this shit :/
+    // maybe i'll get it back later...
+    if(StrContains(szMsgName, "_Name_Change", false) != -1) {
+        delete params;
+        return params;
+    }
 
     char szParams[MAX_PARAMS][MESSAGE_LENGTH];
     int i;
