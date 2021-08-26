@@ -34,9 +34,40 @@ public void OnPluginStart() {
     g_aThread = new ArrayList(64, 0);
 }
 
+
+/*
+    A little story about SayText2.
+
+    It all started when I was bored. The idea flew into my head to test two technologies: protobuf & bitbuffer.
+    The thought disappointed me ...
+
+    Meet this callback. It has parameters, but it does not guarantee their professional suitability, like Valve.
+
+    Let's go over:
+    @UserMsg msg_id - message id, everything is ok here.
+    @Handle msg - this thing can be null.
+    @const int [] players is a crutch, just accept
+    @int playersNum - may be null, note that @msg may not be null
+    @... - not interested.
+
+    Now let's move on to CS: G0. 
+    Let's start with the main thing. 
+    @Handle msg can be zero, while @playersNum is not, and vice versa.
+    By the way of broadcasting, messages can be sent as a chain of independent ones, or in one big one. 
+    This means that the length of @const int [] players can be either 1 or MAXPLAYERS + 1, respectively. 
+    It is possible that the array is completely empty. 
+    Keep in mind that the order of the message parameters can change randomly, 
+    it gets annoying if it's bitbuffer: /
+
+    Let's move on to bitbuffer. 
+    Everything is simple here, if you are a sick bastard, then work with this for health. 
+
+    Oh, and lastly. 
+    Don't touch SourceTV unless you want to catch recursion ... recursion ... recursion ... recursion ... 
+
+*/
 public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] players, int playersNum, bool reliable, bool init) {
-    // exclude SourceTV from processing
-    // players[] length already = 1
+
     if(!msg || playersNum < 1 || IsClientSourceTV(players[0])) {
         return Plugin_Continue;
     }
@@ -53,6 +84,10 @@ public Action UserMessage_SayText2(UserMsg msg_id, Handle msg, const int[] playe
 
     int chatType;
     mMap.GetValue("chatType", chatType);
+    if(chatType == 2) {
+        delete mMap;
+        return Plugin_Continue;
+    }
 
     char szName[NAME_LENGTH];
     mMap.GetString("params[0]", szName, sizeof(szName));
@@ -200,10 +235,10 @@ StringMap ReadUserMessage(Handle msg) {
 
     // wahahha, i skip this shit :/
     // maybe i'll get it back later...
-    if(StrContains(szMsgName, "_Name_Change", false) != -1) {
-        delete params;
-        return params;
-    }
+    // if(StrContains(szMsgName, "_Name_Change", false) != -1) {
+    //     delete params;
+    //     return params;
+    // }
 
     char szParams[MAX_PARAMS][MESSAGE_LENGTH];
     int i;
