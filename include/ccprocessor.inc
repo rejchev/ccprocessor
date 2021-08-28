@@ -35,7 +35,11 @@ API key:
         #define REQUIRE_EXTENSIONS
 
         #include <ccprocessor/packager/ccprocessor_pkg>
-        #include <ccprocessor/packager/modules/ccp-storage/ccp_storage>
+        
+        #if defined INCLUDE_MODULE_STORAGE
+            #include <ccprocessor/packager/modules/ccp-storage/ccp_storage>
+        #endif
+
         #include <ccprocessor/packager/modules/ccp-channels/ccp-channels>
     #endif
 #endif
