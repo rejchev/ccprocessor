@@ -4,6 +4,8 @@
 
 #include <ccprocessor>
 
+#define DURATION_TIME_IN_SECONDS 60*60*24*7
+
 public Plugin myinfo = 
 {
 	name = "[CCP] Storage",
@@ -13,7 +15,7 @@ public Plugin myinfo =
 	url = "discord.gg/ChTyPUG"
 };
 
-static const char location[] = "data/ccprocessor/cache/%s.json";
+static const char location[] = "data/ccprocessor/storage/%s.json";
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max)
 { 
@@ -35,11 +37,6 @@ public any Native_Write(Handle h, int a) {
     
     char key[PREFIX_LENGTH];
     GetNativeString(2, key, sizeof(key));
-
-    if(asJSONO(storage).HasKey(key)) {
-        delete storage;
-        return false;
-    }
 
     JSON value = asJSON(GetNativeCell(3));
 
@@ -102,12 +99,17 @@ public void ccp_OnPackageAvailable(int iClient) {
 
     path = getStoragePath(getAuth(iClient), location);
 
-    if(!FileExists(path)) {
-        JSONObject buffer = new JSONObject();
-        asJSON(buffer).ToFile(path, 0);
+    JSONObject storage = (!FileExists(path)) ? new JSONObject() : JSONObject.FromFile(path, 0);
+    
+    int time = GetTime();
 
-        delete buffer;
+    if(storage.HasKey("expired") && storage.GetInt("expired") < time) {
+        delete storage;
+        storage = new JSONObject();
     }
+
+    storage.SetInt("expired", time + DURATION_TIME_IN_SECONDS);
+    asJSON(storage).ToFile(path, 0);
 }
 
 stock char[] getAuth(int iClient) {
