@@ -126,9 +126,6 @@ public void OnPluginStart()
 
     g_aPalette = new ArrayList(STATUS_LENGTH, 0);
  
-    if(!DirExists("/cfg/ccprocessor"))
-        CreateDirectory("/cfg/ccprocessor", 0x1ED);
-
     game_mode = FindConVar("game_mode");
     if(!game_mode)
         return;
@@ -172,6 +169,18 @@ public void OnMapStart()
     #if defined DEBUG
         DWRITE("%s: OnMapStart()", DEBUG);
     #endif
+    
+    static char dirs[][MESSAGE_LENGTH] = {
+        "/cfg/ccprocessor", "data/ccprocessor"
+    };
+
+    if(dirs[1][0] == 'd')
+        BuildPath(Path_SM, dirs[1], sizeof(dirs[]), dirs[1]);
+
+    for(int i; i < sizeof(dirs); i++)
+        if(!DirExists(dirs[i]))
+            CreateDirectory(dirs[i], 0x1ED);
+       
 
     g_aPalette.Clear();
     g_szSection = NULL_STRING;
