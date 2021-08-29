@@ -31,17 +31,21 @@ API key:
 
     #if defined INCLUDE_RIPJSON
         #undef REQUIRE_EXTENSIONS
-        #include <ccprocessor/packager/ripext_m>
+            #include <ccprocessor/packager/ripext_m>
         #define REQUIRE_EXTENSIONS
+    
+        #if defined INCLUDE_MODULE_PACKAGER
+            #include <ccprocessor/packager/ccprocessor_pkg>
+        #endif
 
-        #include <ccprocessor/packager/ccprocessor_pkg>
-        
         #if defined INCLUDE_MODULE_STORAGE
             #include <ccprocessor/packager/modules/ccp-storage/ccp_storage>
         #endif
 
         #include <ccprocessor/packager/modules/ccp-channels/ccp-channels>
+
     #endif
+    
 #endif
 
 // Message template parts
