@@ -1,6 +1,7 @@
 #pragma newdecls required
 
 #define INCLUDE_RIPJSON
+#define INCLUDE_MODULE_PACKAGER
 
 #include <ccprocessor>
 
