@@ -111,6 +111,7 @@ public void ccp_OnPackageAvailable(int iClient) {
 
     storage.SetInt("expired", time + DURATION_TIME_IN_SECONDS);
     asJSON(storage).ToFile(path, 0);
+    delete storage;
 }
 
 stock char[] getAuth(int iClient) {
