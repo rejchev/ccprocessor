@@ -12,7 +12,7 @@ public Plugin myinfo =
     name        = "[CCP] TextMsg handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.4",
+    version     = "1.0.6",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -34,6 +34,7 @@ public Action UserMessage_TextMsg(UserMsg msg_id, Handle msg, const int[] player
     if(!msg 
     || ((!umType) ? BfReadByte(msg) : PbReadInt(msg, "msg_dst")) != 3 
     || playersNum < 1
+    || !IsClientInGame(players[0])
     || IsClientSourceTV(players[0])) {
         return Plugin_Continue;
     }
@@ -86,9 +87,8 @@ public void TextMsg_Completed(StringMap g_mMessage)
 
     delete g_mMessage;
 
-    if(!IsClientConnected(recipient)) {
+    if(!IsClientInGame(recipient))
         return;
-    }
 
     ArrayList arr = new ArrayList(MAX_LENGTH, 0);
 

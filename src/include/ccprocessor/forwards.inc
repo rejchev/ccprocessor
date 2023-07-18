@@ -57,8 +57,34 @@ forward Processing    cc_proc_OnNewMessage(const int[] props, int propsCount, Ar
 */
 forward Processing  cc_proc_OnRebuildString(const int[] props, int part, ArrayList params, int &level, char[] value, int size);
 
+
 /*
- *  Call after build part of the template
+ *  Special call after build part
+ *    
+ *  @param props        Message props
+ *      @props[0]       Message ID
+ *      @props[1]       Message buffer (pkg: senderID << 3|senderTeam << 1|senderAlive)
+ *      @props[2]       Message recipient
+ *
+ *  @param part         Template part
+ *
+ *  @param params       Message params
+ *      @params[0]      Message indent                      [String/Read]  
+ *      @params[1]      Message template                    [String/Read]
+ *      @params[2]      Message sender name                 [String/Read]
+ *      @params[3]      Message text                        [String/Read] 
+ *      @params[4]      Message compile                     [String/Read]    
+ *
+ *  @param value        Value buffer    
+ *  @param size         Value Size     
+ *
+ *  @noreturn
+*/
+forward void    cc_proc_OnRebuildString_Txt(const int[] props, int part, ArrayList params, char[] value, int size);
+
+
+/*
+ *  Call after special call
  *  
  *  @param props        Message props
  *      @props[0]       Message ID

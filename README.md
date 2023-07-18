@@ -1,11 +1,8 @@
 <h1 align="center">Color Chat Processor</h1>
 <p align="center">
-    <img src="https://travis-ci.com/nyood/ccprocessor.svg?branch=main" />
-    <a href="#license"><img src="https://img.shields.io/github/license/nyood/ccprocessor" /></a>
-    <a href="https://github.com/nyood/ccprocessor/releases"><img src="https://img.shields.io/github/v/release/nyood/ccprocessor" /></a>
-    <a href="#requirements"><img src="https://img.shields.io/badge/sourcemod-v.1.10-blue" /></a>
+    <a href="#license"><img src="https://img.shields.io/github/license/rejchev/ccprocessor" /></a>
+    <a href="#requirements"><img src="https://img.shields.io/badge/sourcemod-v.1.11-blue" /></a>
     <a href="https://discord.gg/cFZ97Mzrjy" target="_blank"><img src="https://img.shields.io/discord/494942123548868609" /></a>
-    <img src="https://img.shields.io/github/downloads/nyood/ccprocessor/total" />
 </p>
 
 ## About
@@ -47,9 +44,9 @@ You can edit already boring radio commands. <br>
 
 ## Requirements:
 -------------
-- Sourcemod 1.10 
-    - [Windows](http://sourcemod.net/latest.php?os=windows&version=1.10)
-    - [Linux](http://sourcemod.net/latest.php?os=linux&version=1.10)
+- Sourcemod 1.11 
+    - [Windows](http://sourcemod.net/latest.php?os=windows&version=1.11)
+    - [Linux](http://sourcemod.net/latest.php?os=linux&version=1.11)
 
 ## Handlers
 Handler Name | Message identifier | Package | Virtualization |
@@ -59,7 +56,7 @@ Handler Name | Message identifier | Package | Virtualization |
 |  `SayText`   | `ST` = Server chat | `ccp-saytext.smx`  | `Yes` |
 |  `RadioText` | `RT` = Radio chat  | `ccp-radiomsg.smx` |  `Yes` |
     
-## [Supported Modules](https://github.com/nyood/ccp-modules)
+## [Supported Modules](https://github.com/rejchev/ccp-modules)
 
 ## License
-[GNU Public License v3](https://github.com/nyood/ccprocessor/blob/main/LICENSE)
+[GNU Public License v3](https://github.com/rejchev/ccprocessor/blob/main/LICENSE)

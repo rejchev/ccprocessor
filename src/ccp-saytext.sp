@@ -11,7 +11,7 @@ public Plugin myinfo =
     name        = "[CCP] SayText handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.4",
+    version     = "1.0.5",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -83,9 +83,8 @@ public void OnNextFrame(StringMap g_mMessage) {
 
     delete g_mMessage;
 
-    if(!IsClientConnected(recipient)) {
+    if(!IsClientInGame(recipient))
         return;
-    }
 
     ArrayList arr = new ArrayList(MAX_LENGTH, 0);
 

@@ -1,5 +1,6 @@
 #pragma newdecls required
 
+
 #define CORE
 
 #if defined INCLUDE_DEBUG
@@ -25,7 +26,8 @@ GlobalForward
     g_fwdNewMessage,
     g_fwdAPIHandShake,
     g_fwdRebuildString_Post,
-    g_fwdMessageEnd;
+    g_fwdMessageEnd,
+    g_fwdRebuildString_Sp;
 
 bool 
     g_bRTP,
@@ -39,7 +41,7 @@ public Plugin myinfo =
     name        = "[CCP] Core",
     author      = "nyood",
     description = "Color chat processor",
-    version     = "3.6.0",
+    version     = "3.6.3",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -106,6 +108,11 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
     g_fwdRebuildString = new GlobalForward(
         "cc_proc_OnRebuildString",
         ET_Hook, Param_Array, Param_Cell, Param_Cell, Param_CellByRef, Param_String, Param_Cell
+    );
+
+    g_fwdRebuildString_Sp = new GlobalForward(
+        "cc_proc_OnRebuildString_Txt",
+        ET_Ignore, Param_Array, Param_Cell, Param_Cell, Param_String, Param_Cell
     );
 
     RegPluginLibrary("ccprocessor");
@@ -371,7 +378,7 @@ void RenderEngineCtx(const int[] props, int propsCount, ArrayList params) {
     char szNum[8];
     for(int i; i < props[2]; i++) {
         FormatEx(SZ(szNum), "{%i}", i+1);
-            ReplaceString(
+            ReplaceString( 
                 SZ(szMessage), szNum, 
                 (i == 0) ? "%s1" 
                 : (i == 1) ? "%s2" 

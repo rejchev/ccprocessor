@@ -12,7 +12,7 @@ public Plugin myinfo =
     name        = "[CCP] RadioText handler",
     author      = "nyood",
     description = "...",
-    version     = "1.0.4",
+    version     = "1.0.5",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -124,9 +124,8 @@ public void AfterMessage(UserMsg msgid, bool send)
     
     delete mMessage;
 
-    if(!IsClientConnected(recipient)) {
+    if(!IsClientInGame(recipient))
         return;
-    }
 
     int id;
     ArrayList arr = new ArrayList(MAX_LENGTH, 0);
@@ -144,7 +143,7 @@ public void AfterMessage(UserMsg msgid, bool send)
                 next = (ccp_Translate(message, recipient)) ? Proc_Change : Proc_Continue;
             }
 
-            if(next != Proc_Stop && IsClientConnected(recipient)) {
+            if(next != Proc_Stop && IsClientInGame(recipient)) {
                 // Attempting to render message text (Its a useless thing ... )
                 stock_RenderEngineCtx(arr, sender, recipient, PARAM_NAME, SZ(message));
 

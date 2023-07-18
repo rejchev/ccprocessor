@@ -231,7 +231,7 @@ stock Processing stock_EngineMsgReq(ArrayList a, int s, int r, const char[] m) {
  * 
  *  @define CORE
 */
-#if !defined CORE
+#if !defined CORE && !defined EXCLUDE_HANDSHAKE 
 public void cc_proc_APIHandShake(const int key)
 {
     if(key != API_KEY) SetFailState(API_OOD);
@@ -277,7 +277,7 @@ stock int numlts_stock(const char[] str)
 
     for(int i, b; i < strlen(str); i++)
     {
-        if((b = IsCharMB(szValue[i])))
+        if((b = IsCharMB(str[i])))
             i += b-1;
         
         a++;
@@ -376,9 +376,9 @@ stock int FindChannelInChannels(const char[][] array, int count, const char[] ch
 }
 
 
-#if defined INCLUDE_RIPJSON
+#if defined INCLUDE_JSON
 
-stock int FindChannelInChannels_json(JSONArray jsonArray, const char[] channel, bool casesens = true) {
+stock int FindChannelInChannels_json(JsonArray jsonArray, const char[] channel, bool casesens = true) {
     static char buffer[64];
     
     for(int i = 0; i < jsonArray.Length; i++) {
