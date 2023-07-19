@@ -36,7 +36,9 @@ jobs:
         run: |
           for file in *.sp;
           do
-            echo "\nCompiling $file..."
+            filename=$(basename -- "$file")
+
+            echo "\nCompiling $filename..."
           done
 
       - name: Upload Packager
