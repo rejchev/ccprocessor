@@ -36,7 +36,7 @@ jobs:
         run: |
           for file in *.sp;
           do
-            filename=$(basename -- "$file")
+            filename="${file%.*}"
 
             echo "\nCompiling $filename..."
           done
