@@ -1,9 +1,11 @@
 <h1 align="center">Color Chat Processor</h1>
-<p align="center">
-    <a href="#license"><img src="https://img.shields.io/github/license/rejchev/ccprocessor" /></a>
-    <a href="#requirements"><img src="https://img.shields.io/badge/sourcemod-v.1.11-blue" /></a>
-    <a href="https://discord.gg/cFZ97Mzrjy" target="_blank"><img src="https://img.shields.io/discord/494942123548868609" /></a>
-</p>
+<div align="center">
+
+[![CI](https://github.com/rejchev/ccprocessor/actions/workflows/ci.yml/badge.svg)](https://github.com/rejchev/ccprocessor/actions/workflows/ci.yml)
+[![Discord](https://img.shields.io/discord/494942123548868609?logo=discord&logoColor=%23959da5&color=%235865F2)](https://discord.gg/cFZ97Mzrjy)
+[![Downloads](https://img.shields.io/github/downloads/rejchev/ccprocessor/total?color=%2332c955)]()
+[![LICENSE](https://img.shields.io/github/license/rejchev/ccprocessor)](LICENSE)
+</div>
 
 ## About
 
