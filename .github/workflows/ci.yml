@@ -39,6 +39,8 @@ jobs:
             filename="${file%.*}"
 
             echo "\nCompiling $filename..."
+
+            spcomp $file -O2 -v2 -iinclude -o sourcemod/plugins/$filename.smx
           done
 
       - name: Upload Packager
