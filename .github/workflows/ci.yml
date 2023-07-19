@@ -38,8 +38,7 @@ jobs:
           do
             filename="${file%.*}"
 
-            echo "\nCompiling $filename..."
-
+            echo "Compiling $filename..."
             spcomp $file -O2 -v2 -iinclude -o ../sourcemod/plugins/$filename.smx
           done
 
@@ -68,7 +67,7 @@ jobs:
       - name: Package artifact
         run: |
           version=`echo $GITHUB_REF | sed "s/refs\/tags\///"`
-          7z a packager-${version}.${{ github.run_number }}.zip ./packager-${{ matrix.sm-version }}/*
+          7z a ccprocessor-${version}.${{ github.run_number }}.zip ./ccprocessor-${{ matrix.sm-version }}
       
       - name: Release
         uses: svenstaro/upload-release-action@v2

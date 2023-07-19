@@ -1,8 +1,5 @@
 #pragma newdecls required
 
-
-#define CORE
-
 #if defined INCLUDE_DEBUG
     #define DEBUG "[CCProcessor]"
 #endif

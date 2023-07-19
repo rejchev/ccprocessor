@@ -24,28 +24,8 @@ API key:
     ATTENTION: Do not change it yourself if you are not ready for the consequences!
 */
 
-#define API_KEY             22012022
-
-#if !defined CORE
-    #define API_OOD         "The plugin module uses an outdated API. You must update it."
-
-    #if defined INCLUDE_PACKAGER
-        #include <packager>
-    #endif
-
-    #if defined INCLUDE_STORAGE
-        #include <storage>
-    #endif
-
-    #if defined INCLUDE_JSON
-        #include <jansson>
-    #endif
-
-    #if defined INCLUDE_JSON && defined INCLUDE_PACKAGER
-        #include <ccprocessor/modules/channels/ccp-channels>
-    #endif
-    
-#endif
+#define API_KEY             19072023
+#define API_OOD             "The plugin module uses an outdated API. You must update it."
 
 // Message template parts
 enum
