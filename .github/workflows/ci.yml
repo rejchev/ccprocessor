@@ -31,7 +31,7 @@ jobs:
 
           cp -r -f src/* sourcemod/scripting/
           
-      - name: Build Packager
+      - name: Build
         working-directory: src
         run: |
           for file in *.sp;
@@ -42,7 +42,7 @@ jobs:
             spcomp $file -O2 -v2 -iinclude -o ../sourcemod/plugins/$filename.smx
           done
 
-      - name: Upload Packager
+      - name: Upload
         uses: actions/upload-artifact@v3
         with: 
           name: ccprocessor-${{ matrix.sm-version }}
