@@ -1,9 +1,5 @@
 #pragma newdecls required
 
-#if defined INCLUDE_DEBUG
-    #define DEBUG "[CCProcessor]"
-#endif
-
 #include <ccprocessor>
 
 ArrayList
@@ -36,7 +32,7 @@ int g_iMsgInProgress = -1;
 public Plugin myinfo = 
 {
     name        = "[CCP] Core",
-    author      = "nyood",
+    author      = "rejchev",
     description = "Color chat processor",
     version     = "3.6.3",
     url         = "discord.gg/ChTyPUG"
@@ -50,7 +46,7 @@ public Plugin myinfo =
 
 public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max) {    
     #if defined DEBUG
-        DBUILD()
+        DEBUG_BUILD()
     #endif
 
     CreateNative("cc_get_APIKey",                       Native_GetAPIKey);
@@ -122,7 +118,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 public void OnPluginStart()
 {
     #if defined DEBUG
-        DWRITE("%s: OnPluginStart()", DEBUG)
+        DEBUG_WRITE("%s: OnPluginStart()", DEBUG)
     #endif
 
     LoadTranslations("ccp_core.phrases");
@@ -138,7 +134,7 @@ public void OnPluginStart()
     game_mode.GetString(mode_default_value, sizeof(mode_default_value));
 
     #if defined DEBUG
-        DWRITE("%s: Game Mode(%x): %s", DEBUG, game_mode, mode_default_value);
+        DEBUG_WRITE("%s: Game Mode(%x): %s", DEBUG, game_mode, mode_default_value);
     #endif
 }
 
@@ -150,7 +146,7 @@ public void OnAllPluginsLoaded()
     #if !defined DEBUG
         Call_Finish();
     #else
-        DWRITE("%s: Call(g_fwdAPIHandShake) code: %d", DEBUG, Call_Finish())
+        DEBUG_WRITE("%s: Call(g_fwdAPIHandShake) code: %d", DEBUG, Call_Finish())
     #endif
     
 }
@@ -160,7 +156,7 @@ public void OnModChanged(ConVar cvar, const char[] oldVal, const char[] newVal)
     cvar.GetString(mode_default_value, sizeof(mode_default_value));
 
     #if defined DEBUG
-        DWRITE("%s: Game Mode Changed(%x): %s", DEBUG, game_mode, mode_default_value);
+        DEBUG_WRITE("%s: Game Mode Changed(%x): %s", DEBUG, game_mode, mode_default_value);
     #endif
 }
 
@@ -171,7 +167,7 @@ public void OnMapStart()
     #endif
 
     #if defined DEBUG
-        DWRITE("%s: OnMapStart()", DEBUG);
+        DEBUG_WRITE("%s: OnMapStart()", DEBUG);
     #endif
     
     static char dirs[][MESSAGE_LENGTH] = {
@@ -196,7 +192,7 @@ public void OnMapStart()
         SetFailState("Where is my config: '%s' ", szConfig);
     
     #if defined DEBUG
-        DWRITE("%s: Game Config Path(): %s", DEBUG, szConfig);
+        DEBUG_WRITE("%s: Game Config Path(): %s", DEBUG, szConfig);
     #endif
 
     int iLine;
@@ -234,7 +230,7 @@ public void OnConfigsExecuted() {
     if(game_mode) game_mode.Flags |= FCVAR_REPLICATED;
 
     #if defined DEBUG
-        DWRITE("%s: OnConfigsExecuted()", DEBUG);
+        DEBUG_WRITE("%s: OnConfigsExecuted()", DEBUG);
     #endif
 }
 
@@ -243,7 +239,7 @@ SMCResult OnEnterSection(SMCParser smc, const char[] name, bool opt_quotes)
     g_szSection[strlen(g_szSection)] = name[0];
 
     #if defined DEBUG
-        DWRITE("%s: OnEnterSection(%x): %s", DEBUG, smc, name);
+        DEBUG_WRITE("%s: OnEnterSection(%x): %s", DEBUG, smc, name);
     #endif
 
     return SMCParse_Continue;
@@ -254,7 +250,7 @@ SMCResult OnLeave(SMCParser smc)
     g_szSection[strlen(g_szSection)-1] = 0;
 
     #if defined DEBUG
-        DWRITE("%s: OnLeave From Section(%x)", DEBUG, smc);
+        DEBUG_WRITE("%s: OnLeave From Section(%x)", DEBUG, smc);
     #endif
 
     return SMCParse_Continue;
@@ -268,7 +264,7 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
     int iBuffer;
 
     #if defined DEBUG
-        DWRITE("%s: OnKeyValue(%x): Key: %s, Value: %s", DEBUG, smc, sKey, sValue);
+        DEBUG_WRITE("%s: OnKeyValue(%x): Key: %s, Value: %s", DEBUG, smc, sKey, sValue);
     #endif
 
     // chat -> [p]alette
@@ -308,7 +304,7 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
     delete smc;
 
     #if defined DEBUG
-        DWRITE("%s: OnCompReading(%x): Halted: %b, Failed: %b", DEBUG, smc, halted, failed);
+        DEBUG_WRITE("%s: OnCompReading(%x): Halted: %b, Failed: %b", DEBUG, smc, halted, failed);
     #endif
 
     g_szSection = NULL_STRING;
@@ -341,7 +337,7 @@ Processing BuildMessage(const int[] props, int propsCount, ArrayList params) {
         
         if((whatNext = Call_RebuildString(props, propsCount, i, params, SZ(value))) > Proc_Change) {
             #if defined DEBUG
-                DWRITE("%s: MessageBuilder(Rejected): \
+                DEBUG_WRITE("%s: MessageBuilder(Rejected): \
                         \n\t\t\tSender: %d \
                         \n\t\t\tRecipient: %N \
                         \n\t\t\tPart: %s, \
@@ -355,7 +351,7 @@ Processing BuildMessage(const int[] props, int propsCount, ArrayList params) {
     }
 
     #if defined DEBUG
-    DWRITE("%s: RebuildMessage(%N) out: %s", DEBUG, SENDER_INDEX(props[1]), szBuffer);
+    DEBUG_WRITE("%s: RebuildMessage(%N) out: %s", DEBUG, SENDER_INDEX(props[1]), szBuffer);
     #endif
 
     params.SetString(compile, szBuffer);
@@ -369,7 +365,7 @@ void RenderEngineCtx(const int[] props, int propsCount, ArrayList params) {
     params.GetString(compile, SZ(szMessage));
 
     #if defined DEBUG
-    DWRITE("%s: HandleEngineMsg(%i) in: %s", DEBUG, props[0], szMessage);
+    DEBUG_WRITE("%s: HandleEngineMsg(%i) in: %s", DEBUG, props[0], szMessage);
     #endif
 
     char szNum[8];
@@ -386,7 +382,7 @@ void RenderEngineCtx(const int[] props, int propsCount, ArrayList params) {
     }
 
     #if defined DEBUG
-    DWRITE("%s: HandleEngineMsg(%i) out: %s", DEBUG, props[0], szMessage);
+    DEBUG_WRITE("%s: HandleEngineMsg(%i) out: %s", DEBUG, props[0], szMessage);
     #endif
 
     params.SetString(compile, szMessage);

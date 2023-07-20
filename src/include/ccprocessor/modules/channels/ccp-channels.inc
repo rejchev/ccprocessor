@@ -3,17 +3,20 @@
 #endif
 #define _ccp_channels
 
+#include <packager>
+#include <ccprocessor>
+
 stock const char CHANNEL_MGR_PKGKEY[] = "channel_mgr";
 
-stock Json ccp_GetChannelList() {
-    return asJSON(pckg_GetArtifact(0, CHANNEL_MGR_PKGKEY));
+stock Json ccp_GetChannelList(const int iClientPackage = 0) {
+    return Packager.GetPackage(iClientPackage).GetArtifact(CHANNEL_MGR_PKGKEY);
 }
 
 stock int ccp_FindChannel(const char[] szTag, bool casesens = true) {
     JsonArray channels;
     if((channels = asJSONA(ccp_GetChannelList())) != null) {
         char szBuffer[PREFIX_LENGTH];
-        for(int i; i < channels.Length; i++) {
+        for(int i; i < channels.Size; i++) {
             channels.GetString(i, szBuffer, sizeof(szBuffer));
             if(!strcmp(szTag, szBuffer, casesens)) {
                 delete channels;
@@ -31,35 +34,42 @@ stock char[] ccp_GetChannelTag(const int index) {
 
     JsonArray channels;
     if((channels = asJSONA(ccp_GetChannelList())) != null)
-        if(index >= 0 && index < channels.Length)
+        if(index >= 0 && index < channels.Size)
             channels.GetString(index, szTag, sizeof(szTag));
 
     delete channels;
     return szTag;
 }
 
-stock void ccp_RemoveChannel(const int index) {
+stock void ccp_RemoveChannel(const int index, const int iClientPackage = 0) {
+    Package pack;
+    if(!(pack = Packager.GetPackage(iClientPackage)))
+        return;
+
     JsonArray channels;
     if((channels = asJSONA(ccp_GetChannelList())) != null) {
-        if(index >= 0 && index < channels.Length) {
+        if(index >= 0 && index < channels.Size) {
             if(channels.Remove(index))
-                pckg_SetArtifact(0, CHANNEL_MGR_PKGKEY, channels);
+                pack.SetArtifact(CHANNEL_MGR_PKGKEY, channels);
         }
     }
 
     delete channels;
 }
 
-stock bool ccp_AddChannel(const char[] szTag) {
+stock bool ccp_AddChannel(const char[] szTag, const int iClientPackage = 0) {
+    Package pack;
+    if(!(pack = Packager.GetPackage(iClientPackage)))
+        return false;
+    
     if(ccp_FindChannel(szTag) != -1)
         return false;
     
     bool bSet;
     JsonArray channels;
-    if((channels = asJSONA(ccp_GetChannelList())) != null) {
+    if((channels = asJSONA(ccp_GetChannelList())) != null)
         if((bSet = channels.PushString(szTag)))
-            bSet = pckg_SetArtifact(0, CHANNEL_MGR_PKGKEY, channels);            
-    }
+            bSet = pack.SetArtifact(CHANNEL_MGR_PKGKEY, channels);
 
     delete channels;
     return bSet;

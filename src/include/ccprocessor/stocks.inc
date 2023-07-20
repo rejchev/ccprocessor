@@ -74,42 +74,6 @@ stock int stock_NewMessage(ArrayList a, int s, int r, const char[] t, const char
 }
 
 /*
- *  Request to start rebuilding recipient list
- *  
- *  @param a            Buffer array 
- *  @param id           Message ID
- *  @param s            Message sender
- *  @param ind          Message indent
- *  @param m            Message text
- *  @param p            Message recipient list
- *  @param c            Message recipient count       
- *  
- *  @return             Proc_Continue - with out changes,
- *                      Proc_Change - recipients have been changed,
- *                      Proc_Reject - message rejected
-*/
-// stock Processing stock_RebuildClients(ArrayList a, int id, int s, const char[] ind, const char[] m, int[] p, int &c) {
-//     static const int propsCount = 2;
-//     int[] props = new int[propsCount]
-//     props[0] = id;
-//     props[1] = s;
-
-//     a.Clear();
-//     a.PushString(ind);
-//     a.PushString(m);
-//     a.PushArray(p, c);
-//     a.Push(c);
-
-//     Processing next;
-//     if((next = ccp_RebuildClients(props, propsCount, a)) == Proc_Change) {
-//         c = a.Get(3);
-//         a.GetArray(2, p, c);
-//     }
-
-//     return next;
-// }
-
-/*
  *  Request to start rebuilding message
  *  
  *  @param a            Buffer array 
@@ -359,64 +323,3 @@ stock void StringToUppercase(char[] sText)
         i++;
     }
 }
-
-/*
- *  Find string in array
- *
- *  @return             Index or -1         
-*/
-stock int FindChannelInChannels(const char[][] array, int count, const char[] channel, bool casesens = true) {
-    for(int i = 0; i < count; i++) {
-        if(!strcmp(channel, array[i], casesens)) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-
-#if defined INCLUDE_JSON
-
-stock int FindChannelInChannels_json(JsonArray jsonArray, const char[] channel, bool casesens = true) {
-    static char buffer[64];
-    
-    for(int i = 0; i < jsonArray.Length; i++) {
-        jsonArray.GetString(i, buffer, sizeof(buffer));
-
-        if(!strcmp(buffer, channel, casesens)) {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-#endif
-
-/*
- *  DEBUG 
- *
- *  @define DEBUG      
-*/
-#if defined DEBUG
-char g_szLog[MESSAGE_LENGTH];
-
-stock char[] GetDebugPath() {
-    char szBuffer[MESSAGE_LENGTH] = "logs/ccprocessor";
-    BuildPath(Path_SM, szBuffer, sizeof(szBuffer), szBuffer);
-
-    if(!DirExists(szBuffer))
-        CreateDirectory(szBuffer, 0x1ED);
-
-    char szLog[64];
-    FormatTime(szLog, sizeof(szLog), "/%j.log", GetTime());
-    Format(szBuffer, sizeof(szBuffer), "%s%s", szBuffer, szLog);
-
-    return szBuffer;    
-}
-
-#define DBUILD() g_szLog = GetDebugPath();
-#define DWRITE(%0,%1) LogToFileEx(g_szLog, %0, %1)
-
-#endif

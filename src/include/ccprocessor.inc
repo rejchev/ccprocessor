@@ -3,6 +3,9 @@
 #endif
 #define _ccprocessor_included
 
+#define API_KEY             19072023
+#define API_OOD             "The plugin module uses an outdated API. You must update it."
+
 #define STATUS_LENGTH       16
 #define TEAM_LENGTH         64
 #define PREFIX_LENGTH       64
@@ -10,22 +13,10 @@
 #define MESSAGE_LENGTH      256
 #define MAX_LENGTH          512
 
-// See description for: 
-// native Action ccp_RebuildMessage(const int[] props, int propsCount, ArrayList params);
+// OnRebuildString
 #define SENDER_INDEX(%0)    (%0 >> 3)
 #define SENDER_TEAM(%0)     ((%0 >> 1) & 0x03)
 #define SENDER_ALIVE(%0)    view_as<bool>((%0 & 0x01)) 
-
-/* 
-API key:
-    The value changes if the API has been changed. 
-    This is a measure against users who do not follow the changes and do not understand what is happening.
-
-    ATTENTION: Do not change it yourself if you are not ready for the consequences!
-*/
-
-#define API_KEY             19072023
-#define API_OOD             "The plugin module uses an outdated API. You must update it."
 
 // Message template parts
 enum
@@ -61,6 +52,7 @@ enum Processing
 #include "ccprocessor/natives.inc"
 #include "ccprocessor/forwards.inc"
 #include "ccprocessor/stocks.inc"
+#include "ccprocessor/debug.inc"
 
 public SharedPlugin __pl_ccprocessor= 
 {
