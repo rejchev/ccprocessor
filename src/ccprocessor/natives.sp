@@ -1,7 +1,7 @@
 #define MAX_PARAMS 5
 
-public int Native_GetMsgID(Handle hPlugin, int params) {
-    return g_iMsgInProgress;
+public any Native_GetMsgID(Handle hPlugin, int params) {
+    return g_bMsgInProgress;
 }
 
 public int Native_Translate(Handle hPlugin, int params) {
@@ -51,9 +51,8 @@ public int Native_SkipColors(Handle hPlugin, int params) {
 }
 
 public int Native_ChangeMode(Handle hPlugin, int params) {
-    if(!game_mode || mode_default_value[0] == '0') {
+    if(!game_mode || !useMatchmakingModeFix)
         return 0;
-    }
 
     int iClient = GetNativeCell(1);
 
@@ -73,10 +72,10 @@ public int Native_ChangeMode(Handle hPlugin, int params) {
     return 0
 }
 
-public int Native_StartNewMessage(Handle hPlugin, int params) {
-    if(g_iMsgInProgress != -1) {
+public any Native_StartNewMessage(Handle hPlugin, int params) {
+    if(g_bMsgInProgress) {
         #if defined DEBUG
-        DWRITE("%s: ccp_StartNewMessage(%i): already one in progress", DEBUG, g_iMsgInProgress);
+        DWRITE("%s: ccp_StartNewMessage(%i): already one in progress", DEBUG, g_bMsgInProgress);
         #endif
 
         return -1;
@@ -92,15 +91,14 @@ public int Native_StartNewMessage(Handle hPlugin, int params) {
 
         return -1;
     }
-
-    g_iMessageCount++;
-    g_iMsgInProgress = g_iMessageCount;
+    
+    g_bMsgInProgress = true;
 
     #if defined DEBUG
-    DWRITE("%s: ccp_StartNewMessage(%i): start", DEBUG, g_iMsgInProgress);
+    DWRITE("%s: ccp_StartNewMessage(%i): start", DEBUG, g_bMsgInProgress);
     #endif
 
-    return g_iMsgInProgress;
+    return g_bMsgInProgress;
 }
 
 public any Native_RebuildMessage(Handle hPlugin, int params) {
@@ -137,7 +135,7 @@ public int Native_EndMessage(Handle hPlugin, int params) {
 
     Call_MessageEnd(props, GetNativeCell(2), GetNativeCell(3));
 
-    g_iMsgInProgress = -1;
+    g_bMsgInProgress = false;
 
     return 0;
 }

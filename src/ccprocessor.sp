@@ -24,17 +24,19 @@ GlobalForward
 
 bool 
     g_bRTP,
-    g_bResetByMap;
+    g_bResetByMap,
+    bLate,
+    useMatchmakingModeFix;
 
-int g_iMessageCount;
-int g_iMsgInProgress = -1;
+int iTranslationStrategy;
+bool g_bMsgInProgress;
 
 public Plugin myinfo = 
 {
     name        = "[CCP] Core",
     author      = "rejchev",
     description = "Color chat processor",
-    version     = "3.6.3",
+    version     = "3.6.4",
     url         = "discord.gg/ChTyPUG"
 };
 
@@ -110,7 +112,7 @@ public APLRes AskPluginLoad2(Handle myself, bool late, char[] error, int err_max
 
     RegPluginLibrary("ccprocessor");
 
-    if(late) OnAllPluginsLoaded();
+    bLate = late;
 
     return APLRes_Success;
 }
@@ -136,6 +138,8 @@ public void OnPluginStart()
     #if defined DEBUG
         DEBUG_WRITE("%s: Game Mode(%x): %s", DEBUG, game_mode, mode_default_value);
     #endif
+
+    if(bLate) OnAllPluginsLoaded();
 }
 
 public void OnAllPluginsLoaded()
@@ -294,6 +298,12 @@ SMCResult OnKeyValue(SMCParser smc, const char[] sKey, const char[] sValue, bool
 
         else if(!strcmp(sKey, "RTCP"))
             g_bRTP = view_as<bool>(StringToInt(sValue));
+
+        else if(!strcmp(sKey, "UseMMGameModeFix"))
+            useMatchmakingModeFix = view_as<bool>(StringToInt(sValue));
+
+        else if(!strcmp(sKey, "TranslationStrategy"))
+            iTranslationStrategy = StringToInt(sValue);
     }
 
     return SMCParse_Continue;
@@ -314,10 +324,8 @@ public void OnCompReading(SMCParser smc, bool halted, bool failed)
     if(halted || failed)
         SetFailState("There was a problem reading the configuration file");
 
-    if(g_bResetByMap) {
-        g_iMsgInProgress = -1;
-        g_iMessageCount = 0;
-    }
+    if(g_bResetByMap)
+        g_bMsgInProgress = false;
 }
 
 Processing BuildMessage(const int[] props, int propsCount, ArrayList params) {

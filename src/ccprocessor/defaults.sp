@@ -9,11 +9,9 @@ void GetDefaultValue(const int[] props, const int propsCount, int part, ArrayLis
             szBuffer, size
         );
         
-        if(part == BIND_PROTOTYPE && TranslationPhraseExists(szBuffer)) {
-            // Fixed:
-            // Now, template format depends on the recipient
-            Format(szBuffer, size, "%c %T", 1, szBuffer, props[2]);
-        }
+        if(part == BIND_PROTOTYPE && TranslationPhraseExists(szBuffer))
+            Format(szBuffer, size, "%c %T", 1, szBuffer, GetRecipientByTranslationStrategy(szBuffer, props[2]));
+            
 
         #if defined DEBUG
         DWRITE("%s: Template: \
@@ -62,11 +60,11 @@ void GetDefaultValue(const int[] props, const int propsCount, int part, ArrayLis
         );
     }
 
-    if(!TranslationPhraseExists(szBuffer)) {
+    if(!TranslationPhraseExists(szBuffer))
         szBuffer[0] = 0;
-    } else {
-        Format(szBuffer, size, "%T", szBuffer, props[2]);
-    }
+
+    if(szBuffer[0])
+        Format(szBuffer, size, "%T", szBuffer, GetRecipientByTranslationStrategy(szBuffer, props[2]));
 
     #if defined DEBUG
     DWRITE("%s: Template: \
@@ -75,4 +73,32 @@ void GetDefaultValue(const int[] props, const int propsCount, int part, ArrayLis
             \n\t\tPart: %s \
             \n\t\tOutput: %s", DEBUG, SENDER_INDEX(props[1]), props[2], szBinds[part], szBuffer);
     #endif
+}
+
+int GetRecipientByTranslationStrategy(const char[] phrase, int iClient) {
+
+    int lang = (iTranslationStrategy != 0) ? GetClientLanguage(iClient) : GetClientLanguage(0);
+
+    if(iTranslationStrategy != 2 && IsTranslatedForLanguage(phrase, iClient))
+        return iClient;
+
+    if(iTranslationStrategy == 2 && IsTranslatedForLanguage(phrase, GetClientLanguage(0)))
+        return 0;
+
+    char langCode[4];
+    GetLanguageInfo(lang, langCode, sizeof(langCode));
+
+    char error[PLATFORM_MAX_PATH];
+    FormatEx(error, sizeof(error), "An error occured: phrase '%s' is not exist for lang '%s'", phrase, langCode);
+
+    if(iTranslationStrategy == 2) {
+        
+        char sLangCode[4];
+        GetLanguageInfo(GetClientLanguage(0), sLangCode, sizeof(sLangCode));
+
+        Format(error, sizeof(error), "%s and '%s'", error, sLangCode);
+    }
+
+    SetFailState(error);
+    return -1;
 }
