@@ -1,12 +1,8 @@
-name: CI
+name: Release
 
-on: 
-  push: 
-    branches:
-      - dev
-  pull_request:
-    branches:
-      - dev
+on:
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -47,3 +43,16 @@ jobs:
             echo "Compiling $filename..."
             spcomp $file -O2 -v2 -iinclude -o ../sourcemod/plugins/$filename.smx
           done
+
+      - name: Package
+        working-directory: sourcemod
+        run: 7z a ccprocessor-${{ matrix.sm-version }}.zip ./*
+      
+      - name: Attach extension
+        uses: svenstaro/upload-release-action@v2
+        with:
+            repo_token: ${{ secrets.GITHUB_TOKEN }}
+            file: 'sourcemod/ccprocessor-${{ matrix.sm-version }}.zip'
+            asset_name: ccprocessor-$tag.${{ github.run_number }}.zip
+            tag: ${{ github.ref }}
+            file_glob: false 

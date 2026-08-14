@@ -76,29 +76,13 @@ void GetDefaultValue(const int[] props, const int propsCount, int part, ArrayLis
 }
 
 int GetRecipientByTranslationStrategy(const char[] phrase, int iClient) {
+    if (iTranslationStrategy == 0)
+        return 0
 
-    int lang = (iTranslationStrategy != 0) ? GetClientLanguage(iClient) : GetClientLanguage(0);
+    int lang = (iClient > 1) ? GetClientLanguage(iClient) : GetServerLanguage();
 
-    if(iTranslationStrategy != 2 && IsTranslatedForLanguage(phrase, iClient))
+    if(IsTranslatedForLanguage(phrase, lang))
         return iClient;
 
-    if(iTranslationStrategy == 2 && IsTranslatedForLanguage(phrase, GetClientLanguage(0)))
-        return 0;
-
-    char langCode[4];
-    GetLanguageInfo(lang, langCode, sizeof(langCode));
-
-    char error[PLATFORM_MAX_PATH];
-    FormatEx(error, sizeof(error), "An error occured: phrase '%s' is not exist for lang '%s'", phrase, langCode);
-
-    if(iTranslationStrategy == 2) {
-        
-        char sLangCode[4];
-        GetLanguageInfo(GetClientLanguage(0), sLangCode, sizeof(sLangCode));
-
-        Format(error, sizeof(error), "%s and '%s'", error, sLangCode);
-    }
-
-    SetFailState(error);
-    return -1;
+    return 0;
 }
