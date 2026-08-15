@@ -1,7 +1,7 @@
 <h1 align="center">Color Chat Processor</h1>
 <div align="center">
 
-[![CI](https://github.com/rejchev/ccprocessor/actions/workflows/ci.yml/badge.svg)](https://github.com/rejchev/ccprocessor/actions/workflows/ci.yml)
+[![Build](https://github.com/rejchev/ccprocessor/actions/workflows/build.yml/badge.svg)](https://github.com/rejchev/ccprocessor/actions/workflows/build.yml)
 [![Discord](https://img.shields.io/discord/1159851636156530800?logo=discord&logoColor=%23959da5&color=%235865F2)](https://discord.gg/kPtqX2NhYZ)
 [![Downloads](https://img.shields.io/github/downloads/rejchev/ccprocessor/total?color=%2332c955)]()
 [![LICENSE](https://img.shields.io/github/license/rejchev/ccprocessor)](LICENSE)
