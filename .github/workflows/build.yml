@@ -1,0 +1,40 @@
+name: Build Flow
+
+on: 
+  push: 
+    branches:
+      - patch/ostruct-1
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        sm-version: [ '1.12.x' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup SourcePawn ${{ matrix.sm-version }}
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: ${{ matrix.sm-version }}
+
+      - name: Setup Build Env
+        run: |
+          mkdir build
+
+          cp -r -f ccp-* build/
+          cp -r -f ccp/* build/ccp/
+          cp -r -f include/* build/include/
+
+          for dir in build/ccp-*/; do
+            mkdir -p "$dir/plugins" 2>/dev/null
+          done
+
+          mkdir -p build/ccp/plugins
+
+          ls -lR
