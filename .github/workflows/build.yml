@@ -25,7 +25,7 @@ jobs:
 
       - name: Setup Build Env
         run: |
-          mkdir build
+          mkdir -p build/ccp build/include
 
           cp -r -f ccp-* build/
           cp -r -f ccp/* build/ccp/
