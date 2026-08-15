@@ -1,0 +1,9 @@
+[submodule "third-party/packager"]
+	path = third-party/packager
+	url = https://github.com/rej-clown/packager.git
+[submodule "third-party/storage"]
+	path = third-party/storage
+	url = https://github.com/rej-clown/storage.git
+[submodule "third-party/sm-jansson"]
+	path = third-party/sm-jansson
+	url = https://github.com/rejchev/sm-jansson.git
