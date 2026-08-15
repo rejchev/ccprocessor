@@ -17,42 +17,71 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          path: build
+            submodules: recursive
 
-      - uses: actions/checkout@v7
+      - name: Tag
+        id: get_tag
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
-      - name: Setup SourcePawn
+      - name: Setup SourcePawn ${{ matrix.sm-version }}
         uses: rumblefrog/setup-sp@master
         with:
           version: ${{ matrix.sm-version }}
 
-      - name: Setup Working Directory
+      - name: Setup Build Env
         run: |
-          mkdir -p sourcemod/plugins
-          mkdir -p sourcemod/scripting
+          mkdir -p build/ccp build/include
 
-          cp -r -f src/* sourcemod/scripting/
-          
+          cp -r -f ccp-* build/
+          cp -r -f ccp/* build/ccp/
+          cp -r -f include/* build/include/
+
+          cp -r -f third-party/packager/include/* build/include/
+          cp -r -f third-party/storage/src/include/*  build/include/
+          cp -r -f third-party/sm-jansson/pawn/scripting/include/*  build/include/
+          cp -r -f third-party/shop/addons/sourcemod/scripting/include/* build/include/
+          cp -r -f third-party/vip/addons/sourcemod/scripting/include/* build/include/
+
+          for dir in build/ccp-*/; do
+            mkdir -p "$dir/plugins" 2>/dev/null
+          done
+
+          mkdir -p build/ccp/plugins
+
       - name: Build
-        working-directory: src
+        working-directory: build   
         run: |
-          for file in *.sp;
-          do
-            filename="${file%.*}"
+          for dir in ccp-*/; do
+            folder_name=$(basename "$dir")
 
-            echo "Compiling $filename..."
-            spcomp $file -O2 -v2 -iinclude -o ../sourcemod/plugins/$filename.smx
+            s_file=$folder_name/scripting/$folder_name.sp
+            o_file=$folder_name/plugins/$folder_name.smx
+
+            echo "Compiling $s_file ..."
+
+            spcomp $s_file -O2 -v2 -iinclude -o $o_file
           done
 
       - name: Package
-        working-directory: sourcemod
-        run: 7z a ccprocessor-${{ matrix.sm-version }}.zip ./*
+        working-directory: build
+        run: |
+          TAG="${{ steps.get_tag.outputs.tag }}"
+
+          7z a ccp-${TAG}.${{ github.run_number }}-bundle.zip ./*
+          
+          for dir in ccp-*/; do
+            name=$(basename "$dir")
+
+            (cd $dir && 7z a "../${name}-${TAG}.${{ github.run_number }}.zip" ./*)
+          done
       
       - name: Attach extension
         uses: svenstaro/upload-release-action@v2
         with:
             repo_token: ${{ secrets.GITHUB_TOKEN }}
-            file: 'sourcemod/ccprocessor-${{ matrix.sm-version }}.zip'
-            asset_name: ccprocessor-$tag.${{ github.run_number }}.zip
+            file: 'build/*.zip'
             tag: ${{ github.ref }}
-            file_glob: false 
+            file_glob: true 
