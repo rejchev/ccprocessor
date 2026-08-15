@@ -1,8 +1,12 @@
-name: Release
+name: Build Flow
 
-on:
-  release:
-    types: [published]
+on: 
+  push: 
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
 
 jobs:
   build:
@@ -18,13 +22,6 @@ jobs:
         uses: actions/checkout@v7
         with:
             submodules: recursive
-
-      - name: Tag
-        id: get_tag
-        run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "TAG=$TAG" >> $GITHUB_ENV
 
       - name: Setup SourcePawn ${{ matrix.sm-version }}
         uses: rumblefrog/setup-sp@master
@@ -51,7 +48,7 @@ jobs:
 
           mkdir -p build/ccp/plugins
 
-      - name: Build
+      - name: Build All
         working-directory: build   
         run: |
           for dir in ccp-*/; do
@@ -64,24 +61,4 @@ jobs:
 
             spcomp $s_file -O2 -v2 -iinclude -o $o_file
           done
-
-      - name: Package
-        working-directory: build
-        run: |
-          TAG="${{ steps.get_tag.outputs.tag }}"
-
-          7z a ccp-${TAG}.${{ github.run_number }}-bundle.zip ./*
-          
-          for dir in ccp-*/; do
-            name=$(basename "$dir")
-
-            (cd $dir && 7z a "../${name}-${TAG}.${{ github.run_number }}.zip" ./*)
-          done
-      
-      - name: Attach extension
-        uses: svenstaro/upload-release-action@v2
-        with:
-            repo_token: ${{ secrets.GITHUB_TOKEN }}
-            file: 'build/*.zip'
-            tag: ${{ github.ref }}
-            file_glob: true 
+            

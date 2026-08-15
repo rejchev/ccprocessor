@@ -1,8 +1,8 @@
 <h1 align="center">Color Chat Processor</h1>
 <div align="center">
 
-[![CI](https://github.com/rejchev/ccprocessor/actions/workflows/ci.yml/badge.svg)](https://github.com/rejchev/ccprocessor/actions/workflows/ci.yml)
-[![Discord](https://img.shields.io/discord/494942123548868609?logo=discord&logoColor=%23959da5&color=%235865F2)](https://discord.gg/cFZ97Mzrjy)
+[![Build](https://github.com/rejchev/ccprocessor/actions/workflows/build.yml/badge.svg)](https://github.com/rejchev/ccprocessor/actions/workflows/build.yml)
+[![Discord](https://img.shields.io/discord/1159851636156530800?logo=discord&logoColor=%23959da5&color=%235865F2)](https://discord.gg/kPtqX2NhYZ)
 [![Downloads](https://img.shields.io/github/downloads/rejchev/ccprocessor/total?color=%2332c955)]()
 [![LICENSE](https://img.shields.io/github/license/rejchev/ccprocessor)](LICENSE)
 </div>
@@ -46,19 +46,17 @@ You can edit already boring radio commands. <br>
 
 ## Requirements:
 -------------
-- Sourcemod 1.11 
-    - [Windows](http://sourcemod.net/latest.php?os=windows&version=1.11)
-    - [Linux](http://sourcemod.net/latest.php?os=linux&version=1.11)
+- Sourcemod 1.12 [ [Windows](http://sourcemod.net/latest.php?os=windows&version=1.12) | [Linux](http://sourcemod.net/latest.php?os=linux&version=1.12) ]
 
 ## Handlers
-Handler Name | Message identifier | Package | Virtualization |
-:------------: | :------------------: | :-------: | :--------------: |
-|  `SayText2`  | `STA` = Public chat <br> `STP` = Team chat <br> `CN` = Name Change  | `ccp-saytext2.smx` | `Yes` |
-|  `TextMsg`   | `TM` = Server chat | `ccp-textmsg.smx`  | `Yes` |
-|  `SayText`   | `ST` = Server chat | `ccp-saytext.smx`  | `Yes` |
-|  `RadioText` | `RT` = Radio chat  | `ccp-radiomsg.smx` |  `Yes` |
-    
-## [Supported Modules](https://github.com/rejchev/ccp-modules)
+Handlers intercept and expand the engine’s message channels by virtualizing the logical channel.
+
+| Engine channel | Package | Virtualization | Virtual Channels |
+| :------------: | :-------: | :--------------: | :-------------------: |
+|  `SayText2`  |  `ccp-saytext2.smx` | `Yes` |`STA` = Public chat<br>`STP` = Team chat<br>`CN` = Name Change |
+|  `TextMsg`   | `ccp-textmsg.smx`  | `Yes` | `TM` = Server chat |
+|  `SayText`   | `ccp-saytext.smx`  | `Yes` | `ST` = Server chat |
+|  `RadioText` | `ccp-radiomsg.smx` |  `Yes` | `RT` = Radio chat  |
 
 ## License
 [GNU Public License v3](https://github.com/rejchev/ccprocessor/blob/main/LICENSE)

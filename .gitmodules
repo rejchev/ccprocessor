@@ -1,0 +1,17 @@
+[submodule "third-party/packager"]
+	path = third-party/packager
+	url = https://github.com/rej-clown/packager.git
+[submodule "third-party/storage"]
+	path = third-party/storage
+	url = https://github.com/rej-clown/storage.git
+[submodule "third-party/sm-jansson"]
+	path = third-party/sm-jansson
+	url = https://github.com/rejchev/sm-jansson.git
+	branch = main
+[submodule "third-party/shop"]
+	path = third-party/shop
+	url = https://github.com/hlmod/Shop-Core.git
+	branch = master
+[submodule "third-party/vip"]
+	path = third-party/vip
+	url = https://github.com/R1KO/VIP-Core.git
