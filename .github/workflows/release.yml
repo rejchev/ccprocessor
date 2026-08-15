@@ -54,7 +54,7 @@ jobs:
       - name: Build
         working-directory: build   
         run: |
-          for dir in ccp-*/; do
+          for dir in ccp*/; do
             folder_name=$(basename "$dir")
 
             s_file=$folder_name/scripting/$folder_name.sp
@@ -70,9 +70,9 @@ jobs:
         run: |
           TAG="${{ steps.get_tag.outputs.tag }}"
 
-          7z a ccp-${TAG}.${{ github.run_number }}-bundle.zip ./*
+          7z a ccp-bundle-${TAG}.${{ github.run_number }}.zip ./*
           
-          for dir in ccp-*/; do
+          for dir in ccp*/; do
             name=$(basename "$dir")
 
             (cd $dir && 7z a "../${name}-${TAG}.${{ github.run_number }}.zip" ./*)
