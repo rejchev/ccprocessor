@@ -51,7 +51,7 @@ jobs:
       - name: Build All
         working-directory: build   
         run: |
-          for dir in ccp-*/; do
+          for dir in ccp*/; do
             folder_name=$(basename "$dir")
 
             s_file=$folder_name/scripting/$folder_name.sp
