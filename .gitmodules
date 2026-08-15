@@ -7,3 +7,8 @@
 [submodule "third-party/sm-jansson"]
 	path = third-party/sm-jansson
 	url = https://github.com/rejchev/sm-jansson.git
+	branch = main
+[submodule "third-party/shop"]
+	path = third-party/shop
+	url = https://github.com/hlmod/Shop-Core.git
+	branch = master
