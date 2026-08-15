@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+            submodules: recursive
 
       - name: Setup SourcePawn ${{ matrix.sm-version }}
         uses: rumblefrog/setup-sp@master
@@ -30,6 +32,10 @@ jobs:
           cp -r -f ccp-* build/
           cp -r -f ccp/* build/ccp/
           cp -r -f include/* build/include/
+
+          cp -r -f third-party/packager/include/* build/include/
+          cp -r -f third-party/storage/include/*  build/include/
+          cp -r -f third-party/sm-jansson/pawn/scripting/include/*  build/include/
 
           for dir in build/ccp-*/; do
             mkdir -p "$dir/plugins" 2>/dev/null
