@@ -38,3 +38,18 @@ jobs:
           mkdir -p build/ccp/plugins
 
           ls -lR
+
+      - name: Build All
+        working-directory: build   
+        run: |
+          for dir in ccp-*/; do
+            folder_name=$(basename "$dir")
+
+            s_file=$folder_name/scripting/$folder_name.sp
+            o_file=$folder_name/plugins/$folder_name.smx
+
+            echo "Compiling $s_file ..."
+
+            spcomp $s_file -O2 -v2 -iinclude -o $o_file
+          done
+            
