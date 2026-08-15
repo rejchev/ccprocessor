@@ -57,8 +57,6 @@ Handlers intercept and expand the engine’s message channels by virtualizing th
 |  `TextMsg`   | `ccp-textmsg.smx`  | `Yes` | `TM` = Server chat |
 |  `SayText`   | `ccp-saytext.smx`  | `Yes` | `ST` = Server chat |
 |  `RadioText` | `ccp-radiomsg.smx` |  `Yes` | `RT` = Radio chat  |
-    
-## [Supported Modules](https://github.com/rejchev/ccp-modules)
 
 ## License
 [GNU Public License v3](https://github.com/rejchev/ccprocessor/blob/main/LICENSE)
