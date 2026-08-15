@@ -34,7 +34,7 @@ jobs:
           cp -r -f include/* build/include/
 
           cp -r -f third-party/packager/include/* build/include/
-          cp -r -f third-party/storage/include/*  build/include/
+          cp -r -f third-party/storage/src/include/*  build/include/
           cp -r -f third-party/sm-jansson/pawn/scripting/include/*  build/include/
 
           for dir in build/ccp-*/; do
