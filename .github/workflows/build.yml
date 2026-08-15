@@ -45,8 +45,6 @@ jobs:
 
           mkdir -p build/ccp/plugins
 
-          ls -lR
-
       - name: Build All
         working-directory: build   
         run: |
