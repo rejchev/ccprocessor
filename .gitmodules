@@ -12,3 +12,6 @@
 	path = third-party/shop
 	url = https://github.com/hlmod/Shop-Core.git
 	branch = master
+[submodule "third-party/vip"]
+	path = third-party/vip
+	url = https://github.com/R1KO/VIP-Core.git
