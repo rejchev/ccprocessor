@@ -36,6 +36,7 @@ jobs:
           cp -r -f third-party/packager/include/* build/include/
           cp -r -f third-party/storage/src/include/*  build/include/
           cp -r -f third-party/sm-jansson/pawn/scripting/include/*  build/include/
+          cp -r -f third-party/shop/addons/sourcemod/scripting/include/* build/include/
 
           for dir in build/ccp-*/; do
             mkdir -p "$dir/plugins" 2>/dev/null
